@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block 'title' %}Nova Análise de Acidez{% endblock 'title' %}
+
+{% block 'body' %}
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow px-6 py-4 flex items-center justify-between">
+      <!-- Botão de Menu -->
+      <button class="text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-100">
+        ☰ Menu
+      </button>
+
+      <!-- Botões centralizados -->
+      <div class="flex space-x-4 absolute left-1/2 transform -translate-x-1/2">
+        <button class="text-green-700 font-semibold hover:underline">Análises</button>
+        <button class="bg-green-200 text-green-800 font-bold px-3 py-1 rounded">Nova Análise</button>
+        <button class="text-gray-700 hover:underline">Relatórios</button>
+      </div>
+  </nav>
+
+  <!-- Conteúdo -->
+  <main class="p-6 max-w-5xl mx-auto bg-white shadow mt-6 rounded">
+    <h2 class="text-2xl font-bold mb-4">Nova Análise de Acidez</h2>
+
+    <section class="mb-4">
+      <h3 class="text-xl font-semibold mb-1">Dados da Análise</h3>
+      <p class="text-sm text-gray-500 mb-4">Preencha os dados da análise de acidez da soja</p>
+
+      <form class="space-y-4">
+        <div class="flex flex-col md:flex-row md:space-x-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium">Lote</label>
+            <input type="text" placeholder="Número do lote (ex: SO-47852)" class="w-full border px-3 py-2 rounded mt-1" />
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium">Data da Análise</label>
+            <input type="date" value="2025-04-29" class="w-full border px-3 py-2 rounded mt-1" />
+          </div>
+        </div>
+
+        <div class="flex space-x-6">
+          <label class="inline-flex items-center">
+            <input type="checkbox" class="form-checkbox" />
+            <span class="ml-2">Fábrica Parada (FP)</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="checkbox" class="form-checkbox" />
+            <span class="ml-2">Sem Amostra (SA)</span>
+          </label>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium">Peso Tara (mg)</label>
+            <input type="number" value="0.000" class="w-full border px-3 py-2 rounded mt-1" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Peso Amostra (mg)</label>
+            <input type="number" value="0.000" class="w-full border px-3 py-2 rounded mt-1" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Peso Líquido (mg)</label>
+            <input type="number" value="0.000" class="w-full border px-3 py-2 rounded mt-1" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Observações</label>
+          <textarea placeholder="Observações adicionais sobre a análise" rows="3" class="w-full border px-3 py-2 rounded mt-1"></textarea>
+        </div>
+
+        <div class="flex justify-between mt-6">
+          <button type="button" class="px-4 py-2 border rounded text-gray-700">Cancelar</button>
+          <button type="submit" class="px-6 py-2 bg-black text-white font-semibold rounded">Calcular Acidez</button>
+        </div>
+      </form>
+    </section>
+  </main>
+{% endblock 'body' %}
