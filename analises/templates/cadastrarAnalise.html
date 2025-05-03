@@ -1,79 +1,129 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block 'title' %}Nova Análise de Acidez{% endblock 'title' %}
+{% block 'title' %}Nova Análise{% endblock 'title' %}
 
 {% block 'body' %}
-  <!-- Navigation Bar -->
-  <nav class="bg-white shadow px-6 py-4 flex items-center justify-between">
-      <!-- Botão de Menu -->
-      <button class="text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-100">
-        ☰ Menu
-      </button>
 
-      <!-- Botões centralizados -->
-      <div class="flex space-x-4 absolute left-1/2 transform -translate-x-1/2">
-        <button class="text-green-700 font-semibold hover:underline">Análises</button>
-        <button class="bg-green-200 text-green-800 font-bold px-3 py-1 rounded">Nova Análise</button>
-        <button class="text-gray-700 hover:underline">Relatórios</button>
-      </div>
-  </nav>
+<!-- Navigation Bar -->
+<nav class="bg-white shadow px-6 py-4 flex items-center justify-between">
+  <!-- Botão de Menu -->
+  <button class="text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-100">
+    ☰ Menu
+  </button>
 
-  <!-- Conteúdo -->
-  <main class="p-6 max-w-5xl mx-auto bg-white shadow mt-6 rounded">
-    <h2 class="text-2xl font-bold mb-4">Nova Análise de Acidez</h2>
+  <!-- Botões centralizados -->
+  <div class="flex space-x-4 absolute left-1/2 transform -translate-x-1/2">
+    <button class="text-green-700 font-semibold hover:underline">Análises</button>
+    <button class="bg-green-200 text-green-800 font-bold px-3 py-1 rounded">Nova Análise</button>
+    <button class="text-gray-700 hover:underline">Relatórios</button>
+  </div>
+</nav>
 
-    <section class="mb-4">
-      <h3 class="text-xl font-semibold mb-1">Dados da Análise</h3>
-      <p class="text-sm text-gray-500 mb-4">Preencha os dados da análise de acidez da soja</p>
 
-      <form class="space-y-4">
-        <div class="flex flex-col md:flex-row md:space-x-4">
-          <div class="flex-1">
-            <label class="block text-sm font-medium">Lote</label>
-            <input type="text" placeholder="Número do lote (ex: SO-47852)" class="w-full border px-3 py-2 rounded mt-1" />
-          </div>
-          <div class="flex-1">
-            <label class="block text-sm font-medium">Data da Análise</label>
-            <input type="date" value="2025-04-29" class="w-full border px-3 py-2 rounded mt-1" />
-          </div>
-        </div>
+<form method="POST" action="">
+  {% csrf_token %}
+  <h2 class="text-2xl font-bold mb-2">Nova Análise - QualiSoja</h2>
+  
+  <section class="space-y-4">
+    <div>
+      <label class="block font-semibold">Lote</label>
+      <input type="text" name="lote" class="w-full border px-3 py-2 rounded" placeholder="Ex: SO-47852">
+    </div>
+    <div>
+      <label class="block font-semibold">Data</label>
+      <input type="date" name="data" class="w-full border px-3 py-2 rounded">
+    </div>
+  </section>
 
-        <div class="flex space-x-6">
-          <label class="inline-flex items-center">
-            <input type="checkbox" class="form-checkbox" />
-            <span class="ml-2">Fábrica Parada (FP)</span>
-          </label>
-          <label class="inline-flex items-center">
-            <input type="checkbox" class="form-checkbox" />
-            <span class="ml-2">Sem Amostra (SA)</span>
-          </label>
-        </div>
+  <!-- Análises de Umidade -->
+  <details class="border rounded p-4">
+  <summary class="font-bold text-lg cursor-pointer">Análises de Umidade</summary>
+  <div class="section">
+    <div id="umidade" class="section-content">
+      {% for i in intervalo %}
+      <fieldset>
+        <legend>Análise {{ i }}</legend>
+        <input type="text" name="umidade[{{ i }}][horario]" placeholder="Horário + Tipo">
+        <input type="text" name="umidade[{{ i }}][tara]" placeholder="Tara">
+        <input type="text" name="umidade[{{ i }}][liquido]" placeholder="Líquido">
+        <input type="text" name="umidade[{{ i }}][peso_amostra]" placeholder="Peso Amostra" value="5">
+        <input type="text" name="umidade[{{ i }}][resultado]" placeholder="Resultado">
+        <input type="text" name="umidade[{{ i }}][fator]" placeholder="Fator Correção" value="-100">
+      </fieldset>
+      {% endfor %}
+    </div>
+  </div>
+</details>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-sm font-medium">Peso Tara (mg)</label>
-            <input type="number" value="0.000" class="w-full border px-3 py-2 rounded mt-1" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium">Peso Amostra (mg)</label>
-            <input type="number" value="0.000" class="w-full border px-3 py-2 rounded mt-1" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium">Peso Líquido (mg)</label>
-            <input type="number" value="0.000" class="w-full border px-3 py-2 rounded mt-1" />
-          </div>
-        </div>
+  <!-- Análises de Proteínas -->
+  <details class="border rounded p-4">
+  <summary class="font-bold text-lg cursor-pointer">Análises de Proteínas</summary>
+  <div class="section">
+    <div id="proteina" class="section-content" style="display:none;">
+      {% for i in intervalo %}
+      <fieldset>
+        <legend>Proteína {{ i }}</legend>
+        <input type="text" name="proteina[{{ i }}][descricao]" placeholder="Horário + Tipo">
+        <input type="text" name="proteina[{{ i }}][peso_amostra]" placeholder="Peso Amostra" value="0.50">
+        <input type="text" name="proteina[{{ i }}][ml_gasto]" placeholder="ML Gasto">
+        <input type="text" name="proteina[{{ i }}][resultado]" placeholder="Resultado">
+        <input type="text" name="proteina[{{ i }}][resultado_corrigido]" placeholder="Resultado Corrigido">
+      </fieldset>
+      {% endfor %}
+    </div>
+  </div>
+  </details>
 
-        <div>
-          <label class="block text-sm font-medium">Observações</label>
-          <textarea placeholder="Observações adicionais sobre a análise" rows="3" class="w-full border px-3 py-2 rounded mt-1"></textarea>
-        </div>
+  <!-- Análise Teor de Óleo -->
+  <details class="border rounded p-4">
+  <summary class="font-bold text-lg cursor-pointer">Análises de Proteínas</summary>
+  <div class="section">
+    <div id="oleo" class="section-content" style="display:none;">
+      {% for i in intervalo %}
+      <fieldset>
+        <legend>Teor {{ i }}</legend>
+        <input type="text" name="oleo[{{ i }}][descricao]" placeholder="Horário + Tipo">
+        <input type="text" name="oleo[{{ i }}][tara]" placeholder="Tara">
+        <input type="text" name="oleo[{{ i }}][liquido]" placeholder="Líquido">
+        <input type="text" name="oleo[{{ i }}][peso_amostra]" placeholder="Peso Amostra" value="2.00">
+        <input type="text" name="oleo[{{ i }}][resultado]" placeholder="Resultado">
+      </fieldset>
+      {% endfor %}
+    </div>
+  </div>
+  </details>
 
-        <div class="flex justify-between mt-6">
-          <button type="button" class="px-4 py-2 border rounded text-gray-700">Cancelar</button>
-          <button type="submit" class="px-6 py-2 bg-black text-white font-semibold rounded">Calcular Acidez</button>
-        </div>
-      </form>
-    </section>
-  </main>
+  <!-- Análise Umidade + Óleo Mineral -->
+  <details class="border rounded p-4">
+  <summary class="font-bold text-lg cursor-pointer">Análises de Proteínas</summary>
+  <div class="section">
+    <div id="micelas" class="section-content" style="display:none;">
+      {% for i in intervalo %}
+      <fieldset>
+        <legend>Micela {{ i }}</legend>
+        <input type="text" name="micelas[{{ i }}][descricao]" placeholder="Horário + Tipo">
+        <input type="text" name="micelas[{{ i }}][tara]" placeholder="Tara">
+        <input type="text" name="micelas[{{ i }}][liquido]" placeholder="Líquido">
+        <input type="text" name="micelas[{{ i }}][peso_amostra]" placeholder="Peso Amostra" value="5">
+        <input type="text" name="micelas[{{ i }}][resultado]" placeholder="Resultado">
+      </fieldset>
+      {% endfor %}
+    </div>
+  </div>
+  </details>
+
+
+  <div class="flex justify-end mt-6">
+    <button class="bg-green-700 text-white px-6 py-2 rounded font-semibold">Salvar Análise</button>
+  </div>
+</form>
+
+<script>
+  function toggleSection(id) {
+    const section = document.getElementById(id);
+    section.style.display = section.style.display === "none" ? "block" : "none";
+  }
+</script>
+
 {% endblock 'body' %}
