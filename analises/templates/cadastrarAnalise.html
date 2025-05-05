@@ -5,18 +5,6 @@
 
 {% block 'body' %}
 
-<!-- Navigation Bar -->
-<nav class="bg-white shadow px-6 py-4 flex items-center justify-between">
-  <button class="text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-100">
-    ☰ Menu
-  </button>
-  <div class="flex space-x-4 absolute left-1/2 transform -translate-x-1/2">
-    <button class="text-green-700 font-semibold hover:underline">Análises</button>
-    <button class="bg-green-200 text-green-800 font-bold px-3 py-1 rounded">Nova Análise</button>
-    <button class="text-gray-700 hover:underline">Relatórios</button>
-  </div>
-</nav>
-
 <div class="max-w-4xl mx-auto px-4 py-8"> <!-- 🔹 Centralização aqui -->
 <form method="POST" action="">
   {% csrf_token %}

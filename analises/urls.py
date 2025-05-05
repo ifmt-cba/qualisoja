@@ -3,5 +3,6 @@ from analises import views
 
 urlpatterns = [
     path('cadastrarAnalise/', views.cadastrarAnalise, name="CadastrarAnalise"),
-    path('salvarAnalise/', views.cadastrarAnalise, name="salvarAnalise")
+    path('historicoAnalises/',views.historicoAnalises, name="historicoAnalises"),
+    path('relatorios/',views.relatorios, name="relatorios")
 ]
