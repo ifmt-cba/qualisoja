@@ -7,12 +7,9 @@
 
 <!-- Navigation Bar -->
 <nav class="bg-white shadow px-6 py-4 flex items-center justify-between">
-  <!-- Botão de Menu -->
   <button class="text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-100">
     ☰ Menu
   </button>
-
-  <!-- Botões centralizados -->
   <div class="flex space-x-4 absolute left-1/2 transform -translate-x-1/2">
     <button class="text-green-700 font-semibold hover:underline">Análises</button>
     <button class="bg-green-200 text-green-800 font-bold px-3 py-1 rounded">Nova Análise</button>
@@ -20,29 +17,28 @@
   </div>
 </nav>
 
-
+<div class="max-w-4xl mx-auto px-4 py-8"> <!-- 🔹 Centralização aqui -->
 <form method="POST" action="">
   {% csrf_token %}
-  <h2 class="text-2xl font-bold mb-2">Nova Análise - QualiSoja</h2>
-  
-  <section class="space-y-4">
-    <div>
-      <label class="block font-semibold">Lote</label>
-      <input type="text" name="lote" class="w-full border px-3 py-2 rounded" placeholder="Ex: SO-47852">
-    </div>
-    <div>
-      <label class="block font-semibold">Data</label>
-      <input type="date" name="data" class="w-full border px-3 py-2 rounded">
-    </div>
-  </section>
+  <h2 class="text-2xl font-bold mb-4">Nova Análise - QualiSoja</h2>
 
-  <!-- Análises de Umidade -->
-  <details class="border rounded p-4">
-  <summary class="font-bold text-lg cursor-pointer">Análises de Umidade</summary>
-  <div class="section">
-    <div id="umidade" class="section-content">
-      {% for i in intervalo %}
-      <fieldset>
+  <!-- Lote e data -->
+  <div class="flex flex-col md:flex-row md:space-x-4">
+    <div class="flex-1">
+      <label class="block text-sm font-medium">Lote</label>
+      <input type="text" placeholder="Número do lote (ex: SO-47852)" class="w-full border px-3 py-2 rounded mt-1" />
+    </div>
+    <div class="flex-1">
+      <label class="block text-sm font-medium">Data da Análise</label>
+      <input type="date" value="2025-04-29" class="w-full border px-3 py-2 rounded mt-1" />
+    </div>
+  </div>
+
+  <!-- Umidade -->
+  <details class="border rounded p-4 mb-4" open>
+    <summary class="font-bold text-lg cursor-pointer">Análises de Umidade</summary>
+    {% for i in intervalo %}
+      <fieldset class="mt-2">
         <legend>Análise {{ i }}</legend>
         <input type="text" name="umidade[{{ i }}][horario]" placeholder="Horário + Tipo">
         <input type="text" name="umidade[{{ i }}][tara]" placeholder="Tara">
@@ -51,18 +47,14 @@
         <input type="text" name="umidade[{{ i }}][resultado]" placeholder="Resultado">
         <input type="text" name="umidade[{{ i }}][fator]" placeholder="Fator Correção" value="-100">
       </fieldset>
-      {% endfor %}
-    </div>
-  </div>
-</details>
+    {% endfor %}
+  </details>
 
-  <!-- Análises de Proteínas -->
-  <details class="border rounded p-4">
-  <summary class="font-bold text-lg cursor-pointer">Análises de Proteínas</summary>
-  <div class="section">
-    <div id="proteina" class="section-content" style="display:none;">
-      {% for i in intervalo %}
-      <fieldset>
+  <!-- Proteínas -->
+  <details class="border rounded p-4 mb-4">
+    <summary class="font-bold text-lg cursor-pointer">Análises de Proteínas</summary>
+    {% for i in intervalo %}
+      <fieldset class="mt-2">
         <legend>Proteína {{ i }}</legend>
         <input type="text" name="proteina[{{ i }}][descricao]" placeholder="Horário + Tipo">
         <input type="text" name="proteina[{{ i }}][peso_amostra]" placeholder="Peso Amostra" value="0.50">
@@ -70,18 +62,14 @@
         <input type="text" name="proteina[{{ i }}][resultado]" placeholder="Resultado">
         <input type="text" name="proteina[{{ i }}][resultado_corrigido]" placeholder="Resultado Corrigido">
       </fieldset>
-      {% endfor %}
-    </div>
-  </div>
+    {% endfor %}
   </details>
 
-  <!-- Análise Teor de Óleo -->
-  <details class="border rounded p-4">
-  <summary class="font-bold text-lg cursor-pointer">Análises de Proteínas</summary>
-  <div class="section">
-    <div id="oleo" class="section-content" style="display:none;">
-      {% for i in intervalo %}
-      <fieldset>
+  <!-- Teor de Óleo -->
+  <details class="border rounded p-4 mb-4">
+    <summary class="font-bold text-lg cursor-pointer">Análises de Teor de Óleo</summary>
+    {% for i in intervalo %}
+      <fieldset class="mt-2">
         <legend>Teor {{ i }}</legend>
         <input type="text" name="oleo[{{ i }}][descricao]" placeholder="Horário + Tipo">
         <input type="text" name="oleo[{{ i }}][tara]" placeholder="Tara">
@@ -89,18 +77,14 @@
         <input type="text" name="oleo[{{ i }}][peso_amostra]" placeholder="Peso Amostra" value="2.00">
         <input type="text" name="oleo[{{ i }}][resultado]" placeholder="Resultado">
       </fieldset>
-      {% endfor %}
-    </div>
-  </div>
+    {% endfor %}
   </details>
 
-  <!-- Análise Umidade + Óleo Mineral -->
-  <details class="border rounded p-4">
-  <summary class="font-bold text-lg cursor-pointer">Análises de Proteínas</summary>
-  <div class="section">
-    <div id="micelas" class="section-content" style="display:none;">
-      {% for i in intervalo %}
-      <fieldset>
+  <!-- Micelas -->
+  <details class="border rounded p-4 mb-4">
+    <summary class="font-bold text-lg cursor-pointer">Análises de Micelas</summary>
+    {% for i in intervalo %}
+      <fieldset class="mt-2">
         <legend>Micela {{ i }}</legend>
         <input type="text" name="micelas[{{ i }}][descricao]" placeholder="Horário + Tipo">
         <input type="text" name="micelas[{{ i }}][tara]" placeholder="Tara">
@@ -108,22 +92,13 @@
         <input type="text" name="micelas[{{ i }}][peso_amostra]" placeholder="Peso Amostra" value="5">
         <input type="text" name="micelas[{{ i }}][resultado]" placeholder="Resultado">
       </fieldset>
-      {% endfor %}
-    </div>
-  </div>
+    {% endfor %}
   </details>
-
 
   <div class="flex justify-end mt-6">
     <button class="bg-green-700 text-white px-6 py-2 rounded font-semibold">Salvar Análise</button>
   </div>
 </form>
-
-<script>
-  function toggleSection(id) {
-    const section = document.getElementById(id);
-    section.style.display = section.style.display === "none" ? "block" : "none";
-  }
-</script>
+</div>
 
 {% endblock 'body' %}
