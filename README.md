@@ -1,5 +1,5 @@
 <p aling="center">
-# QualiSoja
+<b>QualiSoja</b><br>
 </p>
 <p align="center">
   <b>Sistema de Registro da Análise da Qualidade da Soja</b><br>
