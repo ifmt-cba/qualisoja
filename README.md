@@ -1,10 +1,6 @@
 # QualiSoja
 
 <p align="center">
-  <img src="docs/assets/logo_qualisoja.png" alt="QualiSoja Logo" width="200"/>
-</p>
-
-<p align="center">
   <b>Sistema de Registro da Análise da Qualidade da Soja</b><br>
   Desenvolvido pelo <a href="https://cba.ifmt.edu.br/">IFMT Campus Cuiabá</a>
 </p>
