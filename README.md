@@ -1,7 +1,6 @@
-<p aling="center">
-<b>QualiSoja</b><br>
-</p>
+
 <p align="center">
+  <b>QualiSoja</b>
   <b>Sistema de Registro da Análise da Qualidade da Soja</b><br>
   Desenvolvido pelo <a href="https://cba.ifmt.edu.br/">IFMT Campus Cuiabá</a>
 </p>
