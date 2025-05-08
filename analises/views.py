@@ -1,20 +1,24 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-# Create your views here.
-#def cadastrarAnalise(request):
-#    return render(request, 'cadastrarAnalise.html')
+from django.views.generic import CreateView, ListView
+from django.urls import reverse_lazy
+from .models import AnaliseUmidade, AnaliseProteina
+from .forms import AnaliseUmidadeForm, AnaliseProteinaForm
 
-# views.py
-def cadastrarAnalise(request):
-    contexto = {
-        'intervalo': range(1, 9),  # Gera 1 até 8
-    }
-    return render(request, 'cadastrarAnalise.html', contexto)
+class UmidadeCreateView(CreateView):
+    model = AnaliseUmidade
+    form_class = AnaliseUmidadeForm
+    template_name = 'app/cadastro_umidade.html'
+    success_url = reverse_lazy('umidade_list')
 
+class ProteinaCreateView(CreateView):
+    model = AnaliseProteina
+    form_class = AnaliseProteinaForm
+    template_name = 'app/cadastro_proteina.html'
+    success_url = reverse_lazy('proteina_list')
 
-def historicoAnalises(request):
-    return render(request, 'historicoAnalises.html')
+class UmidadeListView(ListView):
+    model = AnaliseUmidade
+    template_name = 'app/lista_umidade.html'
 
-
-def relatorios(request):
-    return render(request, 'relatorios.html')
+class ProteinaListView(ListView):
+    model = AnaliseProteina
+    template_name = 'app/lista_proteina.html'
