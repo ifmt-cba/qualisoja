@@ -38,4 +38,8 @@ def cadastro(request):
             return redirect('/users/login')
         except Exception as e:
             print(f'Erro ao criar usuário: {e}')
-            return redirect('/users/cadastro')
+            return redirect('/users/login')
+        
+def loginViews(request):
+    if request.method == "GET":
+        return render(request, 'login.html')

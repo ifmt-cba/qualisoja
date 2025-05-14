@@ -1,0 +1,21 @@
+{% extends 'baseLogin.html' %}
+{% load static %}
+
+{% block 'title' %}Login{% endblock 'title' %}
+
+{% block 'body' %}
+  <h1>Login</h1>
+  <p>Preencha os dados abaixo para entrar no sistema</p>
+  <form action="{% url 'login' %}" method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" required>
+    </div>
+    <div class="form-group">
+      <label for="senha">Senha</label>
+      <input type="password" name="password" id="senha" required>
+    </div>
+    <button type="submit" class="btn">Entrar</button>
+  </form>
+{% endblock 'body' %}
