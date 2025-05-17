@@ -95,3 +95,34 @@ class AnaliseProteina(models.Model):
         verbose_name = "Análise de Proteína"
         verbose_name_plural = "Análises de Proteína"
         ordering = ['data', 'horario']
+
+        # Adicione ao final do seu arquivo models.py existente
+
+class ConfiguracaoRelatorio(models.Model):
+    TIPO_RELATORIO_CHOICES = [
+        ('UMIDADE', 'Relatório de Umidade'),
+        ('PROTEINA', 'Relatório de Proteína'),
+        ('COMBINADO', 'Relatório Combinado'),
+    ]
+    
+    nome = models.CharField(max_length=100, verbose_name="Nome do Relatório")
+    tipo_relatorio = models.CharField(
+        max_length=15,
+        choices=TIPO_RELATORIO_CHOICES,
+        verbose_name="Tipo de Relatório"
+    )
+    periodo_padrao = models.IntegerField(
+        default=7,
+        verbose_name="Período padrão em dias",
+        validators=[MinValueValidator(1), MaxValueValidator(365)]
+    )
+    ativo = models.BooleanField(default=True, verbose_name="Relatório Ativo")
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    ultima_modificacao = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.nome} ({self.get_tipo_relatorio_display()})"
+    
+    class Meta:
+        verbose_name = "Configuração de Relatório"
+        verbose_name_plural = "Configurações de Relatórios"

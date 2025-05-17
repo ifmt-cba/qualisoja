@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h2>Relatório {% if tipo_relatorio == 'umidade' %}de Umidade{% elif tipo_relatorio == 'proteina' %}de Proteína{% else %}Completo{% endif %}</h2>
+        <div>
+            {% if formato_saida == 'html' %}
+                <a href="?{{ query_string }}&formato=pdf" class="btn btn-danger me-2">Exportar para PDF</a>
+                <a href="?{{ query_string }}&formato=excel" class="btn btn-success">Exportar para Excel</a>
+            {% endif %}
+            <a href="{% url 'listar_relatorios' %}" class="btn btn-secondary ms-2">Voltar</a>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Parâmetros do Relatório</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <strong>Período:</strong> {{ data_inicio }} a {{ data_fim }}
+            </div>
+            <div class="col-md-3">
+                <strong>Tipo:</strong> 
+                {% if tipo_relatorio == 'umidade' %}Umidade
+                {% elif tipo_relatorio == 'proteina' %}Proteína
+                {% else %}Completo{% endif %}
+            </div>
+            <div class="col-md-3">
+                {% if tipo_amostra_umidade and tipo_relatorio != 'proteina' %}
+                    <strong>Amostra (Umidade):</strong> {{ tipo_amostra_umidade_display }}
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                {% if tipo_amostra_proteina and tipo_relatorio != 'umidade' %}
+                    <strong>Amostra (Proteína):</strong> {{ tipo_amostra_proteina_display }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if tipo_relatorio == 'umidade' or tipo_relatorio == 'completo' %}
+<div class="card mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Análises de Umidade</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Tipo de Amostra</th>
+                    <th>Peso da Amostra (g)</th>
+                    <th>Peso Após Secagem (g)</th>
+                    <th>Umidade (%)</th>
+                    <th>Média 24h?</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for analise in analises_umidade %}
+                <tr>
+                    <td>{{ analise.data }}</td>
+                    <td>{{ analise.horario }}</td>
+                    <td>{{ analise.get_tipo_amostra_display }}</td>
+                    <td>{{ analise.peso_amostra }}</td>
+                    <td>{{ analise.peso_apos_secagem }}</td>
+                    <td>{{ analise.umidade }}</td>
+                    <td>{% if analise.eh_media_24h %}Sim{% else %}Não{% endif %}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7">Nenhuma análise de umidade encontrada no período.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% if tipo_relatorio == 'proteina' or tipo_relatorio == 'completo' %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Análises de Proteína</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Tipo de Amostra</th>
+                    <th>Peso da Amostra (g)</th>
+                    <th>ML Gasto</th>
+                    <th>Resultado (%)</th>
+                    <th>Resultado Corrigido (%)</th>
+                    <th>Média 24h?</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for analise in analises_proteina %}
+                <tr>
+                    <td>{{ analise.data }}</td>
+                    <td>{{ analise.horario }}</td>
+                    <td>{{ analise.get_tipo_amostra_display }}</td>
+                    <td>{{ analise.peso_amostra }}</td>
+                    <td>{{ analise.ml_gasto }}</td>
+                    <td>{{ analise.resultado }}</td>
+                    <td>{{ analise.resultado_corrigido }}</td>
+                    <td>{% if analise.eh_media_24h %}Sim{% else %}Não{% endif %}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="8">Nenhuma análise de proteína encontrada no período.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% if estatisticas %}
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Estatísticas do Relatório</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% if estatisticas.umidade %}
+            <div class="col-md-6 mb-4">
+                <h6 class="border-bottom pb-2">Umidade</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Total de Amostras:</strong> {{ estatisticas.umidade.total }}</li>
+                    <li><strong>Média:</strong> {{ estatisticas.umidade.media|floatformat:2 }}%</li>
+                    <li><strong>Mínima:</strong> {{ estatisticas.umidade.minima|floatformat:2 }}%</li>
+                    <li><strong>Máxima:</strong> {{ estatisticas.umidade.maxima|floatformat:2 }}%</li>
+                </ul>
+            </div>
+            {% endif %}
+            
+            {% if estatisticas.proteina %}
+            <div class="col-md-6 mb-4">
+                <h6 class="border-bottom pb-2">Proteína</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Total de Amostras:</strong> {{ estatisticas.proteina.total }}</li>
+                    <li><strong>Média:</strong> {{ estatisticas.proteina.media|floatformat:2 }}%</li>
+                    <li><strong>Mínima:</strong> {{ estatisticas.proteina.minima|floatformat:2 }}%</li>
+                    <li><strong>Máxima:</strong> {{ estatisticas.proteina.maxima|floatformat:2 }}%</li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
