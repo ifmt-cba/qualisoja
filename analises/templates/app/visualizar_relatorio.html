@@ -1,157 +1,236 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row mb-3">
-    <div class="col-12 d-flex justify-content-between align-items-center">
-        <h2>Relatório {% if tipo_relatorio == 'umidade' %}de Umidade{% elif tipo_relatorio == 'proteina' %}de Proteína{% else %}Completo{% endif %}</h2>
-        <div>
-            {% if formato_saida == 'html' %}
-                <a href="?{{ query_string }}&formato=pdf" class="btn btn-danger me-2">Exportar para PDF</a>
-                <a href="?{{ query_string }}&formato=excel" class="btn btn-success">Exportar para Excel</a>
-            {% endif %}
-            <a href="{% url 'listar_relatorios' %}" class="btn btn-secondary ms-2">Voltar</a>
-        </div>
-    </div>
-</div>
-
-<div class="card mb-4">
-    <div class="card-header bg-light">
-        <h5 class="mb-0">Parâmetros do Relatório</h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-3">
-                <strong>Período:</strong> {{ data_inicio }} a {{ data_fim }}
-            </div>
-            <div class="col-md-3">
-                <strong>Tipo:</strong> 
-                {% if tipo_relatorio == 'umidade' %}Umidade
-                {% elif tipo_relatorio == 'proteina' %}Proteína
-                {% else %}Completo{% endif %}
-            </div>
-            <div class="col-md-3">
-                {% if tipo_amostra_umidade and tipo_relatorio != 'proteina' %}
-                    <strong>Amostra (Umidade):</strong> {{ tipo_amostra_umidade_display }}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                {% if tipo_relatorio == 'umidade' %}
+                    Relatório de Análises de Umidade
+                {% elif tipo_relatorio == 'proteina' %}
+                    Relatório de Análises de Proteína
+                {% else %}
+                    Relatório Completo de Análises
                 {% endif %}
-            </div>
-            <div class="col-md-3">
-                {% if tipo_amostra_proteina and tipo_relatorio != 'umidade' %}
-                    <strong>Amostra (Proteína):</strong> {{ tipo_amostra_proteina_display }}
+            </h2>
+            <p class="text-muted">Período: {{ data_inicial|date:"d/m/Y" }} a {{ data_final|date:"d/m/Y" }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group">
+                <a href="{% url 'gerar_relatorio' %}" class="btn btn-secondary">
+                    Voltar
+                </a>
+                {% if formato == 'HTML' %}
+                    <button onclick="window.print()" class="btn btn-outline-dark">
+                        Imprimir
+                    </button>
+                    <a href="?{{ query_string }}&formato=PDF" class="btn btn-danger">
+                        PDF
+                    </a>
+                    <a href="?{{ query_string }}&formato=EXCEL" class="btn btn-success">
+                        Excel
+                    </a>
                 {% endif %}
             </div>
         </div>
     </div>
-</div>
 
-{% if tipo_relatorio == 'umidade' or tipo_relatorio == 'completo' %}
-<div class="card mb-4">
-    <div class="card-header bg-success text-white">
-        <h5 class="mb-0">Análises de Umidade</h5>
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
     </div>
-    <div class="card-body">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Tipo de Amostra</th>
-                    <th>Peso da Amostra (g)</th>
-                    <th>Peso Após Secagem (g)</th>
-                    <th>Umidade (%)</th>
-                    <th>Média 24h?</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for analise in analises_umidade %}
-                <tr>
-                    <td>{{ analise.data }}</td>
-                    <td>{{ analise.horario }}</td>
-                    <td>{{ analise.get_tipo_amostra_display }}</td>
-                    <td>{{ analise.peso_amostra }}</td>
-                    <td>{{ analise.peso_apos_secagem }}</td>
-                    <td>{{ analise.umidade }}</td>
-                    <td>{% if analise.eh_media_24h %}Sim{% else %}Não{% endif %}</td>
-                </tr>
-            {% empty %}
-                <tr><td colspan="7">Nenhuma análise de umidade encontrada no período.</td></tr>
-            {% endfor %}
-            </tbody>
-        </table>
+    {% endif %}
+    
+    {% if erro_umidade %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de umidade:</strong> {{ erro_umidade }}
     </div>
-</div>
-{% endif %}
+    {% endif %}
+    
+    {% if erro_proteina %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de proteína:</strong> {{ erro_proteina }}
+    </div>
+    {% endif %}
 
-{% if tipo_relatorio == 'proteina' or tipo_relatorio == 'completo' %}
-<div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Análises de Proteína</h5>
-    </div>
-    <div class="card-body">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Tipo de Amostra</th>
-                    <th>Peso da Amostra (g)</th>
-                    <th>ML Gasto</th>
-                    <th>Resultado (%)</th>
-                    <th>Resultado Corrigido (%)</th>
-                    <th>Média 24h?</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for analise in analises_proteina %}
-                <tr>
-                    <td>{{ analise.data }}</td>
-                    <td>{{ analise.horario }}</td>
-                    <td>{{ analise.get_tipo_amostra_display }}</td>
-                    <td>{{ analise.peso_amostra }}</td>
-                    <td>{{ analise.ml_gasto }}</td>
-                    <td>{{ analise.resultado }}</td>
-                    <td>{{ analise.resultado_corrigido }}</td>
-                    <td>{% if analise.eh_media_24h %}Sim{% else %}Não{% endif %}</td>
-                </tr>
-            {% empty %}
-                <tr><td colspan="8">Nenhuma análise de proteína encontrada no período.</td></tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endif %}
-
-{% if estatisticas %}
-<div class="card">
-    <div class="card-header bg-info text-white">
-        <h5 class="mb-0">Estatísticas do Relatório</h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            {% if estatisticas.umidade %}
-            <div class="col-md-6 mb-4">
-                <h6 class="border-bottom pb-2">Umidade</h6>
-                <ul class="list-unstyled">
-                    <li><strong>Total de Amostras:</strong> {{ estatisticas.umidade.total }}</li>
-                    <li><strong>Média:</strong> {{ estatisticas.umidade.media|floatformat:2 }}%</li>
-                    <li><strong>Mínima:</strong> {{ estatisticas.umidade.minima|floatformat:2 }}%</li>
-                    <li><strong>Máxima:</strong> {{ estatisticas.umidade.maxima|floatformat:2 }}%</li>
-                </ul>
+    {% if tipo_relatorio == 'proteina' or tipo_relatorio == 'completo' %}
+    {% if analises_proteina %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Análises de Proteína</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_proteina.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_proteina %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_proteina.media|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_proteina.minimo|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_proteina.maximo|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_proteina.total }} análises
+                    </div>
+                </div>
             </div>
             {% endif %}
             
-            {% if estatisticas.proteina %}
-            <div class="col-md-6 mb-4">
-                <h6 class="border-bottom pb-2">Proteína</h6>
-                <ul class="list-unstyled">
-                    <li><strong>Total de Amostras:</strong> {{ estatisticas.proteina.total }}</li>
-                    <li><strong>Média:</strong> {{ estatisticas.proteina.media|floatformat:2 }}%</li>
-                    <li><strong>Mínima:</strong> {{ estatisticas.proteina.minima|floatformat:2 }}%</li>
-                    <li><strong>Máxima:</strong> {{ estatisticas.proteina.maxima|floatformat:2 }}%</li>
-                </ul>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>ML Gasto</th>
+                            <th>Resultado (%)</th>
+                            <th>Resultado Corrigido (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_proteina %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.ml_gasto|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                            <td>{{ analise.resultado_corrigido|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            {% endif %}
         </div>
     </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de proteína para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if tipo_relatorio == 'umidade' or tipo_relatorio == 'completo' %}
+    {% if analises_umidade %}
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Análises de Umidade</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_umidade.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_umidade %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_umidade.media|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_umidade.minimo|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_umidade.maximo|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_umidade.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>Resultado (%)</th>
+                            {% if analises_umidade.first.tara is not None %}
+                            <th>Tara (g)</th>
+                            {% endif %}
+                            {% if analises_umidade.first.liquido is not None %}
+                            <th>Líquido (g)</th>
+                            {% endif %}
+                            {% if analises_umidade.first.fator_correcao is not None %}
+                            <th>Fator Correção</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_umidade %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                            {% if analise.tara is not None %}
+                            <td>{{ analise.tara|floatformat:2 }}</td>
+                            {% endif %}
+                            {% if analise.liquido is not None %}
+                            <td>{{ analise.liquido|floatformat:2 }}</td>
+                            {% endif %}
+                            {% if analise.fator_correcao is not None %}
+                            <td>{{ analise.fator_correcao|floatformat:2 }}</td>
+                            {% endif %}
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de umidade para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if not analises_proteina and not analises_umidade %}
+    <div class="alert alert-warning text-center py-4">
+        <h4>Nenhum dado encontrado</h4>
+        <p class="mb-0">Não foram encontradas análises para o período e filtros selecionados.</p>
+        <p class="mt-3">
+            <a href="{% url 'gerar_relatorio' %}" class="btn btn-primary">
+                Voltar e tentar outros filtros
+            </a>
+        </p>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
+
+<style>
+@media print {
+    .btn-group, .btn {
+        display: none !important;
+    }
+    .alert-info {
+        border: 1px solid #ccc;
+        background-color: #f9f9f9 !important;
+        color: #333 !important;
+    }
+    .card {
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        break-inside: avoid;
+    }
+    .card-header.bg-primary, .card-header.bg-success {
+        color: #000 !important;
+        background-color: #eee !important;
+        font-weight: bold;
+    }
+}
+</style>
 {% endblock %}

@@ -15,49 +15,69 @@ class AnaliseProteinaForm(forms.ModelForm):
         fields = '__all__'
 
 class RelatorioFiltroForm(forms.Form):
-    data_inicial = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        initial=timezone.localdate  # Correto: usando timezone.localdate do Django
-    )
-    data_final = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        initial=timezone.localdate  # Correto: usando timezone.localdate do Django
-    )
+    """Formulário para filtrar relatórios"""
     
-    OPCOES_RELATORIO = [
+    TIPO_RELATORIO_CHOICES = [
         ('umidade', 'Relatório de Umidade'),
         ('proteina', 'Relatório de Proteína'),
-        ('completo', 'Relatório Completo')
+        ('completo', 'Relatório Completo'),
     ]
     
-    tipo_relatorio = forms.ChoiceField(
-        choices=OPCOES_RELATORIO,
-        initial='completo',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    
-    tipo_amostra_umidade = forms.ChoiceField(
-        choices=[('', 'Todos')] + list(AnaliseUmidade.TIPO_AMOSTRA_CHOICES),
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    
-    tipo_amostra_proteina = forms.ChoiceField(
-        choices=[('', 'Todos')] + list(AnaliseProteina.TIPO_AMOSTRA_CHOICES),
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    
-    # Adicione estas opções para personalizar a exportação
-    FORMATO_CHOICES = [
+    FORMATO_SAIDA_CHOICES = [
         ('HTML', 'Visualizar no navegador'),
         ('PDF', 'Exportar como PDF'),
         ('EXCEL', 'Exportar como Excel'),
     ]
     
-    formato_saida = forms.ChoiceField(
-        choices=FORMATO_CHOICES,
+    tipo_relatorio = forms.ChoiceField(
+        choices=TIPO_RELATORIO_CHOICES,
+        initial='completo',
         required=True,
-        initial='HTML',
-        widget=forms.RadioSelect()
+        label='Tipo de Relatório'
     )
+    
+    formato_saida = forms.ChoiceField(
+        choices=FORMATO_SAIDA_CHOICES,
+        initial='HTML',
+        required=True,
+        label='Formato de Saída'
+    )
+    
+    data_inicial = forms.DateField(
+        required=True,
+        label='Data Inicial',
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        initial=datetime.date.today() - datetime.timedelta(days=7)
+    )
+    
+    data_final = forms.DateField(
+        required=True,
+        label='Data Final',
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        initial=datetime.date.today()
+    )
+    
+    tipo_amostra_umidade = forms.CharField(
+        required=False,
+        label='Tipo de Amostra (Umidade)'
+    )
+    
+    tipo_amostra_proteina = forms.CharField(
+        required=False,
+        label='Tipo de Amostra (Proteína)'
+    )
+    
+    def clean(self):
+        """Validar o formulário"""
+        cleaned_data = super().clean()
+        
+        # Validar datas
+        data_inicial = cleaned_data.get('data_inicial')
+        data_final = cleaned_data.get('data_final')
+        
+        if data_inicial and data_final and data_inicial > data_final:
+            raise forms.ValidationError(
+                "A data inicial não pode ser posterior à data final!"
+            )
+        
+        return cleaned_data

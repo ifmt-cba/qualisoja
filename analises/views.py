@@ -1,11 +1,12 @@
+from urllib.parse import urlencode
 from django.views.generic import CreateView, ListView
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from .models import AnaliseUmidade, AnaliseProteina
 from .forms import AnaliseUmidadeForm, AnaliseProteinaForm
 from django.views.generic import TemplateView, View, FormView
 from django.http import HttpResponse
 from django.utils import timezone
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.db.models import Avg, Max, Min, Count
 from datetime import timedelta
 import io
@@ -17,6 +18,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 
 from .forms import RelatorioFiltroForm
+
 class UmidadeCreateView(CreateView):
     model = AnaliseUmidade
     form_class = AnaliseUmidadeForm
@@ -71,36 +73,39 @@ class RelatorioGerarView(FormView):
         tipo_amostra_proteina = form.cleaned_data.get('tipo_amostra_proteina', '')
         formato_saida = form.cleaned_data.get('formato_saida', 'HTML')
         
-        # Obter dados para o relatório
-        dados = self.obter_dados_relatorio(
-            tipo_relatorio, 
-            data_inicial, 
-            data_final, 
-            tipo_amostra_umidade, 
-            tipo_amostra_proteina
-        )
+        # Construir a URL de redirecionamento com query parameters
+        query_params = {
+            'tipo': tipo_relatorio,
+            'inicio': data_inicial.strftime('%Y-%m-%d'),
+            'fim': data_final.strftime('%Y-%m-%d'),
+            'formato': formato_saida,
+        }
         
-        # Gerar relatório no formato desejado
-        if formato_saida == 'PDF':
-            return self.gerar_pdf_relatorio(dados, tipo_relatorio, data_inicial, data_final)
-        elif formato_saida == 'EXCEL':
-            return self.gerar_excel_relatorio(dados, tipo_relatorio, data_inicial, data_final)
-        else:  # HTML
-            contexto = {
-                'dados': dados,
-                'tipo_relatorio': tipo_relatorio,
-                'data_inicial': data_inicial,
-                'data_final': data_final,
-                'filtros': form.cleaned_data,
-                'form': form
-            }
-            return render(self.request, 'app/visualizar_relatorio.html', contexto)
+        if tipo_amostra_umidade:
+            query_params['umidade_tipo'] = tipo_amostra_umidade
+        
+        if tipo_amostra_proteina:
+            query_params['proteina_tipo'] = tipo_amostra_proteina
+        
+        # Construir a URL com os parâmetros
+        url = reverse('visualizar_relatorio')
+        url = f"{url}?{urlencode(query_params)}"
+        
+        # Logs para depuração
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Redirecionando para URL: {url}")
+        
+        # Redirecionar para a visualização do relatório
+        return redirect(url)
     
-    def obter_dados_relatorio(self, tipo_relatorio, data_inicial, data_final, tipo_amostra_umidade='', tipo_amostra_proteina=''):
-        """Obtém dados para o relatório com base nos parâmetros"""
-        dados = {}
-        
-        if tipo_relatorio in ['umidade', 'completo']:
+def obter_dados_relatorio(tipo_relatorio, data_inicial, data_final, tipo_amostra_umidade='', tipo_amostra_proteina=''):
+    """Obtém dados para o relatório com base nos parâmetros"""
+    dados = {}
+    
+    if tipo_relatorio in ['umidade', 'completo']:
+        try:
+            # Consulta para análises de umidade
             queryset = AnaliseUmidade.objects.filter(
                 data__gte=data_inicial,
                 data__lte=data_final
@@ -109,18 +114,26 @@ class RelatorioGerarView(FormView):
             if tipo_amostra_umidade:
                 queryset = queryset.filter(tipo_amostra=tipo_amostra_umidade)
             
-            dados['umidade'] = queryset.order_by('data', 'horario')
+            dados['analises_umidade'] = queryset.order_by('-data', '-horario')
             
-            # Cálculo de estatísticas
+            # Cálculo de estatísticas - usando 'resultado'
             if queryset.exists():
+                from django.db.models import Avg, Min, Max
                 dados['estatisticas_umidade'] = {
-                    'media': queryset.aggregate(media=Avg('resultado'))['media'],
-                    'minimo': queryset.aggregate(min=Min('resultado'))['min'],
-                    'maximo': queryset.aggregate(max=Max('resultado'))['max'],
+                    'media': queryset.aggregate(Avg('resultado'))['resultado__avg'],
+                    'minimo': queryset.aggregate(Min('resultado'))['resultado__min'],
+                    'maximo': queryset.aggregate(Max('resultado'))['resultado__max'],
                     'total': queryset.count(),
                 }
-        
-        if tipo_relatorio in ['proteina', 'completo']:
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Erro ao processar dados de umidade: {str(e)}")
+            dados['erro_umidade'] = str(e)
+    
+    if tipo_relatorio in ['proteina', 'completo']:
+        try:
+            # Consulta para análises de proteína
             queryset = AnaliseProteina.objects.filter(
                 data__gte=data_inicial,
                 data__lte=data_final
@@ -129,251 +142,398 @@ class RelatorioGerarView(FormView):
             if tipo_amostra_proteina:
                 queryset = queryset.filter(tipo_amostra=tipo_amostra_proteina)
             
-            dados['proteina'] = queryset.order_by('data', 'horario')
+            dados['analises_proteina'] = queryset.order_by('-data', '-horario')
             
-            # Cálculo de estatísticas
+            # Cálculo de estatísticas - usando 'resultado' e 'resultado_corrigido' se disponíveis
             if queryset.exists():
-                dados['estatisticas_proteina'] = {
-                    'media': queryset.aggregate(media=Avg('resultado'))['media'],
-                    'minimo': queryset.aggregate(min=Min('resultado'))['min'],
-                    'maximo': queryset.aggregate(max=Max('resultado'))['max'],
+                from django.db.models import Avg, Min, Max
+                estatisticas = {
                     'total': queryset.count(),
                 }
-        
-        return dados
+                
+                # Verificar se o campo resultado existe
+                estatisticas['media'] = queryset.aggregate(Avg('resultado'))['resultado__avg']
+                estatisticas['minimo'] = queryset.aggregate(Min('resultado'))['resultado__min']
+                estatisticas['maximo'] = queryset.aggregate(Max('resultado'))['resultado__max']
+                
+                # Verificar se resultado_corrigido existe e usá-lo se disponível
+                try:
+                    estatisticas['media_corrigida'] = queryset.aggregate(Avg('resultado_corrigido'))['resultado_corrigido__avg']
+                    estatisticas['minimo_corrigido'] = queryset.aggregate(Min('resultado_corrigido'))['resultado_corrigido__min']
+                    estatisticas['maximo_corrigido'] = queryset.aggregate(Max('resultado_corrigido'))['resultado_corrigido__max']
+                except:
+                    pass  # Ignorar se o campo não existir
+                    
+                dados['estatisticas_proteina'] = estatisticas
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Erro ao processar dados de proteína: {str(e)}")
+            dados['erro_proteina'] = str(e)
     
-    def gerar_pdf_relatorio(self, dados, tipo_relatorio, data_inicial, data_final):
-        """Gera um relatório em formato PDF"""
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{tipo_relatorio}_{data_inicial}_a_{data_final}.pdf"'
-        
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4)
-        elements = []
-        
-        # Título do relatório
-        styles = getSampleStyleSheet()
-        if tipo_relatorio == 'umidade':
-            titulo = "Relatório de Umidade"
-        elif tipo_relatorio == 'proteina':
-            titulo = "Relatório de Proteína"
-        else:
-            titulo = "Relatório Completo"
-            
-        elements.append(Paragraph(f"{titulo} - {data_inicial.strftime('%d/%m/%Y')} a {data_final.strftime('%d/%m/%Y')}", styles['Title']))
-        
-        # Criação das tabelas com os dados
-        if 'umidade' in dados and dados['umidade'].exists():
-            elements.append(Paragraph("Dados de Umidade:", styles['Heading2']))
-            
-            # Cabeçalho da tabela
-            data = [["Data", "Hora", "Tipo de Amostra", "Peso da Amostra", "Resultado (%)"]]
-            
-            # Dados
-            for item in dados['umidade']:
-                data.append([
-                    item.data.strftime('%d/%m/%Y'),
-                    item.horario.strftime('%H:%M'),
-                    item.get_tipo_amostra_display(),
-                    f"{item.peso_amostra:.2f}",
-                    f"{item.resultado:.2f}" if item.resultado else "-"
-                ])
-            
-            # Adicionar tabela ao documento
-            table = Table(data)
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ]))
-            elements.append(table)
-            
-            # Adicionar estatísticas
-            if 'estatisticas_umidade' in dados:
-                elements.append(Paragraph("Estatísticas de Umidade:", styles['Heading3']))
-                estat_data = [
-                    ["Média", "Mínimo", "Máximo", "Total de Amostras"],
-                    [
-                        f"{dados['estatisticas_umidade']['media']:.2f}%",
-                        f"{dados['estatisticas_umidade']['minimo']:.2f}%",
-                        f"{dados['estatisticas_umidade']['maximo']:.2f}%",
-                        f"{dados['estatisticas_umidade']['total']}"
-                    ]
-                ]
-                
-                estat_table = Table(estat_data)
-                estat_table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ]))
-                elements.append(estat_table)
-        
-        if 'proteina' in dados and dados['proteina'].exists():
-            elements.append(Paragraph("Dados de Proteína:", styles['Heading2']))
-            
-            # Cabeçalho da tabela
-            data = [["Data", "Hora", "Tipo de Amostra", "Peso da Amostra", "ML Gastos", "Resultado (%)", "Resultado Corrigido (%)"]]
-            
-            # Dados
-            for item in dados['proteina']:
-                data.append([
-                    item.data.strftime('%d/%m/%Y'),
-                    item.horario.strftime('%H:%M'),
-                    item.get_tipo_amostra_display(),
-                    f"{item.peso_amostra:.2f}",
-                    f"{item.ml_gasto:.2f}" if item.ml_gasto else "-",
-                    f"{item.resultado:.2f}" if item.resultado else "-",
-                    f"{item.resultado_corrigido:.2f}" if item.resultado_corrigido else "-"
-                ])
-            
-            # Adicionar tabela ao documento
-            table = Table(data)
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.green),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ]))
-            elements.append(table)
-            
-            # Adicionar estatísticas
-            if 'estatisticas_proteina' in dados:
-                elements.append(Paragraph("Estatísticas de Proteína:", styles['Heading3']))
-                estat_data = [
-                    ["Média", "Mínimo", "Máximo", "Total de Amostras"],
-                    [
-                        f"{dados['estatisticas_proteina']['media']:.2f}%",
-                        f"{dados['estatisticas_proteina']['minimo']:.2f}%",
-                        f"{dados['estatisticas_proteina']['maximo']:.2f}%",
-                        f"{dados['estatisticas_proteina']['total']}"
-                    ]
-                ]
-                
-                estat_table = Table(estat_data)
-                estat_table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.lightgreen),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ]))
-                elements.append(estat_table)
-        
-        # Construir o PDF e retorná-lo
-        doc.build(elements)
-        pdf = buffer.getvalue()
-        buffer.close()
-        response.write(pdf)
-        return response
+    return dados
+
+def gerar_pdf_relatorio(dados, tipo_relatorio, data_inicial, data_final):
+    """Gera um relatório em formato PDF"""
+    from io import BytesIO
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import letter, A4
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib.styles import getSampleStyleSheet
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{tipo_relatorio}_{data_inicial}_a_{data_final}.pdf"'
     
-    def gerar_excel_relatorio(self, dados, tipo_relatorio, data_inicial, data_final):
-        """Gera um relatório em formato Excel"""
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = f'attachment; filename="{tipo_relatorio}_{data_inicial}_a_{data_final}.xlsx"'
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elements = []
+    
+    # Estilos e título
+    styles = getSampleStyleSheet()
+    titulo_texto = {
+        'umidade': "Relatório de Umidade",
+        'proteina': "Relatório de Proteína",
+        'completo': "Relatório Completo"
+    }[tipo_relatorio]
+    
+    elements.append(Paragraph(f"{titulo_texto}: {data_inicial.strftime('%d/%m/%Y')} a {data_final.strftime('%d/%m/%Y')}", styles['Title']))
+    elements.append(Spacer(1, 20))
+    
+    # Seção de Proteínas
+    if 'analises_proteina' in dados and dados['analises_proteina'].exists():
+        elements.append(Paragraph("Análises de Proteína", styles['Heading2']))
+        elements.append(Spacer(1, 10))
         
-        workbook = xlsxwriter.Workbook(response)
+        # Cabeçalho da tabela
+        data = [["Data", "Hora", "Tipo", "Peso (g)", "ML Gasto", "Result (%)", "Corrigido (%)", "Média 24h"]]
         
-        # Formato para cabeçalhos
-        header_format = workbook.add_format({
-            'bold': True,
-            'bg_color': '#4F81BD',
-            'color': 'white',
-            'align': 'center',
-            'valign': 'vcenter',
-            'border': 1
-        })
+        # Dados da tabela
+        for analise in dados['analises_proteina']:
+            data.append([
+                analise.data.strftime('%d/%m/%Y'),
+                analise.horario.strftime('%H:%M'),
+                analise.get_tipo_amostra_display(),
+                f"{analise.peso_amostra:.2f}",
+                f"{analise.ml_gasto:.2f}" if analise.ml_gasto else "-",
+                f"{analise.resultado:.2f}" if analise.resultado else "-",
+                f"{analise.resultado_corrigido:.2f}" if analise.resultado_corrigido else "-",
+                "Sim" if analise.eh_media_24h else "Não"  # Proteína tem eh_media_24h
+            ])
         
-        # Formato para células de dados
-        cell_format = workbook.add_format({
-            'border': 1,
-            'align': 'center',
-            'valign': 'vcenter'
-        })
+        # Criar e estilizar a tabela
+        t = Table(data, repeatRows=1)
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
         
-        if 'umidade' in dados and dados['umidade'].exists():
-            # Criar planilha para umidade
-            ws_umidade = workbook.add_worksheet('Umidade')
+        elements.append(t)
+        elements.append(Spacer(1, 20))
+        
+        # Adicionar estatísticas se disponíveis
+        if 'estatisticas_proteina' in dados:
+            elements.append(Paragraph("Estatísticas:", styles['Heading3']))
+            estat = dados['estatisticas_proteina']
+            estat_data = [
+                ["Média", "Mínimo", "Máximo", "Total de Análises"],
+                [
+                    f"{estat['media']:.2f}%",
+                    f"{estat['minimo']:.2f}%",
+                    f"{estat['maximo']:.2f}%",
+                    str(estat['total'])
+                ]
+            ]
+            t = Table(estat_data)
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ]))
+            elements.append(t)
+            elements.append(Spacer(1, 30))
+    
+    # Seção de Umidade (similar à seção de Proteínas)
+    if 'analises_umidade' in dados and dados['analises_umidade'].exists():
+        elements.append(Paragraph("Análises de Umidade", styles['Heading2']))
+        elements.append(Spacer(1, 10))
+        
+        # Cabeçalho e dados da tabela
+        data = [["Data", "Hora", "Tipo", "Tara (g)", "Líquido (g)", "Peso (g)", "Resultado (%)", "Fator", "Média 24h"]]
+        
+        for analise in dados['analises_umidade']:
+            data.append([
+                analise.data.strftime('%d/%m/%Y'),
+                analise.horario.strftime('%H:%M'),
+                analise.get_tipo_amostra_display(),
+                f"{analise.tara:.2f}" if hasattr(analise, 'tara') and analise.tara else "-",
+                f"{analise.liquido:.2f}" if hasattr(analise, 'liquido') and analise.liquido else "-",
+                f"{analise.peso_amostra:.2f}",
+                f"{analise.resultado:.2f}" if hasattr(analise, 'resultado') and analise.resultado else "-",  # Corrigido
+                f"{analise.fator_correcao:.2f}" if hasattr(analise, 'fator_correcao') and analise.fator_correcao else "-",
+                "Não"  # AnaliseUmidade não tem o campo eh_media_24h
+            ])
+        
+        t = Table(data, repeatRows=1)
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.green),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        
+        elements.append(t)
+        elements.append(Spacer(1, 20))
+        
+        # Estatísticas de umidade
+        if 'estatisticas_umidade' in dados:
+            elements.append(Paragraph("Estatísticas:", styles['Heading3']))
+            estat = dados['estatisticas_umidade']
+            estat_data = [
+                ["Média", "Mínimo", "Máximo", "Total de Análises"],
+                [
+                    f"{estat['media']:.2f}%",
+                    f"{estat['minimo']:.2f}%",
+                    f"{estat['maximo']:.2f}%",
+                    str(estat['total'])
+                ]
+            ]
+            t = Table(estat_data)
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.lightgreen),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ]))
+            elements.append(t)
+    
+    # Construir o PDF
+    doc.build(elements)
+    pdf = buffer.getvalue()
+    buffer.close()
+    
+    response.write(pdf)
+    return response
+
+def gerar_excel_relatorio(dados, tipo_relatorio, data_inicial, data_final):
+    """Gera um relatório em formato Excel"""
+    import xlsxwriter
+    from io import BytesIO
+    
+    output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    
+    # Formatos
+    header_format = workbook.add_format({
+        'bold': True, 
+        'bg_color': '#4472C4', 
+        'color': 'white',
+        'align': 'center',
+        'valign': 'vcenter',
+        'border': 1
+    })
+    
+    cell_format = workbook.add_format({
+        'align': 'center',
+        'valign': 'vcenter',
+        'border': 1
+    })
+    
+    number_format = workbook.add_format({
+        'align': 'center',
+        'valign': 'vcenter',
+        'border': 1,
+        'num_format': '0.00'
+    })
+    
+    # Planilha para Proteína
+    if 'analises_proteina' in dados and dados['analises_proteina'].exists():
+        worksheet = workbook.add_worksheet('Proteína')
+        
+        # Adicionar cabeçalho
+        headers = ['Data', 'Horário', 'Tipo de Amostra', 'Peso da Amostra (g)', 
+                  'ML Gasto', 'Resultado (%)', 'Resultado Corrigido (%)', 'Média 24h']
+        
+        for col, header in enumerate(headers):
+            worksheet.write(0, col, header, header_format)
+            worksheet.set_column(col, col, 15)  # Largura da coluna
+        
+        # Adicionar dados
+        for row, analise in enumerate(dados['analises_proteina'], start=1):
+            worksheet.write(row, 0, analise.data.strftime('%d/%m/%Y'), cell_format)
+            worksheet.write(row, 1, analise.horario.strftime('%H:%M'), cell_format)
+            worksheet.write(row, 2, analise.get_tipo_amostra_display(), cell_format)
+            worksheet.write(row, 3, analise.peso_amostra, number_format)
+            worksheet.write(row, 4, analise.ml_gasto if analise.ml_gasto else 0, number_format)
+            worksheet.write(row, 5, analise.resultado if analise.resultado else 0, number_format)
+            worksheet.write(row, 6, analise.resultado_corrigido if analise.resultado_corrigido else 0, number_format)
+            worksheet.write(row, 7, "Sim" if analise.eh_media_24h else "Não", cell_format)  # Proteína tem eh_media_24h
+        
+        # Adicionar estatísticas
+        if 'estatisticas_proteina' in dados:
+            row_start = len(dados['analises_proteina']) + 3
+            estat = dados['estatisticas_proteina']
             
-            # Cabeçalhos
-            headers = ['Data', 'Horário', 'Tipo de Amostra', 'Peso (g)', 'Resultado (%)', 'Fator Correção']
-            for col, header in enumerate(headers):
-                ws_umidade.write(0, col, header, header_format)
-            
-            # Dados
-            for row, item in enumerate(dados['umidade'], start=1):
-                ws_umidade.write(row, 0, item.data.strftime('%d/%m/%Y'), cell_format)
-                ws_umidade.write(row, 1, item.horario.strftime('%H:%M'), cell_format)
-                ws_umidade.write(row, 2, item.get_tipo_amostra_display(), cell_format)
-                ws_umidade.write(row, 3, float(item.peso_amostra), cell_format)
-                ws_umidade.write(row, 4, float(item.resultado) if item.resultado else 0, cell_format)
-                ws_umidade.write(row, 5, float(item.fator_correcao) if item.fator_correcao else 0, cell_format)
-                
-            # Adicionar estatísticas
-            if 'estatisticas_umidade' in dados:
-                ws_umidade.write(len(dados['umidade']) + 2, 0, "Estatísticas", header_format)
-                
-                estat_row = len(dados['umidade']) + 3
-                ws_umidade.write(estat_row, 0, "Média", cell_format)
-                ws_umidade.write(estat_row, 1, float(dados['estatisticas_umidade']['media']), cell_format)
-                
-                ws_umidade.write(estat_row + 1, 0, "Mínimo", cell_format)
-                ws_umidade.write(estat_row + 1, 1, float(dados['estatisticas_umidade']['minimo']), cell_format)
-                
-                ws_umidade.write(estat_row + 2, 0, "Máximo", cell_format)
-                ws_umidade.write(estat_row + 2, 1, float(dados['estatisticas_umidade']['maximo']), cell_format)
-                
-                ws_umidade.write(estat_row + 3, 0, "Total de Amostras", cell_format)
-                ws_umidade.write(estat_row + 3, 1, int(dados['estatisticas_umidade']['total']), cell_format)
+            worksheet.write(row_start, 0, "Estatísticas", header_format)
+            worksheet.write(row_start + 1, 0, "Média (%)", cell_format)
+            worksheet.write(row_start + 1, 1, estat['media'], number_format)
+            worksheet.write(row_start + 2, 0, "Mínimo (%)", cell_format)
+            worksheet.write(row_start + 2, 1, estat['minimo'], number_format)
+            worksheet.write(row_start + 3, 0, "Máximo (%)", cell_format)
+            worksheet.write(row_start + 3, 1, estat['maximo'], number_format)
+            worksheet.write(row_start + 4, 0, "Total de Análises", cell_format)
+            worksheet.write(row_start + 4, 1, estat['total'], cell_format)
+    
+    # Planilha para Umidade
+    if 'analises_umidade' in dados and dados['analises_umidade'].exists():
+        worksheet = workbook.add_worksheet('Umidade')
         
-        if 'proteina' in dados and dados['proteina'].exists():
-            # Criar planilha para proteína
-            ws_proteina = workbook.add_worksheet('Proteína')
-            
-            # Cabeçalhos
-            headers = ['Data', 'Horário', 'Tipo de Amostra', 'Peso (g)', 'ML Gastos', 'Resultado (%)', 'Resultado Corrigido (%)']
-            for col, header in enumerate(headers):
-                ws_proteina.write(0, col, header, header_format)
-            
-            # Dados
-            for row, item in enumerate(dados['proteina'], start=1):
-                ws_proteina.write(row, 0, item.data.strftime('%d/%m/%Y'), cell_format)
-                ws_proteina.write(row, 1, item.horario.strftime('%H:%M'), cell_format)
-                ws_proteina.write(row, 2, item.get_tipo_amostra_display(), cell_format)
-                ws_proteina.write(row, 3, float(item.peso_amostra), cell_format)
-                ws_proteina.write(row, 4, float(item.ml_gasto) if item.ml_gasto else 0, cell_format)
-                ws_proteina.write(row, 5, float(item.resultado) if item.resultado else 0, cell_format)
-                ws_proteina.write(row, 6, float(item.resultado_corrigido) if item.resultado_corrigido else 0, cell_format)
-                
-            # Adicionar estatísticas
-            if 'estatisticas_proteina' in dados:
-                ws_proteina.write(len(dados['proteina']) + 2, 0, "Estatísticas", header_format)
-                
-                estat_row = len(dados['proteina']) + 3
-                ws_proteina.write(estat_row, 0, "Média", cell_format)
-                ws_proteina.write(estat_row, 1, float(dados['estatisticas_proteina']['media']), cell_format)
-                
-                ws_proteina.write(estat_row + 1, 0, "Mínimo", cell_format)
-                ws_proteina.write(estat_row + 1, 1, float(dados['estatisticas_proteina']['minimo']), cell_format)
-                
-                ws_proteina.write(estat_row + 2, 0, "Máximo", cell_format)
-                ws_proteina.write(estat_row + 2, 1, float(dados['estatisticas_proteina']['maximo']), cell_format)
-                
-                ws_proteina.write(estat_row + 3, 0, "Total de Amostras", cell_format)
-                ws_proteina.write(estat_row + 3, 1, int(dados['estatisticas_proteina']['total']), cell_format)
+        # Adicionar cabeçalho
+        headers = ['Data', 'Horário', 'Tipo de Amostra', 'Tara', 'Líquido', 
+                  'Peso da Amostra (g)', 'Resultado (%)', 'Fator de Correção', 'Média 24h']
         
-        workbook.close()
-        return response
+        for col, header in enumerate(headers):
+            worksheet.write(0, col, header, header_format)
+            worksheet.set_column(col, col, 15)  # Largura da coluna
+        
+        # Adicionar dados
+        for row, analise in enumerate(dados['analises_umidade'], start=1):
+            worksheet.write(row, 0, analise.data.strftime('%d/%m/%Y'), cell_format)
+            worksheet.write(row, 1, analise.horario.strftime('%H:%M'), cell_format)
+            worksheet.write(row, 2, analise.get_tipo_amostra_display(), cell_format)
+            worksheet.write(row, 3, analise.tara if hasattr(analise, 'tara') and analise.tara else 0, number_format)
+            worksheet.write(row, 4, analise.liquido if hasattr(analise, 'liquido') and analise.liquido else 0, number_format)
+            worksheet.write(row, 5, analise.peso_amostra, number_format)
+            worksheet.write(row, 6, analise.resultado if hasattr(analise, 'resultado') else 0, number_format)  # Corrigido
+            worksheet.write(row, 7, analise.fator_correcao if hasattr(analise, 'fator_correcao') else 0, number_format)
+            worksheet.write(row, 8, "Não", cell_format)  # AnaliseUmidade não tem eh_media_24h
+        
+        # Adicionar estatísticas
+        if 'estatisticas_umidade' in dados:
+            row_start = len(dados['analises_umidade']) + 3
+            estat = dados['estatisticas_umidade']
+            
+            worksheet.write(row_start, 0, "Estatísticas", header_format)
+            worksheet.write(row_start + 1, 0, "Média (%)", cell_format)
+            worksheet.write(row_start + 1, 1, estat['media'], number_format)
+            worksheet.write(row_start + 2, 0, "Mínimo (%)", cell_format)
+            worksheet.write(row_start + 2, 1, estat['minimo'], number_format)
+            worksheet.write(row_start + 3, 0, "Máximo (%)", cell_format)
+            worksheet.write(row_start + 3, 1, estat['maximo'], number_format)
+            worksheet.write(row_start + 4, 0, "Total de Análises", cell_format)
+            worksheet.write(row_start + 4, 1, estat['total'], cell_format)
+    
+    # Finalizar e retornar o arquivo Excel
+    workbook.close()
+    output.seek(0)
+    
+    response = HttpResponse(
+        output,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename=relatorio_{tipo_relatorio}_{data_inicial.strftime("%Y%m%d")}_{data_final.strftime("%Y%m%d")}.xlsx'
+    
+    return response
+
+class RelatorioVisualizarView(TemplateView):
+    """View para visualizar relatórios gerados"""
+    template_name = 'app/visualizar_relatorio.html'
+    
+    def get(self, request, *args, **kwargs):
+        """Sobrescrever o método get para lidar com formatos especiais"""
+        formato = request.GET.get('formato', 'HTML')
+        
+        if formato in ['PDF', 'EXCEL']:
+            # Obter parâmetros da URL
+            tipo_relatorio = request.GET.get('tipo', 'completo')
+            data_inicial_str = request.GET.get('inicio')
+            data_final_str = request.GET.get('fim')
+            tipo_amostra_umidade = request.GET.get('umidade_tipo', '')
+            tipo_amostra_proteina = request.GET.get('proteina_tipo', '')
+            
+            try:
+                # Converter strings para datas
+                from datetime import datetime
+                data_inicial = datetime.strptime(data_inicial_str, '%Y-%m-%d').date()
+                data_final = datetime.strptime(data_final_str, '%Y-%m-%d').date()
+                
+                # Obter dados para o relatório
+                dados = obter_dados_relatorio(
+                    tipo_relatorio, 
+                    data_inicial, 
+                    data_final, 
+                    tipo_amostra_umidade, 
+                    tipo_amostra_proteina
+                )
+                
+                # Gerar o arquivo apropriado
+                if formato == 'PDF':
+                    return gerar_pdf_relatorio(dados, tipo_relatorio, data_inicial, data_final)
+                elif formato == 'EXCEL':
+                    return gerar_excel_relatorio(dados, tipo_relatorio, data_inicial, data_final)
+            
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Erro ao gerar relatório: {str(e)}")
+                # Em caso de erro, continue para renderizar o template com a mensagem de erro
+        
+        # Para formato HTML ou em caso de erro, renderiza o template normalmente
+        return super().get(request, *args, **kwargs)
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['paginaAtiva'] = 'relatorios'  # Se estiver usando isso no template
+        
+        # Obter parâmetros da URL
+        tipo_relatorio = self.request.GET.get('tipo', 'completo')
+        data_inicial_str = self.request.GET.get('inicio')
+        data_final_str = self.request.GET.get('fim')
+        formato = self.request.GET.get('formato', 'HTML')
+        tipo_amostra_umidade = self.request.GET.get('umidade_tipo', '')
+        tipo_amostra_proteina = self.request.GET.get('proteina_tipo', '')
+        
+        try:
+            # Converter strings para datas
+            from datetime import datetime
+            data_inicial = datetime.strptime(data_inicial_str, '%Y-%m-%d').date()
+            data_final = datetime.strptime(data_final_str, '%Y-%m-%d').date()
+            
+            # Obter dados para o relatório
+            dados = obter_dados_relatorio(
+                tipo_relatorio, 
+                data_inicial, 
+                data_final, 
+                tipo_amostra_umidade, 
+                tipo_amostra_proteina
+            )
+            
+            # Adicionar todos os dados ao contexto
+            context.update({
+                'tipo_relatorio': tipo_relatorio,
+                'data_inicial': data_inicial,
+                'data_final': data_final,
+                'formato': formato,
+                'tipo_amostra_umidade': tipo_amostra_umidade,
+                'tipo_amostra_proteina': tipo_amostra_proteina,
+                'query_string': self.request.META.get('QUERY_STRING', ''),
+                **dados
+            })
+                
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Erro ao gerar relatório: {str(e)}")
+            context['error'] = f"Erro ao gerar relatório: {str(e)}"
+        
         return context
