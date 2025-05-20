@@ -26,55 +26,89 @@ Desenvolvido como projeto de pesquisa e extensão do Instituto Federal de Mato G
 ## Funcionalidades
 
 - **Registro de Análises Físico-Químicas:**
-  - Teor de proteína em grãos
-  - Umidade e impurezas
-  - Análises de óleo degomado
-  - Análises específicas (OGM, micotoxinas, etc.)
+  - Teor de proteína em grãos e farelo
+  - Umidade em diferentes tipos de amostras
+  - Análises com correção de fatores
 
 - **Gerenciamento de Amostras:**
-  - Rastreabilidade completa
-  - Controle de lotes
-  - Histórico de análises
+  - Rastreabilidade por data e horário
+  - Categorização por tipo de amostra
+  - Histórico completo de análises
 
-- **Relatórios e Certificações:**
-  - Relatórios de expedição para vendas
-  - Certificados de qualidade
-  - Relatórios comparativos e estatísticos
+- **Relatórios e Visualizações:**
+  - Relatórios em PDF e Excel
+  - Visualizações gráficas interativas
+  - Estatísticas detalhadas (média, mediana, desvio padrão)
 
-- **Gestão de Laboratório:**
-  - Controle de equipamentos e calibrações
-  - Gerenciamento de métodos analíticos
-  - Fluxo de trabalho laboratorial
+- **Dashboard Analítico:**
+  - Visualização de tendências temporais
+  - Comparação por tipo de amostra
+  - Exportação de dados e gráficos
 
 ## Tecnologias
 
 - **Backend:**
-  - Java/Spring Boot
-  - API REST
-  - PostgreSQL
+  - Django (Python)
+  - APIs REST
+  - SQLite (desenvolvimento) / PostgreSQL (produção)
 
 - **Frontend:**
-  - React.js
-  - Material-UI
+  - HTML/CSS/JavaScript
+  - Bootstrap
   - Chart.js para visualizações
 
 - **DevOps:**
-  - Docker
+  - Git para controle de versão
   - GitHub Actions para CI/CD
-  - Monitoramento com Prometheus/Grafana
+  - Testes automatizados com Jest e Python unittest
 
 ## Instalação
 
-### Pré-requisitos
+Para instruções detalhadas de instalação e configuração, consulte o arquivo [SETUP.md](SETUP.md).
 
-- Java JDK 17+
-- Node.js 16+
-- PostgreSQL 13+ ou Docker
-- Maven 3.8+
+### Requisitos básicos
 
-### Configurando o ambiente de desenvolvimento
+- Python 3.10+
+- Node.js 16+ (para desenvolvimento JavaScript)
+- Git
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/ifmt-cba/qualisoja.git
-   cd qualisoja
+## Uso
+
+Após a instalação, execute o servidor de desenvolvimento:
+
+```bash
+python manage.py runserver
+```
+
+Acesse o sistema em `http://127.0.0.1:8000/`.
+
+### Usuário de teste
+
+- Usuário: admin
+- Senha: admin123
+
+## Documentação Adicional
+
+- [Configuração do Ambiente (SETUP.md)](SETUP.md)
+- [Relatório de Melhorias JavaScript](docs/relatorio_melhorias_javascript.md)
+- [Documentação do Módulo de Visualização](templates/static/geral/js/README.md)
+- [Documentação da API (swagger)](api/docs)
+
+## Contribuição
+
+Contribuições são bem-vindas! Para contribuir:
+
+1. Fork o projeto
+2. Crie sua Feature Branch (`git checkout -b feature/MinhaFeature`)
+3. Commit suas mudanças (`git commit -m 'Adicionando nova funcionalidade'`)
+4. Push para a Branch (`git push origin feature/MinhaFeature`)
+5. Abra um Pull Request
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE.md para detalhes.
+
+## Equipe
+
+- Coordenação: Prof. Dr. João Silva
+- Desenvolvimento: Equipe de Engenharia de Software IFMT
