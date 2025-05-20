@@ -1,8 +1,30 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+import logging
 
-class AnaliseUmidade(models.Model):
+logger = logging.getLogger(__name__)
+
+def validate_not_future_date(value):
+    """Valida que uma data não está no futuro."""
+    if value > timezone.localdate():
+        raise ValidationError('A data não pode estar no futuro.')
+
+class BaseModel(models.Model):
+    """
+    Modelo base que contém campos e métodos comuns a todos os modelos.
+    """
+    criado_em = models.DateTimeField(auto_now_add=True, verbose_name="Data de Criação")
+    atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Última Atualização")
+    
+    class Meta:
+        abstract = True
+
+class AnaliseUmidade(BaseModel):
+    """
+    Modelo para armazenar análises de umidade na soja.
+    """
     TIPO_AMOSTRA_CHOICES = [
         ('FG', 'Farelo Grosso'),
         ('FF', 'Farelo Fino'),
@@ -10,8 +32,15 @@ class AnaliseUmidade(models.Model):
         ('PE', 'Peletizado'),
     ]
     
-    data = models.DateField(verbose_name="Data da Análise", default=timezone.localdate)
-    horario = models.TimeField(verbose_name="Horário da Análise",default=timezone.localtime().time())
+    data = models.DateField(
+        verbose_name="Data da Análise", 
+        default=timezone.localdate,
+        validators=[validate_not_future_date]
+    )
+    horario = models.TimeField(
+        verbose_name="Horário da Análise",
+        default=timezone.localtime().time()
+    )
     tipo_amostra = models.CharField(
         max_length=2,
         choices=TIPO_AMOSTRA_CHOICES,
@@ -39,15 +68,24 @@ class AnaliseUmidade(models.Model):
         verbose_name_plural = "Análises de Umidade"
         ordering = ['-data', '-horario']
 
-class AnaliseProteina(models.Model):
+class AnaliseProteina(BaseModel):
+    """
+    Modelo para armazenar análises de proteína na soja.
+    """
     TIPO_AMOSTRA_CHOICES = [
         ('FL', 'Farelo'),
         ('SI', 'Soja Industrializada'),
     ]
     
-    
-    data = models.DateField(verbose_name="Data da Análise", default=timezone.localdate)
-    horario = models.TimeField(verbose_name="Horário da Análise",default=timezone.localtime().time())
+    data = models.DateField(
+        verbose_name="Data da Análise", 
+        default=timezone.localdate,
+        validators=[validate_not_future_date]
+    )
+    horario = models.TimeField(
+        verbose_name="Horário da Análise",
+        default=timezone.localtime().time()
+    )
     tipo_amostra = models.CharField(
         max_length=2,
         choices=TIPO_AMOSTRA_CHOICES,
@@ -89,23 +127,28 @@ class AnaliseProteina(models.Model):
     
     def __str__(self):
         media = " (Média 24h)" if self.eh_media_24h else ""
-        return f"{self.horario} - {self.get_tipo_amostra_display()}{media}"
+        return f"{self.get_tipo_amostra_display()} - {self.data} {self.horario}{media}"
     
     class Meta:
         verbose_name = "Análise de Proteína"
         verbose_name_plural = "Análises de Proteína"
-        ordering = ['data', 'horario']
+        ordering = ['-data', '-horario']
 
-        # Adicione ao final do seu arquivo models.py existente
-
-class ConfiguracaoRelatorio(models.Model):
+class ConfiguracaoRelatorio(BaseModel):
+    """
+    Modelo para armazenar configurações de relatórios.
+    Permite personalizar como os relatórios são gerados e exibidos.
+    """
     TIPO_RELATORIO_CHOICES = [
         ('UMIDADE', 'Relatório de Umidade'),
         ('PROTEINA', 'Relatório de Proteína'),
         ('COMBINADO', 'Relatório Combinado'),
     ]
     
-    nome = models.CharField(max_length=100, verbose_name="Nome do Relatório")
+    nome = models.CharField(
+        max_length=100, 
+        verbose_name="Nome do Relatório"
+    )
     tipo_relatorio = models.CharField(
         max_length=15,
         choices=TIPO_RELATORIO_CHOICES,
@@ -116,9 +159,10 @@ class ConfiguracaoRelatorio(models.Model):
         verbose_name="Período padrão em dias",
         validators=[MinValueValidator(1), MaxValueValidator(365)]
     )
-    ativo = models.BooleanField(default=True, verbose_name="Relatório Ativo")
-    data_criacao = models.DateTimeField(auto_now_add=True)
-    ultima_modificacao = models.DateTimeField(auto_now=True)
+    ativo = models.BooleanField(
+        default=True, 
+        verbose_name="Relatório Ativo"
+    )
     
     def __str__(self):
         return f"{self.nome} ({self.get_tipo_relatorio_display()})"
@@ -126,3 +170,4 @@ class ConfiguracaoRelatorio(models.Model):
     class Meta:
         verbose_name = "Configuração de Relatório"
         verbose_name_plural = "Configurações de Relatórios"
+        ordering = ['nome']

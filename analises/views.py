@@ -100,7 +100,31 @@ class RelatorioGerarView(FormView):
         return redirect(url)
     
 def obter_dados_relatorio(tipo_relatorio, data_inicial, data_final, tipo_amostra_umidade='', tipo_amostra_proteina=''):
-    """Obtém dados para o relatório com base nos parâmetros"""
+    """
+    Obtém dados para o relatório com base nos parâmetros
+    
+    Args:
+        tipo_relatorio (str): Tipo de relatório ('umidade', 'proteina' ou 'completo')
+        data_inicial (date): Data inicial para o relatório
+        data_final (date): Data final para o relatório
+        tipo_amostra_umidade (str, optional): Filtro de tipo de amostra para umidade
+        tipo_amostra_proteina (str, optional): Filtro de tipo de amostra para proteína
+        
+    Returns:
+        dict: Dicionário com os dados do relatório
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Validação de parâmetros
+    if not tipo_relatorio or not data_inicial or not data_final:
+        logger.error("Parâmetros obrigatórios não fornecidos para o relatório")
+        raise ValueError("Parâmetros obrigatórios não fornecidos")
+        
+    if data_inicial > data_final:
+        logger.error(f"Data inicial ({data_inicial}) posterior à data final ({data_final})")
+        raise ValueError("Data inicial não pode ser posterior à data final")
+    
     dados = {}
     
     if tipo_relatorio in ['umidade', 'completo']:
@@ -115,6 +139,25 @@ def obter_dados_relatorio(tipo_relatorio, data_inicial, data_final, tipo_amostra
                 queryset = queryset.filter(tipo_amostra=tipo_amostra_umidade)
             
             dados['analises_umidade'] = queryset.order_by('-data', '-horario')
+            
+            # Preparar dados em JSON para os gráficos de umidade
+            import json
+            umidade_data = []
+            
+            for analise in queryset:
+                umidade_data.append({
+                    'data': analise.data.strftime('%Y-%m-%d'),
+                    'horario': analise.horario.strftime('%H:%M'),
+                    'tipo': analise.get_tipo_amostra_display(),
+                    'tipo_code': analise.tipo_amostra,
+                    'peso_amostra': float(analise.peso_amostra) if analise.peso_amostra else 0,
+                    'tara': float(analise.tara) if hasattr(analise, 'tara') and analise.tara else 0,
+                    'liquido': float(analise.liquido) if hasattr(analise, 'liquido') and analise.liquido else 0,
+                    'resultado': float(analise.resultado) if analise.resultado else 0,
+                    'fator_correcao': float(analise.fator_correcao) if hasattr(analise, 'fator_correcao') and analise.fator_correcao else 0
+                })
+                
+            dados['analises_umidade_json'] = json.dumps(umidade_data)
             
             # Cálculo de estatísticas - usando 'resultado'
             if queryset.exists():
@@ -143,6 +186,24 @@ def obter_dados_relatorio(tipo_relatorio, data_inicial, data_final, tipo_amostra
                 queryset = queryset.filter(tipo_amostra=tipo_amostra_proteina)
             
             dados['analises_proteina'] = queryset.order_by('-data', '-horario')
+            
+            # Preparar dados em JSON para os gráficos
+            import json
+            proteina_data = []
+            
+            for analise in queryset:
+                proteina_data.append({
+                    'data': analise.data.strftime('%Y-%m-%d'),
+                    'horario': analise.horario.strftime('%H:%M'),
+                    'tipo': analise.get_tipo_amostra_display(),
+                    'tipo_code': analise.tipo_amostra,
+                    'peso_amostra': float(analise.peso_amostra),
+                    'ml_gasto': float(analise.ml_gasto) if analise.ml_gasto else 0,
+                    'resultado': float(analise.resultado) if analise.resultado else 0,
+                    'resultado_corrigido': float(analise.resultado_corrigido) if analise.resultado_corrigido else 0
+                })
+                
+            dados['analises_proteina_json'] = json.dumps(proteina_data)
             
             # Cálculo de estatísticas - usando 'resultado' e 'resultado_corrigido' se disponíveis
             if queryset.exists():
@@ -449,24 +510,68 @@ class RelatorioVisualizarView(TemplateView):
     """View para visualizar relatórios gerados"""
     template_name = 'app/visualizar_relatorio.html'
     
-    def get(self, request, *args, **kwargs):
-        """Sobrescrever o método get para lidar com formatos especiais"""
-        formato = request.GET.get('formato', 'HTML')
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        import logging
+        self.logger = logging.getLogger(__name__)
+    
+    def _parse_date_params(self, request):
+        """
+        Processa os parâmetros de data da requisição.
         
-        if formato in ['PDF', 'EXCEL']:
-            # Obter parâmetros da URL
+        Returns:
+            tuple: (tipo_relatorio, data_inicial, data_final, formato, tipo_amostra_umidade, tipo_amostra_proteina)
+            ou None se ocorrer um erro.
+        """
+        try:
+            from datetime import datetime
+            
             tipo_relatorio = request.GET.get('tipo', 'completo')
             data_inicial_str = request.GET.get('inicio')
             data_final_str = request.GET.get('fim')
+            formato = request.GET.get('formato', 'HTML')
             tipo_amostra_umidade = request.GET.get('umidade_tipo', '')
             tipo_amostra_proteina = request.GET.get('proteina_tipo', '')
             
-            try:
-                # Converter strings para datas
-                from datetime import datetime
-                data_inicial = datetime.strptime(data_inicial_str, '%Y-%m-%d').date()
-                data_final = datetime.strptime(data_final_str, '%Y-%m-%d').date()
+            # Validar parâmetros
+            if not data_inicial_str or not data_final_str:
+                raise ValueError("Datas inicial e final são obrigatórias")
                 
+            # Converter strings para datas
+            data_inicial = datetime.strptime(data_inicial_str, '%Y-%m-%d').date()
+            data_final = datetime.strptime(data_final_str, '%Y-%m-%d').date()
+            
+            if data_inicial > data_final:
+                raise ValueError("A data inicial não pode ser posterior à data final")
+                
+            return (
+                tipo_relatorio, 
+                data_inicial, 
+                data_final, 
+                formato,
+                tipo_amostra_umidade,
+                tipo_amostra_proteina
+            )
+        except ValueError as e:
+            self.logger.error(f"Erro ao processar parâmetros de data: {str(e)}")
+            return None
+        except Exception as e:
+            self.logger.error(f"Erro inesperado ao processar parâmetros: {str(e)}")
+            return None
+    
+    def get(self, request, *args, **kwargs):
+        """Sobrescrever o método get para lidar com formatos especiais"""
+        params = self._parse_date_params(request)
+        
+        if not params:
+            # Se houver erro nos parâmetros, exibir mensagem de erro na página HTML
+            return super().get(request, *args, **kwargs)
+            
+        tipo_relatorio, data_inicial, data_final, formato, tipo_amostra_umidade, tipo_amostra_proteina = params
+            
+        # Para formatos de arquivo, gera o arquivo diretamente
+        if formato in ['PDF', 'EXCEL']:
+            try:
                 # Obter dados para o relatório
                 dados = obter_dados_relatorio(
                     tipo_relatorio, 
@@ -483,32 +588,26 @@ class RelatorioVisualizarView(TemplateView):
                     return gerar_excel_relatorio(dados, tipo_relatorio, data_inicial, data_final)
             
             except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Erro ao gerar relatório: {str(e)}")
+                self.logger.error(f"Erro ao gerar relatório {formato}: {str(e)}")
                 # Em caso de erro, continue para renderizar o template com a mensagem de erro
         
         # Para formato HTML ou em caso de erro, renderiza o template normalmente
         return super().get(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
+        """Prepara o contexto para renderização do template."""
         context = super().get_context_data(**kwargs)
-        context['paginaAtiva'] = 'relatorios'  # Se estiver usando isso no template
+        context['paginaAtiva'] = 'relatorios'
         
-        # Obter parâmetros da URL
-        tipo_relatorio = self.request.GET.get('tipo', 'completo')
-        data_inicial_str = self.request.GET.get('inicio')
-        data_final_str = self.request.GET.get('fim')
-        formato = self.request.GET.get('formato', 'HTML')
-        tipo_amostra_umidade = self.request.GET.get('umidade_tipo', '')
-        tipo_amostra_proteina = self.request.GET.get('proteina_tipo', '')
+        params = self._parse_date_params(self.request)
+        
+        if not params:
+            context['error'] = "Parâmetros de data inválidos. Verifique se as datas estão no formato correto."
+            return context
+            
+        tipo_relatorio, data_inicial, data_final, formato, tipo_amostra_umidade, tipo_amostra_proteina = params
         
         try:
-            # Converter strings para datas
-            from datetime import datetime
-            data_inicial = datetime.strptime(data_inicial_str, '%Y-%m-%d').date()
-            data_final = datetime.strptime(data_final_str, '%Y-%m-%d').date()
-            
             # Obter dados para o relatório
             dados = obter_dados_relatorio(
                 tipo_relatorio, 
@@ -531,9 +630,7 @@ class RelatorioVisualizarView(TemplateView):
             })
                 
         except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"Erro ao gerar relatório: {str(e)}")
+            self.logger.error(f"Erro ao gerar dados para relatório HTML: {str(e)}")
             context['error'] = f"Erro ao gerar relatório: {str(e)}"
         
         return context

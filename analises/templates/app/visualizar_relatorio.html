@@ -79,6 +79,37 @@
             </div>
             {% endif %}
             
+            <!-- Seção de estatísticas para proteína -->
+            <div id="proteina-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para proteína -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Proteína ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="proteinaTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="proteinaTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
@@ -144,6 +175,37 @@
                 </div>
             </div>
             {% endif %}
+            
+            <!-- Seção de estatísticas para umidade -->
+            <div id="umidade-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para umidade -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Umidade ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="umidadeTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="umidadeTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
@@ -232,5 +294,59 @@
         font-weight: bold;
     }
 }
+
+/* Estilos para estatísticas */
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #343a40;
+}
+
+/* Estilos para container de gráficos */
+.chart-container {
+    position: relative;
+    min-height: 300px;
+}
+
+/* Alerta de erro nos gráficos */
+.chart-container .alert {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    text-align: center;
+}
 </style>
+
+<!-- Importar a biblioteca Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<!-- Dados para os gráficos (separando a lógica do template) -->
+<script type="application/json" id="proteina-data">
+{% if analises_proteina_json %}{{ analises_proteina_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<script type="application/json" id="umidade-data">
+{% if analises_umidade_json %}{{ analises_umidade_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<!-- Script para renderizar os gráficos -->
+<script src="/static/geral/js/relatorio_charts.js"></script>
 {% endblock %}
