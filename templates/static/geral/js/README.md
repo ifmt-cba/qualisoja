@@ -79,4 +79,4 @@ Os testes abrangem:
 
 ## Desenvolvido por
 
-Equipe QualiSoja - 2023-2025
+Equipe QualiSoja - 2025
