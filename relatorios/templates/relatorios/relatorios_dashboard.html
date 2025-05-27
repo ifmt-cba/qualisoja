@@ -27,7 +27,7 @@
           <p class="card-text flex-grow-1">
             Gere relatórios completos de análises de umidade com filtros por data, tipo de amostra e mais.
           </p>
-          <a href="{% url 'gerar_relatorio' %}?tipo=umidade"
+          <a href="{% url 'relatorios:gerar' %}?tipo=umidade"
              class="btn btn-success btn-lg mt-auto w-100">
             <i class="fas fa-file-alt me-1"></i> Gerar
           </a>
@@ -46,7 +46,7 @@
           <p class="card-text flex-grow-1">
             Relatórios detalhados de análises de proteína com filtros personalizados.
           </p>
-          <a href="{% url 'gerar_relatorio' %}?tipo=proteina"
+          <a href="{% url 'relatorios:gerar' %}?tipo=proteina"
              class="btn btn-primary btn-lg mt-auto w-100">
             <i class="fas fa-file-alt me-1"></i> Gerar
           </a>
@@ -65,7 +65,7 @@
           <p class="card-text flex-grow-1">
             Relatório combinado com dados de umidade e proteína para análise comparativa.
           </p>
-          <a href="{% url 'gerar_relatorio' %}?tipo=completo"
+          <a href="{% url 'relatorios:gerar' %}?tipo=completo"
              class="btn btn-info btn-lg mt-auto w-100">
             <i class="fas fa-file-alt me-1"></i> Gerar
           </a>
