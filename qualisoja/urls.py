@@ -15,7 +15,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('cadastro/',include('users.urls', namespace='users')),
     path('analises/',include('analises.urls', namespace='analises')),
-    path('relatorios/',include('relatorios_app.urls', namespace='relatorios'))
+    path('relatorios/',include('relatorios.urls', namespace='relatorios'))
 ]
 
 # Adicionar URL de debug se disponível

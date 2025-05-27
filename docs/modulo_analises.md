@@ -43,13 +43,7 @@ Registra análises de proteína em diferentes tipos de amostras:
 
 ### ConfiguracaoRelatorio
 
-Armazena configurações para geração de relatórios:
-
-- **Campos principais:**
-  - `nome`: Nome do relatório
-  - `tipo_relatorio`: Tipo de relatório (Umidade, Proteína, Combinado)
-  - `periodo_padrao`: Período padrão em dias
-  - `ativo`: Indica se a configuração está ativa
+> **Nota:** Este modelo foi movido para o módulo `relatorios`.
 
 ## Funcionalidades
 
@@ -66,11 +60,7 @@ Armazena configurações para geração de relatórios:
 - Filtros por data, tipo de amostra
 - Exportação para Excel e PDF
 
-### Relatórios
-
-- Geração de relatórios customizáveis
-- Visualizações gráficas usando Chart.js
-- Estatísticas e análises de tendências
+> **Nota:** As funcionalidades de relatórios foram migradas para o módulo `relatorios`. Consulte a documentação específica em [modulo_relatorios.md](./modulo_relatorios.md).
 
 ## API e Views
 
@@ -78,15 +68,12 @@ Armazena configurações para geração de relatórios:
 
 1. `UmidadeCreateView` e `ProteinaCreateView`: Para criação de análises
 2. `UmidadeListView` e `ProteinaListView`: Para listagem de análises
-3. `RelatorioGerarView`: Para geração de relatórios
-4. `RelatorioVisualizarView`: Para visualização de relatórios
+
+> **Nota:** As views relacionadas a relatórios foram migradas para o módulo `relatorios`.
 
 ### Endpoints para geração de relatórios
 
-- `/relatorios/gerar/`: Formulário para seleção de parâmetros
-- `/relatorios/visualizar/`: Visualização do relatório gerado
-- `/relatorios/exportar/excel/`: Exportação para Excel
-- `/relatorios/exportar/pdf/`: Exportação para PDF
+> **Nota:** As funcionalidades de relatórios foram migradas para o módulo `relatorios`. Consulte a documentação específica em [modulo_relatorios.md](./modulo_relatorios.md).
 
 ## Fluxo de Trabalho
 

@@ -17,6 +17,7 @@ Bem-vindo à documentação completa do sistema QualiSoja. Este documento serve 
 ### Módulos e Componentes
 
 - [Módulo de Análises](./modulo_analises.md) - Documentação do módulo central de análises
+- [Módulo de Relatórios](./modulo_relatorios.md) - Documentação do módulo de geração e visualização de relatórios
 - [Relatório de Melhorias JavaScript](./relatorio_melhorias_javascript.md) - Detalhes sobre as melhorias implementadas no JavaScript
 - [Módulo de Visualização](../templates/static/geral/js/README.md) - Documentação específica do módulo de visualização de dados
 

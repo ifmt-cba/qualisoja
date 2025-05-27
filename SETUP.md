@@ -54,6 +54,37 @@ Este documento fornece instruções para configurar um ambiente de desenvolvimen
    .quit
    ```
 
+## Configuração após atualização do repositório
+
+Se você está atualizando um repositório existente e ocorreram mudanças significativas na estrutura (como a migração do módulo de relatórios), siga estas etapas adicionais:
+
+1. Atualize seu repositório:
+   ```bash
+   git pull
+   ```
+
+2. Instale quaisquer novas dependências:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Aplique as migrações para garantir que seu banco de dados esteja sincronizado:
+   ```bash
+   python manage.py migrate
+   ```
+
+4. Se encontrar erros durante a migração relacionados a modelos que foram movidos (como ConfiguracaoRelatorio), pode ser necessário usar a opção de migração fake:
+   ```bash
+   python manage.py migrate analises --fake
+   python manage.py migrate relatorios
+   ```
+
+5. Limpe os arquivos de cache Python:
+   ```bash
+   find . -name "*.pyc" -delete
+   find . -name "__pycache__" -delete
+   ```
+
 ## Configuração JavaScript (para testes)
 
 1. Instale as dependências Node.js:
@@ -77,7 +108,9 @@ O site estará disponível em `http://127.0.0.1:8000/`.
 ## Estrutura do Projeto
 
 - `analises/` - Aplicação principal para análises de soja
-- `templates/static/geral/js/` - Código JavaScript para visualizações
+- `relatorios/` - Aplicação para geração e visualização de relatórios
+- `templates/static/geral/js/` - Código JavaScript global
+- `relatorios/static/relatorios/js/` - Código JavaScript específico para relatórios
 - `tests/js/` - Testes JavaScript
 - `docs/` - Documentação adicional
 
@@ -85,3 +118,5 @@ O site estará disponível em `http://127.0.0.1:8000/`.
 
 - [Relatório de Melhorias JavaScript](docs/relatorio_melhorias_javascript.md)
 - [Documentação JavaScript](templates/static/geral/js/README.md)
+- [Módulo de Relatórios](docs/modulo_relatorios.md)
+- [Changelog](CHANGELOG.md)

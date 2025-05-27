@@ -14,13 +14,13 @@ Responsável pela definição da estrutura de dados e regras de negócio.
 
 - **Aplicações principais:**
   - `analises`: Modelos para registro e processamento de análises de qualidade
+  - `relatorios`: Geração e visualização de relatórios de análises
   - `users`: Gerenciamento de usuários e perfis
 
 - **Modelos principais:**
   - `BaseModel`: Classe abstrata com campos comuns (criado_em, atualizado_em)
   - `AnaliseUmidade`: Registro de análises de umidade
   - `AnaliseProteina`: Registro de análises de proteína
-  - `ConfiguracaoRelatorio`: Configurações para geração de relatórios
   - `Profile`: Perfil de usuário estendido
 
 ### 2. Camada de Visão (Templates)
@@ -28,12 +28,14 @@ Responsável pela definição da estrutura de dados e regras de negócio.
 Responsável pela apresentação dos dados aos usuários.
 
 - **Templates principais:**
-  - Templates base: `base.html`, `baseLogin.html`
-  - Templates de aplicação: em `analises/templates/app/`
+  - Templates base: `base.html`, `baseLogin.html`, `home.html`, `home_simple.html`
+  - Templates de análises: em `analises/templates/app/`
+  - Templates de relatórios: em `relatorios/templates/relatorios/`
   - Templates de autenticação: em `users/templates/`
 
 - **Recursos estáticos:**
-  - JavaScript: `templates/static/geral/js/`
+  - JavaScript geral: `templates/static/geral/js/`
+  - JavaScript de relatórios: `relatorios/static/relatorios/js/`
   - CSS: `templates/static/geral/css/`
   - Imagens: `templates/static/image/`
 
@@ -42,15 +44,17 @@ Responsável pela apresentação dos dados aos usuários.
 Responsável pela lógica de controle e processamento.
 
 - **Views principais:**
-  - Views de análise: Cadastro e listagem de análises
-  - Views de relatório: Geração e visualização de relatórios
+  - Views de análise: Cadastro e listagem de análises (em `analises/views.py`)
+  - Views de relatório: Geração e visualização de relatórios (em `relatorios/views.py`)
   - Views de exportação: Exportação para Excel e PDF
-  - Views de autenticação: Login e gerenciamento de usuários
+  - Views de autenticação: Login e gerenciamento de usuários (em `users/views.py`)
+  - Views gerais: Páginas iniciais e dashboard (em `qualisoja/views.py`)
 
 ### 4. URLs e Roteamento
 
 - `qualisoja/urls.py`: URLs globais do projeto
 - `analises/urls.py`: URLs específicas do módulo de análises
+- `relatorios/urls.py`: URLs específicas do módulo de relatórios
 - `users/urls.py`: URLs relacionadas a usuários
 
 ### 5. Componente de Visualização de Dados

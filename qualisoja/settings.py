@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'analises',
     'users',
-    'relatorios_app',
+    'relatorios',
     'widget_tweaks',
 ]
 

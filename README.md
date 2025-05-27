@@ -62,6 +62,18 @@ Desenvolvido como projeto de pesquisa e extensão do Instituto Federal de Mato G
   - GitHub Actions para CI/CD
   - Testes automatizados com Jest e Python unittest
 
+## Estrutura do Projeto
+
+```
+QualiSoja/
+├── analises/           # Módulo de análises (umidade e proteína)
+├── relatorios/         # Módulo de relatórios e visualizações
+├── users/              # Gerenciamento de usuários
+├── templates/          # Templates globais
+├── qualisoja/          # Configurações do projeto
+└── docs/               # Documentação
+```
+
 ## Instalação
 
 Para instruções detalhadas de instalação e configuração, consulte o arquivo [SETUP.md](SETUP.md).
@@ -90,6 +102,9 @@ Acesse o sistema em `http://127.0.0.1:8000/`.
 ## Documentação Adicional
 
 - [Configuração do Ambiente (SETUP.md)](SETUP.md)
+- [Documentação de Arquitetura](docs/arquitetura.md)
+- [Módulo de Análises](docs/modulo_analises.md)
+- [Módulo de Relatórios](docs/modulo_relatorios.md)
 - [Relatório de Melhorias JavaScript](docs/relatorio_melhorias_javascript.md)
 - [Documentação do Módulo de Visualização](templates/static/geral/js/README.md)
 - [Documentação da API (swagger)](api/docs)
