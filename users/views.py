@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .models import Profile
+from django.contrib import auth
 
 def cadastro(request):
     if request.method == "GET":
@@ -43,3 +44,10 @@ def cadastro(request):
 def loginViews(request):
     if request.method == "GET":
         return render(request, 'login.html')
+    elif request.method == "POST":
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        user = auth.authenticate(request, email=email, password=password)
+        
+
