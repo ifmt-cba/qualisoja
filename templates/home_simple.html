@@ -1,0 +1,426 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}QualiSoja - Dashboard{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<style>
+  .dashboard-card {
+    border-radius: 12px;
+    background-color: white;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  }
+  
+  .dashboard-icon {
+    transition: all 0.3s ease;
+  }
+  
+  .dashboard-card:hover .dashboard-icon {
+    transform: scale(1.1);
+  }
+  
+  .shadow-soft {
+    box-shadow: 0 6px 18px 0 rgba(0,0,0,0.05) !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Principal -->
+<section class="py-5" id="dashboard">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="mb-0">Dashboard Análises</h2>
+        <p class="lead mb-4">Visualização em tempo real das análises de umidade e proteína da soja.</p>
+        <p class="text-muted">Dados dos últimos {{ periodo.dias }} dias ({{ periodo.inicio }} a {{ periodo.fim }})</p>
+      </div>
+      
+      {% if user.is_authenticated %}
+      <div class="d-flex gap-2">
+        <div class="dropdown">
+          <button class="btn btn-outline-success dropdown-toggle" type="button" id="addDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-plus-circle"></i> Nova Análise
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="addDropdown">
+            <li><a class="dropdown-item" href="{% url 'analises:umidade_create' %}"><i class="bi bi-droplet me-2"></i>Nova Análise de Umidade</a></li>
+            <li><a class="dropdown-item" href="{% url 'analises:proteina_create' %}"><i class="bi bi-bar-chart me-2"></i>Nova Análise de Proteína</a></li>
+          </ul>
+        </div>
+        <a href="{% url 'relatorios:dashboard' %}" class="btn btn-primary">
+          <i class="bi bi-file-earmark-bar-graph me-1"></i> Relatórios
+        </a>
+      </div>
+      {% endif %}
+    </div>
+    
+    <!-- Seletor de período -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-soft bg-light p-3">
+          <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <p class="mb-0 me-3"><i class="bi bi-calendar3 me-2"></i> Selecione o período:</p>
+            <div class="btn-group" role="group" aria-label="Selecionar período">
+              <a href="?periodo=7" class="btn btn-sm btn-outline-success {% if periodo.dias == 7 %}active{% endif %}">7 dias</a>
+              <a href="?periodo=30" class="btn btn-sm btn-outline-success {% if periodo.dias == 30 %}active{% endif %}">30 dias</a>
+              <a href="?periodo=90" class="btn btn-sm btn-outline-success {% if periodo.dias == 90 %}active{% endif %}">90 dias</a>
+              <a href="?periodo=180" class="btn btn-sm btn-outline-success {% if periodo.dias == 180 %}active{% endif %}">6 meses</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Visão geral - Cards de estatísticas -->
+    <div class="row mb-4">
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="dashboard-card shadow-soft p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-3">Total de Análises</h5>
+              <h2 class="mb-0 fw-bold">{{ total_analises|default:0 }}</h2>
+              <p class="text-muted mb-0">últimos {{ periodo.dias }} dias</p>
+            </div>
+            <div class="dashboard-icon bg-primary bg-opacity-10 p-3 rounded-circle">
+              <i class="bi bi-clipboard-data text-primary" style="font-size: 2.5rem;"></i>
+            </div>
+          </div>
+          <div class="mt-3 d-flex justify-content-between">
+            <span class="badge bg-success rounded-pill p-2">
+              <i class="bi bi-bar-chart-fill"></i> {{ total_proteina|default:0 }} proteína
+            </span>
+            <span class="badge bg-info rounded-pill p-2">
+              <i class="bi bi-droplet-fill"></i> {{ total_umidade|default:0 }} umidade
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="dashboard-card shadow-soft p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-3">Análises de Umidade</h5>
+              <h2 class="mb-0 fw-bold">{{ total_umidade|default:0 }}</h2>
+              <div class="d-flex align-items-baseline">
+                <span class="text-info fs-4 me-2">
+                  {% if estatisticas_umidade.media %}{{ estatisticas_umidade.media|floatformat:2 }}%{% else %}0.00%{% endif %}
+                </span>
+                <span class="text-muted small">média</span>
+              </div>
+            </div>
+            <div class="dashboard-icon bg-info bg-opacity-10 p-3 rounded-circle">
+              <i class="bi bi-droplet-fill text-info" style="font-size: 2.5rem;"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="d-flex justify-content-between text-muted small mb-2">
+              <span>Min: <strong>
+                {% if estatisticas_umidade.minimo %}{{ estatisticas_umidade.minimo|floatformat:2 }}%{% else %}0.00%{% endif %}
+              </strong></span>
+              <span>Max: <strong>
+                {% if estatisticas_umidade.maximo %}{{ estatisticas_umidade.maximo|floatformat:2 }}%{% else %}0.00%{% endif %}
+              </strong></span>
+              <span>Desv: <strong>
+                {% if estatisticas_umidade.desvio %}{{ estatisticas_umidade.desvio|floatformat:2 }}{% else %}0.00{% endif %}
+              </strong></span>
+            </div>
+            <a href="{% url 'analises:umidade_list' %}" class="text-decoration-none small">
+              Ver todas as análises <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="dashboard-card shadow-soft p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-3">Análises de Proteína</h5>
+              <h2 class="mb-0 fw-bold">{{ total_proteina|default:0 }}</h2>
+              <div class="d-flex align-items-baseline">
+                <span class="text-success fs-4 me-2">
+                  {% if estatisticas_proteina.media %}{{ estatisticas_proteina.media|floatformat:2 }}%{% else %}0.00%{% endif %}
+                </span>
+                <span class="text-muted small">média</span>
+              </div>
+            </div>
+            <div class="dashboard-icon bg-success bg-opacity-10 p-3 rounded-circle">
+              <i class="bi bi-bar-chart-fill text-success" style="font-size: 2.5rem;"></i>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="d-flex justify-content-between text-muted small mb-2">
+              <span>Min: <strong>
+                {% if estatisticas_proteina.minimo %}{{ estatisticas_proteina.minimo|floatformat:2 }}%{% else %}0.00%{% endif %}
+              </strong></span>
+              <span>Max: <strong>
+                {% if estatisticas_proteina.maximo %}{{ estatisticas_proteina.maximo|floatformat:2 }}%{% else %}0.00%{% endif %}
+              </strong></span>
+              <span>Desv: <strong>
+                {% if estatisticas_proteina.desvio %}{{ estatisticas_proteina.desvio|floatformat:2 }}{% else %}0.00{% endif %}
+              </strong></span>
+            </div>
+            <a href="{% url 'analises:proteina_list' %}" class="text-decoration-none small">
+              Ver todas as análises <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Gráficos principais -->
+    <div class="row mb-5">
+      <div class="col-lg-8 mb-4">
+        <div class="dashboard-card shadow-soft p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Evolução Temporal</h4>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Dados">
+              <button type="button" class="btn btn-outline-success active" data-chart="proteina">Proteína</button>
+              <button type="button" class="btn btn-outline-info" data-chart="umidade">Umidade</button>
+              <button type="button" class="btn btn-outline-secondary" data-chart="ambos">Ambos</button>
+            </div>
+          </div>
+          <div class="chart-container" style="position: relative; height: 350px;">
+            <canvas id="timeChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 mb-4">
+        <div class="dashboard-card shadow-soft p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Análises por Dia</h4>
+          </div>
+          <div class="chart-container" style="position: relative; height: 350px;">
+            <canvas id="weekdayChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Status dos dados -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="alert alert-info">
+          <h5><i class="bi bi-info-circle me-2"></i>Status dos Dados</h5>
+          <p class="mb-0">
+            <strong>Proteína:</strong> {{ total_proteina|default:0 }} análises carregadas | 
+            <strong>Umidade:</strong> {{ total_umidade|default:0 }} análises carregadas |
+            <strong>Período:</strong> {{ periodo.dias }} dias
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    {% if user.is_authenticated %}
+    <div class="row justify-content-center mt-4 mb-3">
+      <div class="col-md-12">
+        <div class="card border-0 shadow-soft bg-light">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0">
+                <i class="bi bi-lightbulb text-warning" style="font-size: 2rem;"></i>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h5 class="card-title mb-1">Precisa de análises mais detalhadas?</h5>
+                <p class="card-text mb-2">Acesse o módulo completo de relatórios para visualizações avançadas</p>
+                <div class="mt-2">
+                  <a href="{% url 'relatorios:dashboard' %}" class="btn btn-sm btn-primary me-2">
+                    <i class="bi bi-file-earmark-bar-graph me-1"></i> Explorar relatórios
+                  </a>
+                  <a href="{% url 'analises:umidade_create' %}" class="btn btn-sm btn-outline-success me-2">
+                    <i class="bi bi-droplet me-1"></i> Nova análise de umidade
+                  </a>
+                  <a href="{% url 'analises:proteina_create' %}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-bar-chart me-1"></i> Nova análise de proteína
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== DASHBOARD SIMPLIFICADO ===');
+    console.log('Chart.js disponível:', typeof Chart !== 'undefined');
+    
+    // Verificar se Chart.js foi carregado
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js não carregado!');
+        return;
+    }
+    
+    // Dados do backend (com verificação de segurança)
+    let proteinaData = [];
+    let umidadeData = [];
+    
+    try {
+        const proteinaStr = '{{ proteina_json|escapejs }}';
+        const umidadeStr = '{{ umidade_json|escapejs }}';
+        const analisesPorDiaStr = '{{ analises_por_dia_json|escapejs }}';
+        
+        console.log('Dados brutos - Proteína:', proteinaStr.length, 'chars');
+        console.log('Dados brutos - Umidade:', umidadeStr.length, 'chars');
+        
+        if (proteinaStr && proteinaStr !== 'None') {
+            proteinaData = JSON.parse(proteinaStr);
+            console.log('Proteína carregada:', proteinaData.length, 'itens');
+        }
+        
+        if (umidadeStr && umidadeStr !== 'None') {
+            umidadeData = JSON.parse(umidadeStr);
+            console.log('Umidade carregada:', umidadeData.length, 'itens');
+        }
+        
+        // Criar gráficos básicos
+        criarGraficoTemporal();
+        criarGraficoDiaSemana();
+        
+    } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+    }
+    
+    function criarGraficoTemporal() {
+        const ctx = document.getElementById('timeChart');
+        if (!ctx) {
+            console.error('Canvas timeChart não encontrado');
+            return;
+        }
+        
+        console.log('Criando gráfico temporal...');
+        
+        // Preparar dados simples para teste
+        const labels = [];
+        const dataProteina = [];
+        const dataUmidade = [];
+        
+        // Últimos 7 dias para teste
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            labels.push(date.toLocaleDateString('pt-BR', {month: 'short', day: 'numeric'}));
+            
+            // Dados de exemplo ou reais se disponível
+            const proteinaCount = proteinaData.filter(item => {
+                const itemDate = new Date(item.data);
+                return itemDate.toDateString() === date.toDateString();
+            }).length;
+            
+            const umidadeCount = umidadeData.filter(item => {
+                const itemDate = new Date(item.data);
+                return itemDate.toDateString() === date.toDateString();
+            }).length;
+            
+            dataProteina.push(proteinaCount);
+            dataUmidade.push(umidadeCount);
+        }
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Proteína',
+                        data: dataProteina,
+                        borderColor: 'rgb(40, 167, 69)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Umidade',
+                        data: dataUmidade,
+                        borderColor: 'rgb(13, 202, 240)',
+                        backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+        
+        console.log('Gráfico temporal criado com sucesso');
+    }
+    
+    function criarGraficoDiaSemana() {
+        const ctx = document.getElementById('weekdayChart');
+        if (!ctx) {
+            console.error('Canvas weekdayChart não encontrado');
+            return;
+        }
+        
+        console.log('Criando gráfico de dias da semana...');
+        
+        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const contadores = new Array(7).fill(0);
+        
+        // Contar análises por dia da semana
+        [...proteinaData, ...umidadeData].forEach(item => {
+            const date = new Date(item.data);
+            const dayOfWeek = date.getDay();
+            contadores[dayOfWeek]++;
+        });
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: diasSemana,
+                datasets: [{
+                    label: 'Total de Análises',
+                    data: contadores,
+                    backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        console.log('Gráfico de dias da semana criado com sucesso');
+    }
+    
+    console.log('=== DASHBOARD INICIALIZADO ===');
+});
+</script>
+{% endblock %}

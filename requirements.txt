@@ -1,0 +1,24 @@
+# Dependências principais do Django
+Django>=4.2,<6.0
+asgiref>=3.6.0
+sqlparse>=0.4.0
+
+# Bibliotecas de UI
+django-widget-tweaks>=1.5.0
+
+# Geração de relatórios
+reportlab>=4.0.0
+XlsxWriter>=3.0.0
+
+# Visualização de dados
+matplotlib>=3.7.0
+numpy>=1.24.0
+pillow>=10.0.0
+
+# Formatos e parsers
+python-dateutil>=2.8.0
+
+# Desenvolvimento e testes
+pytest>=7.0.0
+pytest-django>=4.5.0
+coverage>=6.0.0

@@ -1,0 +1,16 @@
+{
+  "name": "qualisoja",
+  "version": "1.0.0",
+  "description": "Sistema de análise de qualidade de soja",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "QualiSoja Team",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "identity-obj-proxy": "^3.0.0"
+  }
+}

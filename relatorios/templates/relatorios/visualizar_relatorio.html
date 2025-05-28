@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                {% if tipo_relatorio == 'umidade' %}
+                    Relatório de Análises de Umidade
+                {% elif tipo_relatorio == 'proteina' %}
+                    Relatório de Análises de Proteína
+                {% else %}
+                    Relatório Completo de Análises
+                {% endif %}
+            </h2>
+            <p class="text-muted">Período: {{ data_inicial|date:"d/m/Y" }} a {{ data_final|date:"d/m/Y" }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group">
+                <a href="{% url 'relatorios:gerar' %}" class="btn btn-secondary">
+                    Voltar
+                </a>
+                {% if formato == 'HTML' %}
+                    <button onclick="window.print()" class="btn btn-outline-dark">
+                        Imprimir
+                    </button>
+                    <a href="?{{ query_string }}&formato=PDF" class="btn btn-danger">
+                        PDF
+                    </a>
+                    <a href="?{{ query_string }}&formato=EXCEL" class="btn btn-success">
+                        Excel
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% endif %}
+    
+    {% if erro_umidade %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de umidade:</strong> {{ erro_umidade }}
+    </div>
+    {% endif %}
+    
+    {% if erro_proteina %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de proteína:</strong> {{ erro_proteina }}
+    </div>
+    {% endif %}
+
+    {% if tipo_relatorio == 'proteina' or tipo_relatorio == 'completo' %}
+    {% if analises_proteina %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Análises de Proteína</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_proteina.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_proteina %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_proteina.media|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_proteina.minimo|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_proteina.maximo|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_proteina.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Seção de estatísticas para proteína -->
+            <div id="proteina-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para proteína -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Proteína ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="proteinaTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="proteinaTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>ML Gasto</th>
+                            <th>Resultado (%)</th>
+                            <th>Resultado Corrigido (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_proteina %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.ml_gasto|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                            <td>{{ analise.resultado_corrigido|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de proteína para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if tipo_relatorio == 'umidade' or tipo_relatorio == 'completo' %}
+    {% if analises_umidade %}
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Análises de Umidade</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_umidade.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_umidade %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_umidade.media|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_umidade.minimo|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_umidade.maximo|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_umidade.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Seção de estatísticas para umidade -->
+            <div id="umidade-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para umidade -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Umidade ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="umidadeTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="umidadeTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>Resultado (%)</th>
+                            {% if analises_umidade.first.tara is not None %}
+                            <th>Tara (g)</th>
+                            {% endif %}
+                            {% if analises_umidade.first.liquido is not None %}
+                            <th>Líquido (g)</th>
+                            {% endif %}
+                            {% if analises_umidade.first.fator_correcao is not None %}
+                            <th>Fator Correção</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_umidade %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                            {% if analise.tara is not None %}
+                            <td>{{ analise.tara|floatformat:2 }}</td>
+                            {% endif %}
+                            {% if analise.liquido is not None %}
+                            <td>{{ analise.liquido|floatformat:2 }}</td>
+                            {% endif %}
+                            {% if analise.fator_correcao is not None %}
+                            <td>{{ analise.fator_correcao|floatformat:2 }}</td>
+                            {% endif %}
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de umidade para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if not analises_proteina and not analises_umidade %}
+    <div class="alert alert-warning text-center py-4">
+        <h4>Nenhum dado encontrado</h4>
+        <p class="mb-0">Não foram encontradas análises para o período e filtros selecionados.</p>
+        <p class="mt-3">
+            <a href="{% url 'relatorios:gerar' %}" class="btn btn-primary">
+                Voltar e tentar outros filtros
+            </a>
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+@media print {
+    .btn-group, .btn {
+        display: none !important;
+    }
+    .alert-info {
+        border: 1px solid #ccc;
+        background-color: #f9f9f9 !important;
+        color: #333 !important;
+    }
+    .card {
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        break-inside: avoid;
+    }
+    .card-header.bg-primary, .card-header.bg-success {
+        color: #000 !important;
+        background-color: #eee !important;
+        font-weight: bold;
+    }
+}
+
+/* Estilos para estatísticas */
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #343a40;
+}
+
+/* Estilos para container de gráficos */
+.chart-container {
+    position: relative;
+    min-height: 300px;
+}
+
+/* Alerta de erro nos gráficos */
+.chart-container .alert {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    text-align: center;
+}
+</style>
+
+<!-- Importar a biblioteca Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<!-- Dados para os gráficos (separando a lógica do template) -->
+<script type="application/json" id="proteina-data">
+{% if analises_proteina_json %}{{ analises_proteina_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<script type="application/json" id="umidade-data">
+{% if analises_umidade_json %}{{ analises_umidade_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<!-- Script para renderizar os gráficos -->
+{% load static %}
+<script src="{% static 'relatorios/js/relatorio_charts.js' %}"></script>
+{% endblock %}

@@ -7,13 +7,13 @@ class UmidadeCreateView(CreateView):
     model = AnaliseUmidade
     form_class = AnaliseUmidadeForm
     template_name = 'app/cadastro_umidade.html'
-    success_url = reverse_lazy('umidade_list')
+    success_url = reverse_lazy('analises:umidade_list')
 
 class ProteinaCreateView(CreateView):
     model = AnaliseProteina
     form_class = AnaliseProteinaForm
     template_name = 'app/cadastro_proteina.html'
-    success_url = reverse_lazy('proteina_list')
+    success_url = reverse_lazy('analises:proteina_list')
 
 class UmidadeListView(ListView):
     model = AnaliseUmidade
