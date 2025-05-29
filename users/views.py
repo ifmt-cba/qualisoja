@@ -44,10 +44,34 @@ def cadastro(request):
 def loginViews(request):
     if request.method == "GET":
         return render(request, 'login.html')
+
     elif request.method == "POST":
-        email = request.POST.get('email')
+        username = request.POST.get('username')  # nome do input é "email", mas o valor é o username mesmo
         password = request.POST.get('password')
 
-        user = auth.authenticate(request, email=email, password=password)
+        user = auth.authenticate(request, username=username, password=password)
+
+        if not user:
+            print("Erro: Usuário ou senha inválidos")
+            return redirect('/users/login')
+
+        auth.login(request, user)
+
+        # Usuário autenticado! Agora redirecionar conforme tipo_funcionario
+        if user.is_superuser:
+            return redirect('/admin/')  # ou uma tela personalizada
+
+        try:
+            profile = user.profile
+            if profile.tipo_funcionario == 'analista':
+                return redirect('analises:umidade_list')  # ou dashboard analista
+            elif profile.tipo_funcionario == 'produção':
+                return redirect('relatorios:dashboard')  # ou o que quiser
+            else:
+                print("Erro: Tipo de funcionário desconhecido")
+                return redirect('/users/login')
+        except Profile.DoesNotExist:
+            print("Erro: Perfil não encontrado")
+            return redirect('/users/login')
         
 
