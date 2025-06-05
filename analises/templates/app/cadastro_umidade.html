@@ -1,9 +1,165 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 {% block content %}
-<h2>Nova Análise de Umidade</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Salvar</button>
-</form>
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-success bg-opacity-10 border-success border-opacity-25">
+        <h2 class="mb-0 text-success">
+            <i></i>Nova Análise de Umidade
+        </h2>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="row g-3">
+                <!-- Seção de Identificação -->
+                <div class="col-12">
+                    <div class="card bg-light mb-3 border-0">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i></i>Informações Básicas
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.data|add_class:"form-control" }}
+                                        <label for="{{ form.data.id_for_label }}">{{ form.data.label }}</label>
+                                        {% if form.data.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.data.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.horario|add_class:"form-control" }}
+                                        <label for="{{ form.horario.id_for_label }}">{{ form.horario.label }}</label>
+                                        {% if form.horario.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.horario.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        {{ form.tipo_amostra|add_class:"form-select" }}
+                                        <label for="{{ form.tipo_amostra.id_for_label }}">{{ form.tipo_amostra.label }}</label>
+                                        {% if form.tipo_amostra.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.tipo_amostra.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seção de Medições -->
+                <div class="col-12">
+                    <div class="card bg-light mb-3 border-0">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i class=></i>Medições
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.tara|add_class:"form-control" }}
+                                        <label for="{{ form.tara.id_for_label }}">{{ form.tara.label }}</label>
+                                        {% if form.tara.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.tara.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.liquido|add_class:"form-control" }}
+                                        <label for="{{ form.liquido.id_for_label }}">{{ form.liquido.label }}</label>
+                                        {% if form.liquido.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.liquido.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        {{ form.peso_amostra|add_class:"form-control" }}
+                                        <label for="{{ form.peso_amostra.id_for_label }}">{{ form.peso_amostra.label }}</label>
+                                        {% if form.peso_amostra.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.peso_amostra.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seção de Resultados -->
+                <div class="col-12">
+                    <div class="card bg-light mb-3 border-0">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i></i>Resultados
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.resultado|add_class:"form-control" }}
+                                        <label for="{{ form.resultado.id_for_label }}">{{ form.resultado.label }}</label>
+                                        {% if form.resultado.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.resultado.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.fator_correcao|add_class:"form-control" }}
+                                        <label for="{{ form.fator_correcao.id_for_label }}">{{ form.fator_correcao.label }}</label>
+                                        {% if form.fator_correcao.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.fator_correcao.errors }}</div>
+                                        {% endif %}
+                                        <div class="form-text text-muted mt-1">
+                                            <i class="bi bi-info-circle"></i> Valor entre -1000 e 1000
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'analises:umidade_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Voltar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-1"></i>Salvar Análise
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Script para validação do formulário
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+
+</script>
 {% endblock %}

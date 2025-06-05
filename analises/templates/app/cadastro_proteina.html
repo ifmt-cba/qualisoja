@@ -1,9 +1,144 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
+
 {% block content %}
-<h2>Nova Análise de Proteína</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Salvar</button>
-</form>
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-success bg-opacity-10 border-success border-opacity-25">
+        <h2 class="mb-0 text-success">
+            <i class="bi bi-flask-fill me-2"></i>Nova Análise de Proteína
+        </h2>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="row g-3">
+                <!-- Primeira linha -->
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.data|add_class:"form-control" }}
+                        <label for="{{ form.data.id_for_label }}">{{ form.data.label }}</label>
+                        {% if form.data.errors %}
+                            <div class="invalid-feedback d-block">{{ form.data.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.horario|add_class:"form-control" }}
+                        <label for="{{ form.horario.id_for_label }}">{{ form.horario.label }}</label>
+                        {% if form.horario.errors %}
+                            <div class="invalid-feedback d-block">{{ form.horario.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Segunda linha -->
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.tipo_amostra|add_class:"form-select" }}
+                        <label for="{{ form.tipo_amostra.id_for_label }}">{{ form.tipo_amostra.label }}</label>
+                        {% if form.tipo_amostra.errors %}
+                            <div class="invalid-feedback d-block">{{ form.tipo_amostra.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.peso_amostra|add_class:"form-control" }}
+                        <label for="{{ form.peso_amostra.id_for_label }}">{{ form.peso_amostra.label }}</label>
+                        {% if form.peso_amostra.errors %}
+                            <div class="invalid-feedback d-block">{{ form.peso_amostra.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Terceira linha -->
+                <div class="col-md-4">
+                    <div class="form-floating mb-3">
+                        {{ form.ml_gasto|add_class:"form-control" }}
+                        <label for="{{ form.ml_gasto.id_for_label }}">{{ form.ml_gasto.label }}</label>
+                        {% if form.ml_gasto.errors %}
+                            <div class="invalid-feedback d-block">{{ form.ml_gasto.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="form-floating mb-3">
+                        {{ form.resultado|add_class:"form-control" }}
+                        <label for="{{ form.resultado.id_for_label }}">{{ form.resultado.label }}</label>
+                        {% if form.resultado.errors %}
+                            <div class="invalid-feedback d-block">{{ form.resultado.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="form-floating mb-3">
+                        {{ form.resultado_corrigido|add_class:"form-control" }}
+                        <label for="{{ form.resultado_corrigido.id_for_label }}">{{ form.resultado_corrigido.label }}</label>
+                        {% if form.resultado_corrigido.errors %}
+                            <div class="invalid-feedback d-block">{{ form.resultado_corrigido.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Quarta linha -->
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        {{ form.eh_media_24h|add_class:"form-check-input" }}
+                        <label class="form-check-label" for="{{ form.eh_media_24h.id_for_label }}">
+                            {{ form.eh_media_24h.label }}
+                        </label>
+                        {% if form.eh_media_24h.errors %}
+                            <div class="invalid-feedback d-block">{{ form.eh_media_24h.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'analises:proteina_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Voltar
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save me-1"></i>Salvar Análise
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Script para validação do formulário
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+
+    // Alterar visual dos campos conforme preenchimento
+    const resultFields = document.querySelectorAll('#id_ml_gasto, #id_resultado, #id_resultado_corrigido');
+    resultFields.forEach(field => {
+        field.addEventListener('input', function() {
+            if (this.value) {
+                this.classList.add('bg-success', 'bg-opacity-10');
+            } else {
+                this.classList.remove('bg-success', 'bg-opacity-10');
+            }
+        });
+    });
+</script>
 {% endblock %}
