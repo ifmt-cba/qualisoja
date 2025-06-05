@@ -51,6 +51,12 @@
         <strong>Erro ao processar dados de proteína:</strong> {{ erro_proteina }}
     </div>
     {% endif %}
+    
+    {% if erro_oleo_degomado %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de óleo degomado:</strong> {{ erro_oleo_degomado }}
+    </div>
+    {% endif %}
 
     {% if tipo_relatorio == 'proteina' or tipo_relatorio == 'completo' %}
     {% if analises_proteina %}
@@ -260,7 +266,108 @@
     {% endif %}
     {% endif %}
 
-    {% if not analises_proteina and not analises_umidade %}
+    {% if tipo_relatorio == 'oleo_degomado' or tipo_relatorio == 'completo' %}
+    {% if analises_oleo_degomado %}
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Análises do Óleo Degomado</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_oleo_degomado.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_oleo_degomado %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Acidez Média:</strong> {{ estatisticas_oleo_degomado.acidez_media|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Umidade Média:</strong> {{ estatisticas_oleo_degomado.umidade_media|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Impurezas Médias:</strong> {{ estatisticas_oleo_degomado.impurezas_media|floatformat:2 }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_oleo_degomado.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Seção de estatísticas para óleo degomado -->
+            <div id="oleo-degomado-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para óleo degomado -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução da Acidez ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="oleoAcidezTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Análises por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="oleoTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Acidez (%)</th>
+                            <th>Umidade (%)</th>
+                            <th>Impurezas (%)</th>
+                            <th>Índice Iodo</th>
+                            <th>Cor</th>
+                            <th>Resultado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_oleo_degomado %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.acidez|floatformat:2 }}</td>
+                            <td>{{ analise.umidade_oleo|floatformat:2 }}</td>
+                            <td>{{ analise.impurezas|floatformat:2 }}</td>
+                            <td>{{ analise.indice_iodo|floatformat:2 }}</td>
+                            <td>{{ analise.cor }}</td>
+                            <td>{{ analise.resultado }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="9" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de óleo degomado para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if not analises_proteina and not analises_umidade and not analises_oleo_degomado %}
     <div class="alert alert-warning text-center py-4">
         <h4>Nenhum dado encontrado</h4>
         <p class="mb-0">Não foram encontradas análises para o período e filtros selecionados.</p>
@@ -345,6 +452,10 @@
 
 <script type="application/json" id="umidade-data">
 {% if analises_umidade_json %}{{ analises_umidade_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<script type="application/json" id="oleo-degomado-data">
+{% if analises_oleo_degomado_json %}{{ analises_oleo_degomado_json|safe }}{% else %}[]{% endif %}
 </script>
 
 <!-- Script para renderizar os gráficos -->

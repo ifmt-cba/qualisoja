@@ -8,6 +8,7 @@ class RelatorioFiltroForm(forms.Form):
     TIPO_RELATORIO_CHOICES = [
         ('umidade', 'Relatório de Umidade'),
         ('proteina', 'Relatório de Proteína'),
+        ('oleo_degomado', 'Análise do Óleo Degomado'),
         ('completo', 'Relatório Completo'),
     ]
     
@@ -53,6 +54,11 @@ class RelatorioFiltroForm(forms.Form):
     tipo_amostra_proteina = forms.CharField(
         required=False,
         label='Tipo de Amostra (Proteína)'
+    )
+    
+    tipo_amostra_oleo_degomado = forms.CharField(
+        required=False,
+        label='Tipo de Amostra (Óleo Degomado)'
     )
     
     def clean(self):

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Módulo de Análises - QualiSoja{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Módulo de Análises</h2>
+            <p class="text-muted">Registre e gerencie as análises de qualidade da soja.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-droplet text-primary" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Análises de Umidade</h5>
+                    <p class="card-text">Registre e visualize análises de umidade da soja.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'analises:umidade_create' %}" class="btn btn-primary">Nova Análise</a>
+                        <a href="{% url 'analises:umidade_list' %}" class="btn btn-outline-primary">Ver Lista</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-heart-pulse text-success" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Análises de Proteína</h5>
+                    <p class="card-text">Registre e visualize análises de proteína da soja.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'analises:proteina_create' %}" class="btn btn-success">Nova Análise</a>
+                        <a href="{% url 'analises:proteina_list' %}" class="btn btn-outline-success">Ver Lista</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-droplet-half text-warning" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Análises de Óleo</h5>
+                    <p class="card-text">Registre e visualize análises de óleo degomado.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'analises:oleo_create' %}" class="btn btn-warning">Nova Análise</a>
+                        <a href="{% url 'analises:oleo_list' %}" class="btn btn-outline-warning">Ver Lista</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Acesso Rápido</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{% url 'relatorios:gerar' %}" class="btn btn-info w-100 mb-2">
+                                <i class="bi bi-file-earmark-bar-graph me-2"></i>Gerar Relatórios
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-secondary w-100 mb-2">
+                                <i class="bi bi-house me-2"></i>Voltar à Página Inicial
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

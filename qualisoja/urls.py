@@ -9,6 +9,13 @@ try:
 except ImportError:
     debug_available = False
 
+# Importar view de teste CSRF
+try:
+    from test_csrf_view import test_csrf_view
+    csrf_test_available = True
+except ImportError:
+    csrf_test_available = False
+
 urlpatterns = [
     path('', home, name='home'),
     path('simple/', home_simple, name='home_simple'),
@@ -18,6 +25,8 @@ urlpatterns = [
     path('relatorios/',include('relatorios.urls', namespace='relatorios'))
 ]
 
-# Adicionar URL de debug se disponível
+# Adicionar URL de teste CSRF se disponível
+if csrf_test_available:
+    urlpatterns.append(path('test-csrf/', test_csrf_view, name='test_csrf'))
 if debug_available:
     urlpatterns.append(path('debug/dashboard/', debug_dashboard_data, name='debug_dashboard'))

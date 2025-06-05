@@ -57,7 +57,7 @@
             <li><a class="dropdown-item" href="{% url 'analises:proteina_create' %}"><i class="bi bi-bar-chart me-2"></i>Nova Análise de Proteína</a></li>
           </ul>
         </div>
-        <a href="{% url 'relatorios:dashboard' %}" class="btn btn-primary">
+        <a href="{% url 'relatorios:gerar' %}" class="btn btn-primary">
           <i class="bi bi-file-earmark-bar-graph me-1"></i> Relatórios
         </a>
       </div>
@@ -236,7 +236,7 @@
                 <h5 class="card-title mb-1">Precisa de análises mais detalhadas?</h5>
                 <p class="card-text mb-2">Acesse o módulo completo de relatórios para visualizações avançadas</p>
                 <div class="mt-2">
-                  <a href="{% url 'relatorios:dashboard' %}" class="btn btn-sm btn-primary me-2">
+                  <a href="{% url 'relatorios:gerar' %}" class="btn btn-sm btn-primary me-2">
                     <i class="bi bi-file-earmark-bar-graph me-1"></i> Explorar relatórios
                   </a>
                   <a href="{% url 'analises:umidade_create' %}" class="btn btn-sm btn-outline-success me-2">

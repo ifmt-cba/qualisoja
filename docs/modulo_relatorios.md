@@ -15,8 +15,7 @@ O módulo de relatórios não possui modelos próprios, mas utiliza os dados dos
 
 ### Views
 
-- **RelatorioDashboardView**: Dashboard principal para navegação entre os tipos de relatórios
-- **RelatorioGerarView**: Interface para seleção de parâmetros e geração de relatórios
+- **RelatorioGerarView**: Interface principal para seleção de parâmetros e geração de relatórios
 - **RelatorioVisualizarView**: Exibição do relatório gerado com gráficos e tabelas
 
 ### Funções Auxiliares
@@ -27,8 +26,7 @@ O módulo de relatórios não possui modelos próprios, mas utiliza os dados dos
 
 ## Templates
 
-- **relatorios_dashboard.html**: Dashboard com opções de relatórios
-- **gerar_relatorio.html**: Formulário para seleção de parâmetros
+- **gerar_relatorio.html**: Interface principal para seleção de parâmetros
 - **visualizar_relatorio.html**: Visualização de relatórios com gráficos e tabelas
 
 ## Arquivos Estáticos
@@ -37,8 +35,7 @@ O módulo de relatórios não possui modelos próprios, mas utiliza os dados dos
 
 ## URLs
 
-- `/relatorios/dashboard/`: Dashboard principal de relatórios
-- `/relatorios/gerar/`: Formulário para seleção de parâmetros
+- `/relatorios/gerar/`: Interface principal para seleção de parâmetros
 - `/relatorios/visualizar/`: Visualização do relatório gerado
 
 ## Funcionalidades
@@ -109,7 +106,6 @@ relatorios/
 │           └── relatorio_charts.js
 └── templates/
     └── relatorios/
-        ├── relatorios_dashboard.html
         ├── gerar_relatorio.html
         └── visualizar_relatorio.html
 ```

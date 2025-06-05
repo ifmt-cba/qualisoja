@@ -57,3 +57,16 @@ coverage/
 
 # Qualisoja específico
 qualisoja.log
+
+# Backup files
+*_backup.*
+*_new.*
+*.backup*
+*.bak
+
+# Test and debug files
+test_*.py
+debug_*.py
+debug_*.html
+*_test.html
+*_test.py

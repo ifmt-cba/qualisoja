@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Análise de Óleo Degomado - QualiSoja{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="bi bi-droplet-half me-2"></i>Nova Análise de Óleo Degomado</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.data.id_for_label }}" class="form-label">{{ form.data.label }}</label>
+                                {{ form.data }}
+                                {% if form.data.errors %}
+                                    <div class="text-danger small">{{ form.data.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.horario.id_for_label }}" class="form-label">{{ form.horario.label }}</label>
+                                {{ form.horario }}
+                                {% if form.horario.errors %}
+                                    <div class="text-danger small">{{ form.horario.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tipo_amostra.id_for_label }}" class="form-label">{{ form.tipo_amostra.label }}</label>
+                                {{ form.tipo_amostra }}
+                                {% if form.tipo_amostra.errors %}
+                                    <div class="text-danger small">{{ form.tipo_amostra.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.acidez.id_for_label }}" class="form-label">{{ form.acidez.label }}</label>
+                                {{ form.acidez }}
+                                {% if form.acidez.errors %}
+                                    <div class="text-danger small">{{ form.acidez.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.umidade_oleo.id_for_label }}" class="form-label">{{ form.umidade_oleo.label }}</label>
+                                {{ form.umidade_oleo }}
+                                {% if form.umidade_oleo.errors %}
+                                    <div class="text-danger small">{{ form.umidade_oleo.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.impurezas.id_for_label }}" class="form-label">{{ form.impurezas.label }}</label>
+                                {{ form.impurezas }}
+                                {% if form.impurezas.errors %}
+                                    <div class="text-danger small">{{ form.impurezas.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.indice_iodo.id_for_label }}" class="form-label">{{ form.indice_iodo.label }}</label>
+                                {{ form.indice_iodo }}
+                                {% if form.indice_iodo.errors %}
+                                    <div class="text-danger small">{{ form.indice_iodo.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.cor.id_for_label }}" class="form-label">{{ form.cor.label }}</label>
+                                {{ form.cor }}
+                                {% if form.cor.errors %}
+                                    <div class="text-danger small">{{ form.cor.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.resultado.id_for_label }}" class="form-label">{{ form.resultado.label }}</label>
+                                {{ form.resultado }}
+                                {% if form.resultado.errors %}
+                                    <div class="text-danger small">{{ form.resultado.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.observacoes.id_for_label }}" class="form-label">{{ form.observacoes.label }}</label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.errors %}
+                                <div class="text-danger small">{{ form.observacoes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'analises:oleo_list' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Voltar
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-save me-2"></i>Salvar Análise
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control, .form-select {
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    padding: 0.375rem 0.75rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+</style>
+{% endblock %}

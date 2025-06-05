@@ -673,38 +673,6 @@
         background: var(--primary-green);
     }
 
-    /* Loading Spinner */
-    .loading-spinner {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        display: none; /* Oculto por padrão */
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    }
-
-    /* Footer Styles */
-    .footer-qualisoja {
-        background: linear-gradient(135deg, var(--light-green) 0%, #f8f9fa 100%);
-        border-top: 1px solid var(--border-color);
-        margin-top: 4rem;
-    }
-
-    .footer-qualisoja p {
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: var(--text-muted);
-    }
-
-    .footer-qualisoja strong {
-        color: var(--primary-green);
-        font-weight: 700;
-    }
-
     /* Enhanced Focus States */
     *:focus-visible {
         outline: 2px solid var(--accent-green);
@@ -771,447 +739,40 @@
         </div>
     </div>
 </div>
+
 <div class="page-header">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h1 class="mb-3 animate-slide-in">
-                    <i class="fas fa-chart-line me-3 icon-float"></i>
+                <h1 class="mb-3">
+                    <i class="fas fa-chart-line me-3"></i>
                     Gerador de Relatórios QualiSoja
                 </h1>
-                <p class="mb-0 animate-fade-in-up">Configure e personalize seus relatórios de análise de qualidade com precisão e eficiência</p>
+                <p class="mb-0">Configure e personalize seus relatórios de análise de qualidade com precisão e eficiência</p>
             </div>
             <div class="col-md-4 text-end">
-                <div class="date-container animate-fade-in-up">
-                    <div class="d-flex align-items-center justify-content-end text-white">
-                        <i class="fas fa-calendar-alt me-2 icon-pulse"></i> 
-                        <span id="current-date" class="fw-semibold"></span>
-                    </div>
+                <div class="d-flex align-items-center justify-content-end text-white">
+                    <i class="fas fa-calendar-alt me-2"></i> 
+                    <span id="current-date" class="fw-semibold"></span>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Enhanced Gradient Animation Elements -->
-    <div class="gradient-overlay">
-        <div class="gradient-layer gradient-layer-1"></div>
-        <div class="gradient-layer gradient-layer-2"></div>
-        <div class="gradient-layer gradient-layer-3"></div>
-        <div class="gradient-layer gradient-layer-4"></div>
-    </div>
-    
-    <!-- Subtle Background Pattern -->
-    <div class="pattern-overlay"></div>
 </div>
 
-<style>
-/* Enhanced Page Header with Better Text Visibility */
-.page-header {
-    background: linear-gradient(135deg, #065f46 0%, #047857 25%, #059669 75%, #0d9488 100%);
-    color: white;
-    padding: 4rem 0 6rem;
-    margin-bottom: 3rem;
-    border-radius: 0 0 var(--border-radius-2xl) var(--border-radius-2xl);
-    box-shadow: var(--shadow-xl);
-    position: relative;
-    overflow: hidden;
-}
-
-.page-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(13, 148, 136, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.04) 0%, transparent 30%);
-    opacity: 0.4;
-    animation: gradient-pulse 8s ease-in-out infinite;
-}
-
-/* Pattern Overlay for Additional Texture */
-.pattern-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
-    opacity: 0.2;
-    z-index: 1;
-}
-
-/* Enhanced Gradient Layers */
-.gradient-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-    z-index: 2;
-}
-
-.gradient-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0.3;
-}
-
-.gradient-layer-1 {
-    background: linear-gradient(45deg, 
-        rgba(255, 255, 255, 0.1) 0%, 
-        rgba(13, 148, 136, 0.15) 25%, 
-        rgba(255, 255, 255, 0.05) 50%, 
-        rgba(5, 150, 105, 0.1) 75%, 
-        rgba(255, 255, 255, 0.08) 100%);
-    animation: gradient-float-1 12s ease-in-out infinite;
-}
-
-.gradient-layer-2 {
-    background: linear-gradient(-45deg, 
-        rgba(6, 95, 70, 0.08) 0%, 
-        rgba(255, 255, 255, 0.12) 30%, 
-        rgba(4, 120, 87, 0.1) 60%, 
-        rgba(255, 255, 255, 0.06) 100%);
-    animation: gradient-float-2 16s ease-in-out infinite reverse;
-    opacity: 0.25;
-}
-
-.gradient-layer-3 {
-    background: linear-gradient(90deg, 
-        rgba(255, 255, 255, 0.05) 0%, 
-        rgba(5, 150, 105, 0.12) 25%, 
-        rgba(255, 255, 255, 0.08) 50%, 
-        rgba(13, 148, 136, 0.1) 75%, 
-        rgba(255, 255, 255, 0.04) 100%);
-    animation: gradient-float-3 20s ease-in-out infinite;
-    opacity: 0.2;
-}
-
-.gradient-layer-4 {
-    background: radial-gradient(ellipse at center, 
-        rgba(255, 255, 255, 0.1) 0%, 
-        rgba(5, 150, 105, 0.08) 40%, 
-        transparent 70%);
-    animation: gradient-pulse-slow 10s ease-in-out infinite;
-    opacity: 0.3;
-}
-
-/* Content Container with Higher Z-Index */
-.page-header .container {
-    position: relative;
-    z-index: 10;
-}
-
-/* Enhanced Text Shadows for Better Readability */
-.page-header h1 {
-    font-weight: 700;
-    font-size: 2.8rem;
-    margin-bottom: 0.75rem;
-    text-shadow: 
-        0 2px 4px rgba(0, 0, 0, 0.3),
-        0 1px 2px rgba(0, 0, 0, 0.2),
-        0 4px 8px rgba(0, 0, 0, 0.1);
-    letter-spacing: -0.025em;
-    line-height: 1.2;
-    color: #ffffff;
-}
-
-.page-header p {
-    font-size: 1.2rem;
-    font-weight: 400;
-    opacity: 0.95;
-    line-height: 1.5;
-    text-shadow: 
-        0 1px 3px rgba(0, 0, 0, 0.3),
-        0 2px 6px rgba(0, 0, 0, 0.15);
-    color: #f8fafc;
-}
-
-/* Enhanced Date Container */
-.date-container {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: var(--border-radius-lg);
-    padding: 1rem 1.5rem;
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 
-        0 4px 6px rgba(0, 0, 0, 0.1),
-        0 8px 20px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-}
-
-.date-container:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 
-        0 6px 12px rgba(0, 0, 0, 0.15),
-        0 12px 24px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.date-container span,
-.date-container i {
-    text-shadow: 
-        0 1px 2px rgba(0, 0, 0, 0.3),
-        0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Keyframe Animations */
-@keyframes gradient-float-1 {
-    0%, 100% {
-        transform: translateY(0px) translateX(0px) scale(1);
-        opacity: 0.3;
-    }
-    33% {
-        transform: translateY(-15px) translateX(10px) scale(1.02);
-        opacity: 0.4;
-    }
-    66% {
-        transform: translateY(10px) translateX(-8px) scale(0.98);
-        opacity: 0.35;
-    }
-}
-
-@keyframes gradient-float-2 {
-    0%, 100% {
-        transform: translateX(0px) translateY(0px) rotate(0deg);
-        opacity: 0.25;
-    }
-    25% {
-        transform: translateX(20px) translateY(-10px) rotate(1deg);
-        opacity: 0.3;
-    }
-    50% {
-        transform: translateX(0px) translateY(-20px) rotate(0deg);
-        opacity: 0.35;
-    }
-    75% {
-        transform: translateX(-15px) translateY(-5px) rotate(-1deg);
-        opacity: 0.28;
-    }
-}
-
-@keyframes gradient-float-3 {
-    0%, 100% {
-        transform: translateX(0px) scaleX(1) scaleY(1);
-        opacity: 0.2;
-    }
-    20% {
-        transform: translateX(-25px) scaleX(1.05) scaleY(0.95);
-        opacity: 0.25;
-    }
-    40% {
-        transform: translateX(0px) scaleX(0.95) scaleY(1.05);
-        opacity: 0.3;
-    }
-    60% {
-        transform: translateX(30px) scaleX(1.02) scaleY(0.98);
-        opacity: 0.28;
-    }
-    80% {
-        transform: translateX(-10px) scaleX(0.98) scaleY(1.02);
-        opacity: 0.22;
-    }
-}
-
-@keyframes gradient-pulse {
-    0%, 100% {
-        opacity: 0.9;
-        transform: scale(1);
-    }
-    33% {
-        opacity: 0.7;
-        transform: scale(1.01);
-    }
-    66% {
-        opacity: 0.8;
-        transform: scale(0.99);
-    }
-}
-
-@keyframes gradient-pulse-slow {
-    0%, 100% {
-        opacity: 0.3;
-        transform: scale(1) rotate(0deg);
-    }
-    50% {
-        opacity: 0.5;
-        transform: scale(1.1) rotate(2deg);
-    }
-}
-
-/* Enhanced Animations */
-@keyframes slide-in {
-    from {
-        opacity: 0;
-        transform: translateX(-50px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fade-in-up {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes icon-float {
-    0%, 100% {
-        transform: translateY(0px) rotate(0deg);
-    }
-    50% {
-        transform: translateY(-10px) rotate(5deg);
-    }
-}
-
-@keyframes icon-pulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 0.8;
-    }
-}
-
-/* Animation Classes */
-.animate-slide-in {
-    animation: slide-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.animate-fade-in-up {
-    animation: fade-in-up 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
-}
-
-.icon-float {
-    animation: icon-float 3s ease-in-out infinite;
-}
-
-.icon-pulse {
-    animation: icon-pulse 2s ease-in-out infinite;
-}
-
-/* Accessibility and Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-    .gradient-layer,
-    .page-header::before,
-    .animate-slide-in,
-    .animate-fade-in-up,
-    .icon-float,
-    .icon-pulse {
-        animation: none !important;
-    }
-    
-    .date-container:hover {
-        transform: none;
-    }
-}
-
-/* High Contrast Mode Support */
-@media (prefers-contrast: high) {
-    .page-header {
-        background: #065f46 !important;
-    }
-    
-    .gradient-layer,
-    .pattern-overlay,
-    .page-header::before {
-        display: none !important;
-    }
-    
-    .page-header h1,
-    .page-header p {
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
-    }
-}
-
-/* Enhanced Responsive Design */
-@media (max-width: 768px) {
-    .page-header {
-        padding: 3rem 0 5rem;
-        text-align: center;
-    }
-    
-    .page-header h1 {
-        font-size: 2.2rem;
-    }
-    
-    .page-header p {
-        font-size: 1.1rem;
-    }
-    
-    .date-container {
-        margin-top: 2rem;
-        display: inline-block;
-    }
-}
-
-@media (max-width: 576px) {
-    .page-header h1 {
-        font-size: 1.8rem;
-    }
-    
-    .page-header p {
-        font-size: 1rem;
-    }
-    
-    .date-container {
-        padding: 0.75rem 1rem;
-    }
-}
-</style>
-
-</style>
-
 <div class="container">
-    <div class="timeline-container mb-5">
-        <div class="timeline-line"></div>
-        <div class="timeline-steps">
-            <div class="timeline-step active" id="step-1" data-step-number="1" tabindex="0" role="button" aria-label="Ir para Tipo de Relatório">
-                <div class="timeline-node">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <div class="timeline-content">
-                    <h6>Tipo de Relatório</h6>
-                    <small>Escolha o tipo de análise</small>
-                </div>
-            </div>
-            <div class="timeline-step" id="step-2" data-step-number="2" tabindex="0" role="button" aria-label="Ir para Período e Filtros" aria-disabled="true">
-                <div class="timeline-node">
-                    <i class="fas fa-filter"></i>
-                </div>
-                <div class="timeline-content">
-                    <h6>Período e Filtros</h6>
-                    <small>Configure datas e filtros</small>
-                </div>
-            </div>
-            <div class="timeline-step" id="step-3" data-step-number="3" tabindex="0" role="button" aria-label="Ir para Formato e Geração" aria-disabled="true">
-                <div class="timeline-node">
-                    <i class="fas fa-download"></i>
-                </div>
-                <div class="timeline-content">
-                    <h6>Formato e Geração</h6>
-                    <small>Defina formato e gere</small>
-                </div>
-            </div>
+    <div class="progress-steps">
+        <div class="step active" id="step-1" data-step-number="1" tabindex="0" role="button" aria-label="Ir para Tipo de Relatório">
+            <div class="step-number">1</div>
+            <div class="step-title">Tipo de Relatório</div>
+        </div>
+        <div class="step" id="step-2" data-step-number="2" tabindex="0" role="button" aria-label="Ir para Período e Filtros" aria-disabled="true">
+            <div class="step-number">2</div>
+            <div class="step-title">Período e Filtros</div>
+        </div>
+        <div class="step" id="step-3" data-step-number="3" tabindex="0" role="button" aria-label="Ir para Formato e Geração" aria-disabled="true">
+            <div class="step-number">3</div>
+            <div class="step-title">Formato e Geração</div>
         </div>
     </div>
 
@@ -1239,35 +800,28 @@
                 <div class="card-modern animate-fade-in mb-4" id="section-1">
                     <div class="card-header">
                         <h5>
-                            <i class="fas fa-file-alt text-success me-2"></i>
+                            <i class="fas fa-file-alt text-success"></i>
                             Selecione o Tipo de Relatório
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-3 d-flex">
-                                <div class="report-type-card flex-fill" data-type="umidade" tabindex="0">
+                            <div class="col-md-4">
+                                <div class="report-type-card" data-type="umidade" tabindex="0">
                                     <div class="report-type-icon"><i class="fas fa-tint text-primary"></i></div>
                                     <h6>Umidade</h6>
                                     <small class="text-muted">Análises de teor de umidade dos grãos</small>
                                 </div>
                             </div>
-                            <div class="col-md-3 d-flex">
-                                <div class="report-type-card flex-fill" data-type="proteina" tabindex="0">
+                            <div class="col-md-4">
+                                <div class="report-type-card" data-type="proteina" tabindex="0">
                                     <div class="report-type-icon"><i class="fas fa-seedling text-warning"></i></div>
                                     <h6>Proteína</h6>
                                     <small class="text-muted">Análises de teor proteico dos grãos</small>
                                 </div>
                             </div>
-                            <div class="col-md-3 d-flex">
-                                <div class="report-type-card flex-fill" data-type="oleo_degomado" tabindex="0">
-                                    <div class="report-type-icon"><i class="fas fa-flask text-success"></i></div>
-                                    <h6>Óleo Degomado</h6>
-                                    <small class="text-muted">Análises do óleo degomado e derivados</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3 d-flex">
-                                <div class="report-type-card active flex-fill" data-type="completo" tabindex="0">
+                            <div class="col-md-4">
+                                <div class="report-type-card active" data-type="completo" tabindex="0">
                                     <div class="report-type-icon"><i class="fas fa-chart-bar text-info"></i></div>
                                     <h6>Completo</h6>
                                     <small class="text-muted">Análise comparativa completa e detalhada</small>
@@ -1281,7 +835,7 @@
                 <div class="card-modern animate-fade-in mb-4" id="section-2">
                     <div class="card-header">
                         <h5>
-                            <i class="fas fa-filter text-info me-2"></i>
+                            <i class="fas fa-filter text-info"></i>
                             Período e Filtros Avançados
                         </h5>
                     </div>
@@ -1332,16 +886,6 @@
                                     <option value="CASCA" {% if form.tipo_amostra_proteina.value == 'CASCA' %}selected{% endif %}>Casca</option>
                                 </select>
                             </div>
-                            <div id="oleo-degomado-filter-group" class="mt-3">
-                                <label for="id_tipo_amostra_oleo_degomado" class="form-label">Filtro por Tipo (Óleo Degomado)</label>
-                                <select name="tipo_amostra_oleo_degomado" id="id_tipo_amostra_oleo_degomado" class="form-select-modern">
-                                    <option value="">Todos os tipos</option>
-                                    <option value="CR" {% if form.tipo_amostra_oleo_degomado.value == 'CR' %}selected{% endif %}>Óleo Cru</option>
-                                    <option value="DG" {% if form.tipo_amostra_oleo_degomado.value == 'DG' %}selected{% endif %}>Óleo Degomado</option>
-                                    <option value="RF" {% if form.tipo_amostra_oleo_degomado.value == 'RF' %}selected{% endif %}>Óleo Refinado</option>
-                                    <option value="RS" {% if form.tipo_amostra_oleo_degomado.value == 'RS' %}selected{% endif %}>Resíduo</option>
-                                </select>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1349,7 +893,7 @@
                 <div class="card-modern animate-fade-in mb-4" id="section-3">
                     <div class="card-header">
                         <h5>
-                            <i class="fas fa-download text-warning me-2"></i>
+                            <i class="fas fa-download text-warning"></i>
                             Formato de Saída
                         </h5>
                     </div>
@@ -1392,7 +936,7 @@
                         <i class="fas fa-home me-2"></i>Voltar à Página Inicial
                     </a>
                     <div class="d-flex gap-2">
-                        <button type="button" id="preview-btn-main" class="btn btn-outline-primary">
+                        <button type="button" id="preview-btn-main" class="btn btn-outline-primary" onclick="previewData()">
                             <i class="fas fa-eye me-2"></i>Pré-visualizar
                         </button>
                         <button type="button" id="show-shortcuts-btn-main" class="btn btn-outline-info" onclick="toggleShortcutsPanel()">
@@ -1457,7 +1001,7 @@
         </div>
     </form>
 
-    <div class="loading-spinner" id="loading-spinner" style="display: none;">
+    <div class="loading-spinner" id="loading-spinner">
         <div class="d-flex flex-column align-items-center text-center">
             <div class="spinner-border text-success mb-3" style="width: 4rem; height: 4rem;" role="status">
                 <span class="visually-hidden">Carregando...</span>
@@ -1467,267 +1011,6 @@
         </div>
     </div>
 </div>
-
-<style>
-/* Timeline Styles */
-.timeline-container {
-    position: relative;
-    padding: 3rem 0;
-    margin-top: 2rem;
-}
-
-.timeline-line {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--border-color) 0%, var(--accent-green) 50%, var(--border-color) 100%);
-    border-radius: 2px;
-    z-index: 1;
-}
-
-.timeline-steps {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    z-index: 2;
-}
-
-.timeline-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 1rem;
-    border-radius: var(--border-radius-lg);
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    box-shadow: var(--shadow-sm);
-    border: 2px solid transparent;
-    max-width: 200px;
-    min-height: 120px;
-    justify-content: center;
-}
-
-.timeline-step:hover {
-    transform: translateY(-8px) scale(1.05);
-    box-shadow: var(--shadow-xl);
-    background: white;
-    border-color: rgba(5, 150, 105, 0.2);
-}
-
-.timeline-step.active {
-    background: linear-gradient(135deg, var(--light-green) 0%, white 100%);
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 4px var(--focus-ring-color), var(--shadow-lg);
-    transform: translateY(-4px) scale(1.02);
-}
-
-.timeline-step.completed {
-    background: linear-gradient(135deg, #d4edda 0%, #f8f9fa 100%);
-}
-
-.timeline-step.completed .timeline-node {
-    background: var(--gradient-primary);
-    color: white;
-    box-shadow: var(--shadow-md);
-}
-
-.timeline-step.completed .timeline-node::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 0.9rem;
-    font-weight: bold;
-}
-
-.timeline-step.completed .timeline-node i {
-    opacity: 0;
-}
-
-.timeline-node {
-    width: 4rem;
-    height: 4rem;
-    border-radius: 50%;
-    background: white;
-    border: 3px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    box-shadow: var(--shadow-sm);
-}
-
-.timeline-step:hover .timeline-node {
-    border-color: var(--accent-green);
-    background: linear-gradient(135deg, var(--light-green) 0%, white 100%);
-    transform: scale(1.1);
-    box-shadow: var(--shadow-md);
-}
-
-.timeline-step.active .timeline-node {
-    border-color: var(--accent-green);
-    background: var(--gradient-primary);
-    color: white;
-    box-shadow: 0 0 0 4px var(--focus-ring-color), var(--shadow-md);
-    animation: pulse-node 2s infinite;
-}
-
-@keyframes pulse-node {
-    0%, 100% { 
-        transform: scale(1); 
-        box-shadow: 0 0 0 4px var(--focus-ring-color), var(--shadow-md);
-    }
-    50% { 
-        transform: scale(1.05); 
-        box-shadow: 0 0 0 8px rgba(5, 150, 105, 0.15), var(--shadow-lg);
-    }
-}
-
-.timeline-node i {
-    font-size: 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.timeline-step:hover .timeline-node i {
-    transform: scale(1.1) rotate(5deg);
-}
-
-.timeline-content {
-    text-align: center;
-    flex: 1;
-}
-
-.timeline-content h6 {
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    font-size: 1rem;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
-}
-
-.timeline-content small {
-    color: var(--text-muted);
-    font-weight: 500;
-    font-size: 0.85rem;
-    line-height: 1.3;
-}
-
-.timeline-step.active .timeline-content h6 {
-    color: var(--primary-green);
-}
-
-.timeline-step.active .timeline-content small {
-    color: var(--accent-green);
-    font-weight: 600;
-}
-
-/* Responsive Timeline */
-@media (max-width: 768px) {
-    .timeline-container {
-        padding: 2rem 0;
-    }
-    
-    .timeline-line {
-        display: none;
-    }
-    
-    .timeline-steps {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .timeline-step {
-        flex-direction: row;
-        max-width: 100%;
-        min-height: auto;
-        width: 100%;
-        justify-content: flex-start;
-        padding: 1.5rem;
-        text-align: left;
-    }
-    
-    .timeline-content {
-        text-align: left;
-        margin-left: 1rem;
-    }
-    
-    .timeline-node {
-        width: 3rem;
-        height: 3rem;
-        margin-bottom: 0;
-        flex-shrink: 0;
-    }
-    
-    .timeline-node i {
-        font-size: 1.25rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .timeline-step {
-        padding: 1rem;
-    }
-    
-    .timeline-node {
-        width: 2.5rem;
-        height: 2.5rem;
-    }
-    
-    .timeline-node i {
-        font-size: 1rem;
-    }
-    
-    .timeline-content h6 {
-        font-size: 0.9rem;
-    }
-    
-    .timeline-content small {
-        font-size: 0.8rem;
-    }
-}
-
-/* Enhanced accessibility */
-.timeline-step:focus-visible {
-    outline: 3px solid var(--accent-green);
-    outline-offset: 3px;
-    border-radius: var(--border-radius-lg);
-}
-
-/* Loading state for timeline */
-.timeline-step.loading .timeline-node {
-    animation: spin 1s linear infinite;
-}
-
-.timeline-step.loading .timeline-node i {
-    opacity: 0.5;
-}
-
-/* Success animation */
-@keyframes success-bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0) scale(1);
-    }
-    40% {
-        transform: translateY(-10px) scale(1.1);
-    }
-    60% {
-        transform: translateY(-5px) scale(1.05);
-    }
-}
-
-.timeline-step.success {
-    animation: success-bounce 0.8s ease-in-out;
-}
-</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -1742,10 +1025,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const dataFinalInput = document.getElementById('id_data_final');
     const umidadeFilterGroup = document.getElementById('umidade-filter-group');
     const proteinaFilterGroup = document.getElementById('proteina-filter-group');
-    const oleoFilterGroup = document.getElementById('oleo-degomado-filter-group');
     const tipoAmostraUmidadeSelect = document.getElementById('id_tipo_amostra_umidade');
     const tipoAmostraProteinaSelect = document.getElementById('id_tipo_amostra_proteina');
-    const tipoAmostraOleoSelect = document.getElementById('id_tipo_amostra_oleo_degomado');
 
     let currentStep = 1;
 
@@ -1810,12 +1091,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        [dataInicialInput, dataFinalInput, tipoAmostraUmidadeSelect, tipoAmostraProteinaSelect, tipoAmostraOleoSelect].forEach(el => {
+        [dataInicialInput, dataFinalInput, tipoAmostraUmidadeSelect, tipoAmostraProteinaSelect].forEach(el => {
             if(el) el.addEventListener('change', updateSummary);
         });
         
         document.getElementById('save-config-btn').addEventListener('click', saveConfiguration);
-        document.getElementById('preview-btn-main').addEventListener('click', previewData);
         
         reportForm.addEventListener('submit', function(e) {
             if (!validateForm()) {
@@ -1857,7 +1137,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        [tipoRelatorioInput, dataInicialInput, dataFinalInput, formatoSaidaInput, tipoAmostraUmidadeSelect, tipoAmostraProteinaSelect, tipoAmostraOleoSelect].forEach(element => {
+        [tipoRelatorioInput, dataInicialInput, dataFinalInput, formatoSaidaInput, tipoAmostraUmidadeSelect, tipoAmostraProteinaSelect].forEach(element => {
             if (element) {
                 element.addEventListener('change', () => {
                     setTimeout(saveConfiguration, 500);
@@ -1876,7 +1156,6 @@ document.addEventListener('DOMContentLoaded', function() {
             formato_saida: formatoSaidaInput.value,
             tipo_amostra_umidade: tipoAmostraUmidadeSelect?.value || '',
             tipo_amostra_proteina: tipoAmostraProteinaSelect?.value || '',
-            tipo_amostra_oleo_degomado: tipoAmostraOleoSelect?.value || '',
             timestamp: new Date().toISOString()
         };
         
@@ -1911,9 +1190,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     if (config.tipo_amostra_proteina && tipoAmostraProteinaSelect) {
                         tipoAmostraProteinaSelect.value = config.tipo_amostra_proteina;
-                    }
-                    if (config.tipo_amostra_oleo_degomado && tipoAmostraOleoSelect) {
-                        tipoAmostraOleoSelect.value = config.tipo_amostra_oleo_degomado;
                     }
                     
                     updateSummary();
@@ -1977,7 +1253,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         umidadeFilterGroup.style.display = (type === 'umidade' || type === 'completo') ? 'block' : 'none';
         proteinaFilterGroup.style.display = (type === 'proteina' || type === 'completo') ? 'block' : 'none';
-        oleoFilterGroup.style.display = (type === 'oleo_degomado' || type === 'completo') ? 'block' : 'none';
         
         updateSummary();
     }
@@ -2039,8 +1314,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const tipoNames = {
             'umidade': 'Relatório de Umidade', 
-            'proteina': 'Relatório de Proteína',
-            'oleo_degomado': 'Análise do Óleo Degomado',
+            'proteina': 'Relatório de Proteína', 
             'completo': 'Relatório Completo'
         };
         const formatNames = {
@@ -2066,15 +1340,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (proteinaFilterGroup.style.display !== 'none' && tipoAmostraProteinaSelect.value) {
             const selectedText = tipoAmostraProteinaSelect.options[tipoAmostraProteinaSelect.selectedIndex].text;
-            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Proteína: ${selectedText}</span> `;
+            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Proteína: ${selectedText}</span>`;
         } else if (proteinaFilterGroup.style.display !== 'none') {
-            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Proteína: Todos</span> `;
-        }
-        if (oleoFilterGroup.style.display !== 'none' && tipoAmostraOleoSelect.value) {
-            const selectedText = tipoAmostraOleoSelect.options[tipoAmostraOleoSelect.selectedIndex].text;
-            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Óleo: ${selectedText}</span>`;
-        } else if (oleoFilterGroup.style.display !== 'none') {
-            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Óleo: Todos</span>`;
+            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Proteína: Todos</span>`;
         }
         document.getElementById('active-sample-filters').innerHTML = sampleFiltersHtml;
 
@@ -2137,9 +1405,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (tipoRelatorio === 'proteina' || tipoRelatorio === 'completo') {
                 tiposIncluidos.push('Proteína');
-            }
-            if (tipoRelatorio === 'oleo_degomado' || tipoRelatorio === 'completo') {
-                tiposIncluidos.push('Óleo Degomado');
             }
             
             preview.innerHTML = `

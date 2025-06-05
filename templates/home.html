@@ -1,1564 +1,602 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
 
-{% block title %}QualiSoja - Sistema de Análise da Qualidade da Soja{% endblock %}
+{% block title %}QualiSoja - Painel de Controle{% endblock %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* Estilos para a página inicial */
-  html {
-    scroll-behavior: smooth;
-  }
-  
-  .hero-section {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    background-size: 200% 200%;
-    animation: gradient-animation 15s ease infinite;
-    color: white;
-    padding: 7rem 0 10rem;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .hero-compact {
-    padding: 4rem 0 6rem;
-  }
-  
-  @keyframes gradient-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  
-  .hero-section::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 70px;
-    background: linear-gradient(to bottom right, transparent 49%, white 50%);
-  }
-  
-  .hero-section .bg-dots {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.15) 2px, transparent 2px);
-    background-size: 30px 30px;
-    opacity: 0.5;
-    animation: dots-float 60s linear infinite;
-  }
-  
-  @keyframes dots-float {
-    0% { background-position: 0 0; }
-    100% { background-position: 100px 100px; }
-  }
-  
-  .hero-content h1 {
-    font-size: 3.5rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    animation: fadeInDown 1s ease-out;
-  }
-  
-  .hero-content p {
-    font-size: 1.25rem;
-    max-width: 600px;
-    margin-bottom: 2rem;
-    opacity: 0.9;
-    animation: fadeInUp 1s ease-out 0.5s both;
-  }
-  
-  .feature-card {
-    border-radius: 12px;
-    padding: 1.75rem;
-    height: 100%;
-    transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-    border: none;
-    background-color: white;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-  }
-  
-  .feature-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background-color: #28a745;
-    transform: scaleX(0);
-    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-    transform-origin: left;
-    z-index: -1;
-  }
-  
-  .feature-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(40, 167, 69, 0.15);
-  }
-  
-  .feature-card:hover::after {
-    transform: scaleX(1);
-  }
-  
-  .feature-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: #28a745;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 80px;
-    background-color: rgba(40, 167, 69, 0.1);
-    border-radius: 50%;
-    transition: all 0.5s ease;
-    position: relative;
-  }
-  
-  .feature-card:hover .feature-icon {
-    background-color: #28a745;
-    color: white;
-    transform: rotateY(360deg);
-    box-shadow: 0 10px 20px rgba(40, 167, 69, 0.2);
-  }
-  
-  .section-heading {
-    position: relative;
-    margin-bottom: 3rem;
-    padding-bottom: 1rem;
-    text-align: center;
-  }
-  
-  .section-heading::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 4px;
-    background-color: #28a745;
-    border-radius: 2px;
-  }
-  
-  .stats-counter {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #28a745;
-    margin-bottom: 0.5rem;
-  }
-  
-  .stats-card {
-    text-align: center;
-    padding: 2rem;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
-  }
-  
-  .stats-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  }
-  
-  .how-it-works-step {
-    position: relative;
-    padding-left: 100px;
-    margin-bottom: 3rem;
-    transition: all 0.4s ease;
-  }
-  
-  .how-it-works-step:hover {
-    transform: translateX(10px);
-  }
-  
-  .how-it-works-step::after {
-    content: '';
-    position: absolute;
-    top: 40px;
-    left: 40px;
-    height: calc(100% + 20px);
-    width: 2px;
-    background-color: rgba(40, 167, 69, 0.2);
-    z-index: -1;
-  }
-  
-  .how-it-works-step:last-child::after {
-    display: none;
-  }
-  
-  .how-it-works-step .step-number {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 80px;
-    height: 80px;
-    background-color: #28a745;
-    color: white;
-    font-size: 2rem;
-    font-weight: 700;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 10px 20px rgba(40, 167, 69, 0.2);
-    transition: all 0.4s ease;
-    position: relative;
-    z-index: 2;
-  }
-  
-  .how-it-works-step:hover .step-number {
-    transform: scale(1.1) rotate(5deg);
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  }
-  
-  .how-it-works-step h3 {
-    transition: color 0.3s ease;
-  }
-  
-  .how-it-works-step:hover h3 {
-    color: #28a745;
-  }
-  
-  .testimonial-card {
-    padding: 2rem;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    margin-bottom: 2rem;
-    transition: all 0.4s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .testimonial-card::before {
-    content: '"';
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 120px;
-    color: rgba(40, 167, 69, 0.05);
-    font-family: Georgia, serif;
-    line-height: 1;
-    transition: all 0.4s ease;
-  }
-  
-  .testimonial-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 30px rgba(0,0,0,0.1);
-  }
-  
-  .testimonial-card:hover::before {
-    color: rgba(40, 167, 69, 0.1);
-    transform: scale(1.2);
-  }
-  
-  .testimonial-author {
-    display: flex;
-    align-items: center;
-    margin-top: 1.5rem;
-    position: relative;
-  }
-  
-  .testimonial-author::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 70px;
-    width: 0;
-    height: 2px;
-    background-color: #28a745;
-    transition: width 0.4s ease;
-  }
-  
-  .testimonial-card:hover .testimonial-author::after {
-    width: 100px;
-  }
-  
-  .testimonial-author img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 1rem;
-    border: 2px solid transparent;
-    transition: all 0.4s ease;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-  }
-  
-  .testimonial-card:hover .testimonial-author img {
-    border-color: #28a745;
-    transform: scale(1.1);
-  }
-  
-  .cta-section {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    background-size: 200% 200%;
-    animation: gradient-animation 15s ease infinite;
-    color: white;
-    padding: 5rem 0;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .cta-section .bg-dots {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.15) 2px, transparent 2px);
-    background-size: 30px 30px;
-    opacity: 0.5;
-    animation: dots-float 60s linear infinite;
-  }
-  
-  .contact-form {
-    position: relative;
-  }
-  
-  .contact-form .form-control {
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1.25rem;
-    border: 1px solid #e9ecef;
-    transition: all 0.3s ease;
-    background-color: rgba(255, 255, 255, 0.95);
-  }
-  
-  .contact-form .form-control:focus {
-    border-color: #28a745;
-    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-    transform: translateY(-3px);
-    background-color: white;
-  }
-  
-  .contact-form label {
-    position: absolute;
-    top: 0;
-    left: 1rem;
-    opacity: 0;
-    transition: all 0.3s ease;
-    pointer-events: none;
-    font-size: 0.8rem;
-    color: #28a745;
-  }
-  
-  .contact-form .form-control:focus + label,
-  .contact-form .form-control:not(:placeholder-shown) + label {
-    top: -20px;
-    opacity: 1;
-  }
-  
-  .btn {
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-  }
-  
-  .btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 100%;
-    z-index: -1;
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  }
-  
-  .btn-primary {
-    background-color: #28a745;
-    border-color: #28a745;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
-  }
-  
-  .btn-primary::before {
-    background-color: #218838;
-  }
-  
-  .btn-primary:hover {
-    background-color: #28a745;
-    border-color: #1e7e34;
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
-  }
-  
-  .btn-primary:hover::before {
-    width: 100%;
-  }
-  
-  .btn-outline-light {
-    border: 2px solid white;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-    position: relative;
-  }
-  
-  .btn-outline-light::before {
-    background-color: white;
-  }
-  
-  .btn-outline-light:hover {
-    background-color: transparent;
-    color: #28a745;
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
-  }
-  
-  .btn-outline-light:hover::before {
-    width: 100%;
-  }
-  
-  .btn-light {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  }
-  
-  .btn-light:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  @media (max-width: 768px) {
-    .hero-content h1 {
-      font-size: 2.5rem;
+    :root {
+        --primary-green: #065f46;
+        --light-green: #d1fae5;
+        --accent-green: #059669;
+        --text-dark: #111827;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --focus-ring-color: rgba(5, 150, 105, 0.25);
+        --gradient-primary: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
+        --gradient-light: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        --border-radius-sm: 0.375rem;
+        --border-radius-md: 0.5rem;
+        --border-radius-lg: 0.75rem;
+        --border-radius-xl: 1rem;
+        --border-radius-2xl: 1.5rem;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+        line-height: 1.6;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    .page-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 3.5rem 0;
+        margin-bottom: 3rem;
+        border-radius: 0 0 var(--border-radius-2xl) var(--border-radius-2xl);
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.03)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.03)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.03)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.6;
+    }
+
+    .page-header .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h1 {
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        letter-spacing: -0.025em;
+    }
+
+    .page-header h1 a {
+        transition: all 0.3s ease;
+        border-radius: var(--border-radius-md);
+        padding: 0.5rem;
+        margin: -0.5rem;
+    }
+
+    .page-header h1 a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-1px);
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .page-header p {
+        font-size: 1.125rem;
+        font-weight: 400;
+        opacity: 0.95;
+    }
+
+    .card-modern {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        background: white;
+        backdrop-filter: blur(10px);
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .card-modern:hover::before {
+        opacity: 1;
+    }
+
+    .card-modern:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+        border-color: rgba(5, 150, 105, 0.2);
     }
     
-    .how-it-works-step {
-      padding-left: 0;
-      padding-top: 100px;
+    .card-modern .card-header {
+        background: var(--gradient-light);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem 2rem 1.25rem;
+        position: relative;
     }
-    
-    .how-it-works-step .step-number {
-      left: 50%;
-      transform: translateX(-50%);
+
+    .card-modern .card-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 2rem;
+        right: 2rem;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, var(--accent-green) 50%, transparent 100%);
+        opacity: 0.3;
     }
-  }
-  
-  .section-heading::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 3px;
-    background: #28a745;
-  }
-  
-  .cta-section {
-    background-color: #f8f9fa;
-    padding: 6rem 0;
-  }
-  
-  .stats-item {
-    text-align: center;
-    padding: 2rem;
-  }
-  
-  .stats-number {
-    font-size: 3rem;
-    font-weight: 700;
-    color: #28a745;
-  }
-  
-  .testimonial-card {
-    background-color: white;
-    border-radius: 8px;
-    padding: 2rem;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    margin-bottom: 1rem;
-  }
 
-  .bg-light-green {
-    background-color: #e8f5e9;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .bg-light-green::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2320c997' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
-    z-index: 0;
-  }
-  
-  /* Estilos adicionais para o Dashboard */
-  .dashboard-card {
-    border-radius: 12px;
-    background-color: white;
-    transition: all 0.3s ease;
-    border: none;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    height: 100%;
-    overflow: hidden;
-  }
-  
-  .dashboard-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  }
-  
-  .dashboard-icon {
-    transition: all 0.3s ease;
-  }
-  
-  .dashboard-card:hover .dashboard-icon {
-    transform: scale(1.1);
-  }
-  
-  .chart-container {
-    position: relative;
-    margin: auto;
-  }
-  
-  .shadow-soft {
-    box-shadow: 0 6px 18px 0 rgba(0,0,0,0.05) !important;
-  }
-  
-  /* Estilos para tabelas no dashboard */
-  .table-hover tbody tr:hover {
-    background-color: rgba(40, 167, 69, 0.05);
-  }
-  
-  .sticky-top {
-    top: 0;
-    z-index: 1020;
-  }
-  
-  .bg-light-green .container {
-    position: relative;
-    z-index: 1;
-  }
-  
-  /* Efeito de destaque para textos importantes */
-  .text-highlight {
-    position: relative;
-    display: inline-block;
-    color: #28a745;
-    font-weight: 700;
-  }
-  
-  .text-highlight::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 30%;
-    background-color: rgba(40, 167, 69, 0.1);
-    z-index: -1;
-    transform: rotate(-1deg);
-  }
-  
-  /* Efeito de scroll para setas e indicadores */
-  .scroll-indicator {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    animation: bounce 2s infinite;
-    color: white;
-    font-size: 2rem;
-    opacity: 0.8;
-    cursor: pointer;
-    z-index: 10;
-  }
-  
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
-    40% { transform: translateY(-15px) translateX(-50%); }
-    60% { transform: translateY(-7px) translateX(-50%); }
-  }
-  
-  /* Efeito de mouse hover para links de navegação */
-  .nav-link {
-    position: relative;
-    padding: 0.5rem 0;
-    margin: 0 1rem;
-    transition: all 0.3s ease;
-  }
-  
-  .nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: #28a745;
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.3s ease;
-  }
-  
-  .nav-link:hover::after {
-    transform: scaleX(1);
-    transform-origin: left;
-  }
-  
-  /* Sombras mais sutis */
-  .shadow-soft {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
-  }
+    .card-modern .card-header h5, 
+    .card-modern .card-header h6 {
+        margin-bottom: 0;
+        color: var(--primary-green);
+        font-weight: 700;
+        font-size: 1.125rem;
+        letter-spacing: -0.025em;
+        display: flex;
+        align-items: center;
+    }
 
-  /* Estilos para o dashboard */
-  .dashboard-card {
-    background-color: white;
-    border-radius: 12px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(0,0,0,0.05);
-  }
-  
-  .dashboard-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
-    border-color: rgba(40, 167, 69, 0.1);
-  }
-  
-  .dashboard-icon {
-    background-color: rgba(40, 167, 69, 0.1);
-    width: 70px;
-    height: 70px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-  }
-  
-  .dashboard-card:hover .dashboard-icon {
-    background-color: rgba(40, 167, 69, 0.2);
-    transform: rotate(5deg);
-  }
-  
-  #dashboard h4 {
-    color: #333;
-    font-weight: 600;
-  }
-  
-  #dashboard h2 {
-    font-size: 2.5rem;
-    color: #333;
-  }
-  
-  #dashboard canvas {
-    max-width: 100%;
-  }
-  
-  /* Estilo para os botões de navegação do dashboard */
-  .dashboard-nav {
-    position: sticky;
-    top: 1rem;
-    z-index: 100;
-  }
-  
-  /* Estilos para os cartões de ação */
-  .dashboard-action-card {
-    border-left: 4px solid #28a745;
-  }
+    .card-modern .card-body {
+        padding: 2rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+        color: white;
+    }
+
+    .stat-icon.umidade {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    }
+
+    .stat-icon.proteina {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .stat-icon.oleo {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1.25rem;
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
+        text-decoration: none;
+        color: var(--text-dark);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .action-btn:hover {
+        background: var(--light-green);
+        border-color: var(--accent-green);
+        color: var(--primary-green);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .action-btn i {
+        font-size: 1.25rem;
+    }
+
+    .recent-analyses {
+        background: var(--gradient-light);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .recent-analyses h6 {
+        color: var(--primary-green);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .analysis-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        background: white;
+        border-radius: var(--border-radius-md);
+        margin-bottom: 0.5rem;
+        border: 1px solid rgba(5, 150, 105, 0.1);
+    }
+
+    .analysis-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .analysis-time {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+
+    .analysis-value {
+        font-weight: 600;
+        color: var(--primary-green);
+    }
+
+    .system-info {
+        background: var(--gradient-light);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        text-align: center;
+        border: 1px solid var(--border-color);
+    }
+
+    .system-info h6 {
+        color: var(--primary-green);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .system-info p {
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    .badge-today {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+
+    .summary-badge {
+        background: rgba(5, 150, 105, 0.1);
+        color: var(--primary-green);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Dashboard Principal -->
-<section class="py-5" id="dashboard">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h2 class="section-heading mb-0">Dashboard Análises</h2>
-        <p class="lead mb-4">Visualização em tempo real das análises de umidade e proteína da soja.</p>
-        <p class="text-muted">Dados dos últimos {{ periodo.dias }} dias ({{ periodo.inicio }} a {{ periodo.fim }})</p>
-      </div>
-      
-      {% if user.is_authenticated %}
-      <div class="d-flex gap-2">
-        <div class="dropdown">
-          <button class="btn btn-outline-success dropdown-toggle" type="button" id="addDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-plus-circle"></i> Nova Análise
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="addDropdown">
-            <li><a class="dropdown-item" href="{% url 'analises:umidade_create' %}"><i class="bi bi-droplet me-2"></i>Nova Análise de Umidade</a></li>
-            <li><a class="dropdown-item" href="{% url 'analises:proteina_create' %}"><i class="bi bi-bar-chart me-2"></i>Nova Análise de Proteína</a></li>
-          </ul>
-        </div>
-        <a href="{% url 'relatorios:dashboard' %}" class="btn btn-primary">
-          <i class="bi bi-file-earmark-bar-graph me-1"></i> Relatórios
-        </a>
-      </div>
-      {% endif %}
-    </div>
-    
-    <!-- Seletor de período -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card border-0 shadow-soft bg-light p-3">
-          <div class="d-flex flex-wrap justify-content-between align-items-center">
-            <p class="mb-0 me-3"><i class="bi bi-calendar3 me-2"></i> Selecione o período:</p>
-            <div class="btn-group" role="group" aria-label="Selecionar período">
-              <a href="?periodo=7" class="btn btn-sm btn-outline-success {% if periodo.dias == 7 %}active{% endif %}">7 dias</a>
-              <a href="?periodo=30" class="btn btn-sm btn-outline-success {% if periodo.dias == 30 %}active{% endif %}">30 dias</a>
-              <a href="?periodo=90" class="btn btn-sm btn-outline-success {% if periodo.dias == 90 %}active{% endif %}">90 dias</a>
-              <a href="?periodo=180" class="btn btn-sm btn-outline-success {% if periodo.dias == 180 %}active{% endif %}">6 meses</a>
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-3">
+                    <a href="{% url 'home' %}" class="text-decoration-none text-white d-flex align-items-center" style="color: inherit;">
+                        <i class="fas fa-tachometer-alt me-3"></i>
+                        Painel de Controle QualiSoja
+                    </a>
+                </h1>
+                <p class="mb-0">Monitoramento das análises e controle de qualidade em tempo real</p>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Visão geral - Cards de estatísticas -->
-    <div class="row mb-4">
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="dashboard-card shadow-soft p-4">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="mb-3">Total de Análises</h5>
-              <h2 class="mb-0 fw-bold">{{ total_analises }}</h2>
-              <p class="text-muted mb-0">últimos {{ periodo.dias }} dias</p>
-            </div>
-            <div class="dashboard-icon bg-primary bg-opacity-10 p-3 rounded-circle">
-              <i class="bi bi-clipboard-data text-primary" style="font-size: 2.5rem;"></i>
-            </div>
-          </div>
-          <div class="mt-3 d-flex justify-content-between">
-            <span class="badge bg-success rounded-pill p-2">
-              <i class="bi bi-bar-chart-fill"></i> {{ total_proteina }} proteína
-            </span>
-            <span class="badge bg-info rounded-pill p-2">
-              <i class="bi bi-droplet-fill"></i> {{ total_umidade }} umidade
-            </span>
-            <a href="{% url 'relatorios:dashboard' %}" class="text-decoration-none small">
-              Ver histórico <i class="bi bi-arrow-right"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="dashboard-card shadow-soft p-4">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="mb-3">Análises de Umidade</h5>
-              <h2 class="mb-0 fw-bold" id="total-umidade">{{ total_umidade }}</h2>
-              <div class="d-flex align-items-baseline">
-                <span class="text-info fs-4 me-2">{% if estatisticas_umidade.media %}{{ estatisticas_umidade.media|floatformat:2 }}%{% else %}0.00%{% endif %}</span>
-                <span class="text-muted small">média</span>
-              </div>
-            </div>
-            <div class="dashboard-icon bg-info bg-opacity-10 p-3 rounded-circle">
-              <i class="bi bi-droplet-fill text-info" style="font-size: 2.5rem;"></i>
-            </div>
-          </div>
-          <div class="mt-3">
-            <div class="d-flex justify-content-between text-muted small mb-2">
-              <span>Min: <strong>{% if estatisticas_umidade.minimo %}{{ estatisticas_umidade.minimo|floatformat:2 }}%{% else %}0.00%{% endif %}</strong></span>
-              <span>Max: <strong>{% if estatisticas_umidade.maximo %}{{ estatisticas_umidade.maximo|floatformat:2 }}%{% else %}0.00%{% endif %}</strong></span>
-              <span>Desv: <strong>{% if estatisticas_umidade.desvio %}{{ estatisticas_umidade.desvio|floatformat:2 }}{% else %}0.00{% endif %}</strong></span>
-            </div>
-            <a href="{% url 'analises:umidade_list' %}" class="text-decoration-none small">
-              Ver todas as análises <i class="bi bi-arrow-right"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="dashboard-card shadow-soft p-4">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="mb-3">Análises de Proteína</h5>
-              <h2 class="mb-0 fw-bold" id="total-proteina">{{ total_proteina }}</h2>
-              <div class="d-flex align-items-baseline">
-                <span class="text-success fs-4 me-2">{% if estatisticas_proteina.media %}{{ estatisticas_proteina.media|floatformat:2 }}%{% else %}0.00%{% endif %}</span>
-                <span class="text-muted small">média</span>
-              </div>
-            </div>
-            <div class="dashboard-icon bg-success bg-opacity-10 p-3 rounded-circle">
-              <i class="bi bi-bar-chart-fill text-success" style="font-size: 2.5rem;"></i>
-            </div>
-          </div>
-          <div class="mt-3">
-            <div class="d-flex justify-content-between text-muted small mb-2">
-              <span>Min: <strong>{% if estatisticas_proteina.minimo %}{{ estatisticas_proteina.minimo|floatformat:2 }}%{% else %}0.00%{% endif %}</strong></span>
-              <span>Max: <strong>{% if estatisticas_proteina.maximo %}{{ estatisticas_proteina.maximo|floatformat:2 }}%{% else %}0.00%{% endif %}</strong></span>
-              <span>Desv: <strong>{% if estatisticas_proteina.desvio %}{{ estatisticas_proteina.desvio|floatformat:2 }}{% else %}0.00{% endif %}</strong></span>
-            </div>
-            <a href="{% url 'analises:proteina_list' %}" class="text-decoration-none small">
-              Ver todas as análises <i class="bi bi-arrow-right"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Gráficos principais -->
-    <div class="row mb-5">
-      <div class="col-lg-8 mb-4">
-        <div class="dashboard-card shadow-soft p-4 h-100">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0">Evolução Temporal</h4>
-            <div class="btn-group btn-group-sm" role="group" aria-label="Dados">
-              <button type="button" class="btn btn-outline-success active" data-chart-toggle="proteina">Proteína</button>
-              <button type="button" class="btn btn-outline-info" data-chart-toggle="umidade">Umidade</button>
-              <button type="button" class="btn btn-outline-secondary" data-chart-toggle="ambos">Ambos</button>
-            </div>
-          </div>
-          <div class="chart-container" style="position: relative; height: 350px;">
-            <canvas id="timeChart"></canvas>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 mb-4">
-        <div class="dashboard-card shadow-soft p-4 h-100">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0">Análises por Dia</h4>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="toggleViewMode">
-              <label class="form-check-label small text-muted" for="toggleViewMode">Visualização %</label>
-            </div>
-          </div>
-          <div class="chart-container" style="position: relative; height: 350px;">
-            <canvas id="weekdayChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Análises detalhadas -->
-    <div class="row">
-      <div class="col-md-6 mb-4">
-        <div class="dashboard-card shadow-soft p-4 h-100">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0">Umidade por Tipo de Amostra</h4>
-            <a href="{% url 'analises:umidade_list' %}" class="btn btn-sm btn-outline-primary">Ver tudo</a>
-          </div>
-          <div class="chart-container" style="position: relative; height: 280px;">
-            <canvas id="tipoUmidadeChart"></canvas>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 mb-4">
-        <div class="dashboard-card shadow-soft p-4 h-100">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0">Proteína por Tipo de Amostra</h4>
-            <a href="{% url 'analises:proteina_list' %}" class="btn btn-sm btn-outline-primary">Ver tudo</a>
-          </div>
-          <div class="chart-container" style="position: relative; height: 280px;">
-            <canvas id="tipoProteinaChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Cards de dados detalhados -->
-    <div class="row mb-4">
-      <div class="col-md-6 mb-4">
-        <div class="dashboard-card shadow-soft p-4 h-100">
-          <h4 class="mb-3">Últimos Relatórios de Umidade</h4>
-          <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
-            <table class="table table-sm table-hover">
-              <thead class="bg-light sticky-top">
-                <tr>
-                  <th>Data</th>
-                  <th>Tipo</th>
-                  <th>Umidade</th>
-                </tr>
-              </thead>
-              <tbody id="ultimas-umidade">
-                <tr>
-                  <td colspan="3" class="text-center py-4">
-                    <div class="spinner-border spinner-border-sm text-secondary" role="status">
-                      <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="text-muted mt-2">Carregando dados...</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 mb-4">
-        <div class="dashboard-card shadow-soft p-4 h-100">
-          <h4 class="mb-3">Últimos Relatórios de Proteína</h4>
-          <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
-            <table class="table table-sm table-hover">
-              <thead class="bg-light sticky-top">
-                <tr>
-                  <th>Data</th>
-                  <th>Tipo</th>
-                  <th>Proteína</th>
-                </tr>
-              </thead>
-              <tbody id="ultimas-proteina">
-                <tr>
-                  <td colspan="3" class="text-center py-4">
-                    <div class="spinner-border spinner-border-sm text-secondary" role="status">
-                      <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="text-muted mt-2">Carregando dados...</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {% if user.is_authenticated %}
-    <div class="row justify-content-center mt-4 mb-3">
-      <div class="col-md-12">
-        <div class="card border-0 shadow-soft bg-light">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center">
-              <div class="flex-shrink-0">
-                <i class="bi bi-lightbulb text-warning" style="font-size: 2rem;"></i>
-              </div>
-              <div class="flex-grow-1 ms-3">
-                <h5 class="card-title mb-1">Precisa de análises mais detalhadas?</h5>
-                <p class="card-text mb-2">Acesse o módulo completo de relatórios para visualizações avançadas, análises estatísticas e exportação de dados em diferentes formatos</p>
-                <div class="mt-2">
-                  <a href="{% url 'relatorios:dashboard' %}" class="btn btn-sm btn-primary me-2">
-                    <i class="bi bi-file-earmark-bar-graph me-1"></i> Explorar relatórios
-                  </a>
-                  <a href="{% url 'analises:umidade_create' %}" class="btn btn-sm btn-outline-success me-2">
-                    <i class="bi bi-droplet me-1"></i> Nova análise de umidade
-                  </a>
-                  <a href="{% url 'analises:proteina_create' %}" class="btn btn-sm btn-outline-success">
-                    <i class="bi bi-bar-chart me-1"></i> Nova análise de proteína
-                  </a>
+            <div class="col-md-4 text-end">
+                <div class="d-flex align-items-center justify-content-end text-white">
+                    <i class="fas fa-calendar-day me-2"></i> 
+                    <span class="fw-semibold">{{ hoje|date:"d/m/Y" }}</span>
+                    <span class="badge-today">HOJE</span>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-    {% endif %}
-  </div>
-</section>
+</div>
 
-{% endblock %}
+<div class="container">
+    <!-- Resumo do Dia -->
+    <div class="card-modern">
+        <div class="card-header">
+            <h5><i class="fas fa-chart-bar me-2"></i>Resumo do Dia</h5>
+        </div>
+        <div class="card-body">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon umidade">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="stat-value">{{ stats_umidade_hoje.total }}</div>
+                    <div class="stat-label">Análises de Umidade</div>
+                    {% if stats_umidade_hoje.media %}
+                    <div class="mt-2">
+                        <small class="text-muted">Média: {{ stats_umidade_hoje.media|floatformat:2 }}%</small>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon proteina">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <div class="stat-value">{{ stats_proteina_hoje.total }}</div>
+                    <div class="stat-label">Análises de Proteína</div>
+                    {% if stats_proteina_hoje.media %}
+                    <div class="mt-2">
+                        <small class="text-muted">Média: {{ stats_proteina_hoje.media|floatformat:2 }}%</small>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon oleo">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="stat-value">{{ stats_oleo_hoje.total }}</div>
+                    <div class="stat-label">Análises de Óleo</div>
+                    {% if stats_oleo_hoje.media %}
+                    <div class="mt-2">
+                        <small class="text-muted">Acidez Média: {{ stats_oleo_hoje.media|floatformat:2 }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--gradient-primary);">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-value">{{ total_analises_hoje }}</div>
+                    <div class="stat-label">Total de Análises</div>
+                    <div class="mt-2">
+                        <small class="text-muted">Últimos 30 dias: {{ total_30_dias }}</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                {% if total_analises_hoje > 0 %}
+                    <span class="summary-badge">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Sistema Ativo - {{ total_analises_hoje }} análise{{ total_analises_hoje|pluralize }} realizada{{ total_analises_hoje|pluralize }} hoje
+                    </span>
+                {% else %}
+                    <span class="summary-badge">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Nenhuma análise realizada hoje
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <!-- Menu de Navegação Rápida -->
+    <div class="card-modern">
+        <div class="card-header">
+            <h5><i class="fas fa-compass me-2"></i>Navegação Rápida</h5>
+        </div>
+        <div class="card-body">
+            <div class="quick-actions">
+                <a href="{% url 'analises:umidade_list' %}" class="action-btn">
+                    <i class="fas fa-tint"></i>
+                    <span>Análises de Umidade</span>
+                </a>
+                
+                <a href="{% url 'analises:proteina_list' %}" class="action-btn">
+                    <i class="fas fa-seedling"></i>
+                    <span>Análises de Proteína</span>
+                </a>
+                
+                <a href="{% url 'analises:oleo_list' %}" class="action-btn">
+                    <i class="fas fa-flask"></i>
+                    <span>Análises de Óleo</span>
+                </a>
+                
+                <a href="{% url 'relatorios:gerar' %}" class="action-btn">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Gerar Relatórios</span>
+                </a>
+                
+                <a href="/admin/" class="action-btn">
+                    <i class="fas fa-cog"></i>
+                    <span>Administração</span>
+                </a>
+                
+                <a href="{% url 'analises:umidade_create' %}" class="action-btn">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nova Análise</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimas Análises do Dia -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="recent-analyses">
+                <h6><i class="fas fa-tint me-2"></i>Últimas Análises - Umidade</h6>
+                {% if ultimas_umidade %}
+                    {% for analise in ultimas_umidade %}
+                    <div class="analysis-item">
+                        <div>
+                            <div class="analysis-value">{{ analise.resultado|floatformat:2 }}%</div>
+                            <div class="analysis-time">{{ analise.horario|time:"H:i" }}</div>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ analise.responsavel_analise|default:"N/A" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">Nenhuma análise hoje</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="recent-analyses">
+                <h6><i class="fas fa-seedling me-2"></i>Últimas Análises - Proteína</h6>
+                {% if ultimas_proteina %}
+                    {% for analise in ultimas_proteina %}
+                    <div class="analysis-item">
+                        <div>
+                            <div class="analysis-value">{{ analise.resultado_corrigido|floatformat:2 }}%</div>
+                            <div class="analysis-time">{{ analise.horario|time:"H:i" }}</div>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ analise.responsavel_analise|default:"N/A" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">Nenhuma análise hoje</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="recent-analyses">
+                <h6><i class="fas fa-flask me-2"></i>Últimas Análises - Óleo</h6>
+                {% if ultimas_oleo %}
+                    {% for analise in ultimas_oleo %}
+                    <div class="analysis-item">
+                        <div>
+                            <div class="analysis-value">{{ analise.acidez|floatformat:2 }}</div>
+                            <div class="analysis-time">{{ analise.horario|time:"H:i" }}</div>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">Acidez</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">Nenhuma análise hoje</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações do Sistema -->
+    <div class="system-info">
+        <h6><i class="fas fa-info-circle me-2"></i>Informações do Sistema</h6>
+        <p><strong>QualiSoja</strong> - Sistema de Controle de Qualidade</p>
+        <p>Versão: <strong>{{ versao_sistema }}</strong></p>
+        <p>Última Atualização: <strong>{{ data_ultima_atualizacao }}</strong></p>
+        <p class="mb-0">
+            <i class="fas fa-shield-alt text-success me-1"></i>
+            Sistema operando normalmente
+        </p>
+    </div>
+</div>
+
 <script>
-// Debug do carregamento
-console.log('=== INICIANDO DASHBOARD ===');
-console.log('Chart.js carregado:', typeof Chart !== 'undefined');
-
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM carregado, iniciando scripts...');
-  
-  // Garantir que Chart.js está disponível
-  if (typeof Chart === 'undefined') {
-    console.error('Chart.js não foi carregado!');
-    return;
-  }
-
-  // Carregar dados do backend e inicializar gráficos
-  carregarDados();
-  
-  // Constantes para cores
-  const CORES = {
-    proteina: {
-      primary: 'rgba(40, 167, 69, 0.8)',
-      secondary: 'rgba(40, 167, 69, 0.2)',
-      border: 'rgba(40, 167, 69, 1)'
-    },
-    umidade: {
-      primary: 'rgba(13, 202, 240, 0.8)', 
-      secondary: 'rgba(13, 202, 240, 0.2)',
-      border: 'rgba(13, 202, 240, 1)'
-    },
-    chart: [
-      'rgba(40, 167, 69, 0.8)',
-      'rgba(13, 202, 240, 0.8)',
-      'rgba(255, 193, 7, 0.8)',
-      'rgba(111, 66, 193, 0.8)',
-      'rgba(220, 53, 69, 0.8)',
-      'rgba(23, 162, 184, 0.8)',
-      'rgba(102, 16, 242, 0.8)'
-    ]
-  };
-
-  // Controle de instâncias de gráficos
-  const chartInstances = {};
-  
-  // Dados do backend
-  let proteina_data = [];
-  let umidade_data = [];
-  let tipos_proteina = [];
-  let tipos_umidade = [];
-  let analises_por_dia = {};
-  
-  // Função para carregar dados
-  function carregarDados() {
-    try {
-      console.log('=== CARREGANDO DADOS DO DASHBOARD ===');
-      
-      // Carregar dados de proteína
-      const proteinaJsonStr = '{{ proteina_json|escapejs }}';
-      console.log('String JSON proteína:', proteinaJsonStr);
-      const proteinaJson = proteinaJsonStr && proteinaJsonStr !== 'None' ? JSON.parse(proteinaJsonStr) : [];
-      if (Array.isArray(proteinaJson)) {
-        proteina_data = proteinaJson;
-        console.log('Dados de proteína carregados:', proteina_data.length, 'itens');
-        const totalProteinaElement = document.getElementById('total-proteina');
-        if (totalProteinaElement) {
-          totalProteinaElement.textContent = proteina_data.length;
-        }
-      }
-      
-      // Carregar dados de umidade
-      const umidadeJsonStr = '{{ umidade_json|escapejs }}';
-      const umidadeJson = umidadeJsonStr && umidadeJsonStr !== 'None' ? JSON.parse(umidadeJsonStr) : [];
-      if (Array.isArray(umidadeJson)) {
-        umidade_data = umidadeJson;
-        const totalUmidadeElement = document.getElementById('total-umidade');
-        if (totalUmidadeElement) {
-          totalUmidadeElement.textContent = umidade_data.length;
-        }
-      }
-      
-      // Carregar dados de tipos
-      const tiposProteinaJsonStr = '{{ tipos_proteina_json|escapejs }}';
-      const tiposProteinaJson = tiposProteinaJsonStr && tiposProteinaJsonStr !== 'None' ? JSON.parse(tiposProteinaJsonStr) : [];
-      if (Array.isArray(tiposProteinaJson)) {
-        tipos_proteina = tiposProteinaJson;
-      }
-      
-      const tiposUmidadeJsonStr = '{{ tipos_umidade_json|escapejs }}';
-      const tiposUmidadeJson = tiposUmidadeJsonStr && tiposUmidadeJsonStr !== 'None' ? JSON.parse(tiposUmidadeJsonStr) : [];
-      if (Array.isArray(tiposUmidadeJson)) {
-        tipos_umidade = tiposUmidadeJson;
-      }
-      
-      // Carregar dados por dia da semana
-      const analisesPorDiaJsonStr = '{{ analises_por_dia_json|escapejs }}';
-      const analisesPorDiaJson = analisesPorDiaJsonStr && analisesPorDiaJsonStr !== 'None' ? JSON.parse(analisesPorDiaJsonStr) : {};
-      if (analisesPorDiaJson && typeof analisesPorDiaJson === 'object') {
-        analises_por_dia = analisesPorDiaJson;
-      }
-      
-      // Inicializar gráficos após carregar dados
-      inicializarGraficos();
-      
-      // Preencher tabelas de últimas análises
-      preencherTabelasUltimas();
-      
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-    }
-  }
-  
-  // Função para formatar data para exibição
-  function formatarData(dataStr) {
-    const data = new Date(dataStr);
-    return data.toLocaleDateString('pt-BR');
-  }
-  
-  // Preencher tabelas de últimas análises
-  function preencherTabelasUltimas() {
-    const tabelaUmidade = document.getElementById('ultimas-umidade');
-    const tabelaProteina = document.getElementById('ultimas-proteina');
-    
-    if (tabelaUmidade) {
-      let htmlUmidade = '';
-      
-      // Pegar as últimas 10 análises de umidade
-      const ultimasUmidade = umidade_data.slice(0, 10);
-      
-      if (ultimasUmidade.length > 0) {
-        ultimasUmidade.forEach(analise => {
-          htmlUmidade += `
-          <tr>
-            <td>${formatarData(analise.data)} ${analise.horario}</td>
-            <td>${analise.tipo}</td>
-            <td><span class="badge bg-info text-white">${parseFloat(analise.resultado || 0).toFixed(2)}%</span></td>
-          </tr>`;
-        });
-      } else {
-        htmlUmidade = '<tr><td colspan="3" class="text-center py-3">Nenhuma análise de umidade registrada</td></tr>';
-      }
-      
-      tabelaUmidade.innerHTML = htmlUmidade;
-    }
-    
-    if (tabelaProteina) {
-      let htmlProteina = '';
-      
-      // Pegar as últimas 10 análises de proteína
-      const ultimasProteina = proteina_data.slice(0, 10);
-      
-      if (ultimasProteina.length > 0) {
-        ultimasProteina.forEach(analise => {
-          htmlProteina += `
-          <tr>
-            <td>${formatarData(analise.data)} ${analise.horario}</td>
-            <td>${analise.tipo}</td>
-            <td><span class="badge bg-success text-white">${parseFloat(analise.resultado_corrigido || analise.resultado || 0).toFixed(2)}%</span></td>
-          </tr>`;
-        });
-      } else {
-        htmlProteina = '<tr><td colspan="3" class="text-center py-3">Nenhuma análise de proteína registrada</td></tr>';
-      }
-      
-      tabelaProteina.innerHTML = htmlProteina;
-    }
-  }
-  
-  // Inicializa todos os gráficos
-  function inicializarGraficos() {
-    try {
-      console.log('Inicializando gráficos...');
-      console.log('Dados proteína:', proteina_data.length, 'itens');
-      console.log('Dados umidade:', umidade_data.length, 'itens');
-      
-      // Gráfico de evolução temporal
-      criarGraficoTemporal();
-      
-      // Gráfico de dia da semana
-      criarGraficoDiaSemana();
-      
-      // Gráficos de tipo de amostra
-      criarGraficoTipoUmidade();
-      criarGraficoTipoProteina();
-      
-      console.log('Gráficos inicializados com sucesso');
-    } catch (error) {
-      console.error('Erro ao inicializar gráficos:', error);
-    }
-  }
-  
-  // Cria gráfico de evolução temporal
-  function criarGraficoTemporal() {
-    const ctx = document.getElementById('timeChart');
-    if (!ctx) {
-      console.warn('Canvas timeChart não encontrado');
-      return;
-    }
-    
-    console.log('Criando gráfico temporal...');
-    
-    // Agrupar dados por data
-    const dadosAgrupados = {
-      proteina: {},
-      umidade: {}
-    };
-    
-    proteina_data.forEach(item => {
-      if (!dadosAgrupados.proteina[item.data]) {
-        dadosAgrupados.proteina[item.data] = [];
-      }
-      dadosAgrupados.proteina[item.data].push(item.resultado_corrigido || item.resultado || 0);
-    });
-    
-    umidade_data.forEach(item => {
-      if (!dadosAgrupados.umidade[item.data]) {
-        dadosAgrupados.umidade[item.data] = [];
-      }
-      dadosAgrupados.umidade[item.data].push(item.resultado || 0);
-    });
-    
-    // Calcular médias diárias
-    const dadosMedias = {
-      proteina: {},
-      umidade: {}
-    };
-    
-    Object.keys(dadosAgrupados.proteina).forEach(data => {
-      const valores = dadosAgrupados.proteina[data];
-      const media = valores.reduce((a, b) => a + b, 0) / valores.length;
-      dadosMedias.proteina[data] = media;
-    });
-    
-    Object.keys(dadosAgrupados.umidade).forEach(data => {
-      const valores = dadosAgrupados.umidade[data];
-      const media = valores.reduce((a, b) => a + b, 0) / valores.length;
-      dadosMedias.umidade[data] = media;
-    });
-    
-    // Ordenar datas
-    const datasProteina = Object.keys(dadosMedias.proteina).sort();
-    const datasUmidade = Object.keys(dadosMedias.umidade).sort();
-    
-    // Combinar todas as datas únicas e ordenar
-    const todasDatas = [...new Set([...datasProteina, ...datasUmidade])].sort();
-    
-    // Formatar datas para exibição
-    const datasFormatadas = todasDatas.map(data => {
-      const dataObj = new Date(data);
-      return dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    });
-    
-    // Dados para o gráfico
-    const datasetProteina = {
-      label: 'Proteína (%)',
-      data: todasDatas.map(data => dadosMedias.proteina[data] || null),
-      borderColor: CORES.proteina.border,
-      backgroundColor: CORES.proteina.secondary,
-      borderWidth: 2,
-      tension: 0.3,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-      fill: false
-    };
-    
-    const datasetUmidade = {
-      label: 'Umidade (%)',
-      data: todasDatas.map(data => dadosMedias.umidade[data] || null),
-      borderColor: CORES.umidade.border,
-      backgroundColor: CORES.umidade.secondary,
-      borderWidth: 2,
-      tension: 0.3,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-      fill: false
-    };
-    
-    // Configuração do gráfico
-    chartInstances.timeChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: datasFormatadas,
-        datasets: [datasetProteina, datasetUmidade]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            type: 'category',
-            title: {
-              display: true,
-              text: 'Data'
-            }
-          },
-          y: {
-            title: {
-              display: true,
-              text: 'Porcentagem (%)'
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            position: 'top'
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false
-          }
-        },
-        interaction: {
-          mode: 'nearest',
-          axis: 'x',
-          intersect: false
-        }
-      }
-    });
-    
-    // Configurar botões de alternância
-    document.querySelectorAll('[data-chart-toggle]').forEach(button => {
-      button.addEventListener('click', function() {
-        const tipoChart = this.getAttribute('data-chart-toggle');
+    // Adicionar animações sutis aos cartões
+    const cards = document.querySelectorAll('.card-modern, .stat-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
         
-        // Remover classe active de todos os botões
-        document.querySelectorAll('[data-chart-toggle]').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        
-        // Adicionar classe active ao botão clicado
-        this.classList.add('active');
-        
-        // Atualizar datasets visíveis
-        if (tipoChart === 'proteina') {
-          chartInstances.timeChart.data.datasets = [datasetProteina];
-        } else if (tipoChart === 'umidade') {
-          chartInstances.timeChart.data.datasets = [datasetUmidade];
-        } else {
-          chartInstances.timeChart.data.datasets = [datasetProteina, datasetUmidade];
-        }
-        
-        chartInstances.timeChart.update();
-      });
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
     });
-    
-    console.log('Gráfico temporal criado com sucesso');
-  }
-  
-  // Cria gráfico de distribuição por dia da semana
-  function criarGraficoDiaSemana() {
-    const ctx = document.getElementById('weekdayChart');
-    if (!ctx) {
-      console.warn('Canvas weekdayChart não encontrado');
-      return;
-    }
-    
-    console.log('Criando gráfico de dia da semana...');
-    console.log('Dados analises_por_dia:', analises_por_dia);
-    
-    // Mapear nomes de dia da semana em inglês para português
-    const diasSemana = {
-      'Monday': 'Segunda',
-      'Tuesday': 'Terça',
-      'Wednesday': 'Quarta',
-      'Thursday': 'Quinta',
-      'Friday': 'Sexta',
-      'Saturday': 'Sábado',
-      'Sunday': 'Domingo'
-    };
-    
-    // Organizar dias na ordem correta (segunda a domingo)
-    const diasOrdenados = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    
-    // Preparar dados para o gráfico
-    const labels = [];
-    const dataProteina = [];
-    const dataUmidade = [];
-    
-    diasOrdenados.forEach(dia => {
-      labels.push(diasSemana[dia] || dia);
-      
-      if (analises_por_dia[dia]) {
-        dataProteina.push(analises_por_dia[dia].proteina || 0);
-        dataUmidade.push(analises_por_dia[dia].umidade || 0);
-      } else {
-        dataProteina.push(0);
-        dataUmidade.push(0);
-      }
-    });
-    
-    // Criação do gráfico
-    chartInstances.weekdayChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Proteína',
-            data: dataProteina,
-            backgroundColor: CORES.proteina.primary,
-            borderColor: CORES.proteina.border,
-            borderWidth: 1,
-            barPercentage: 0.6,
-            categoryPercentage: 0.8
-          },
-          {
-            label: 'Umidade',
-            data: dataUmidade,
-            backgroundColor: CORES.umidade.primary,
-            borderColor: CORES.umidade.border,
-            borderWidth: 1,
-            barPercentage: 0.6,
-            categoryPercentage: 0.8
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Número de análises'
-            }
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Dia da semana'
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            position: 'top'
-          }
-        }
-      }
-    });
-    
-    // Alternar entre visualização de contagem e percentual
-    document.getElementById('toggleViewMode').addEventListener('change', function() {
-      const isPercentual = this.checked;
-      
-      if (isPercentual) {
-        // Calcular totais
-        const totalProteina = dataProteina.reduce((a, b) => a + b, 0);
-        const totalUmidade = dataUmidade.reduce((a, b) => a + b, 0);
-        
-        // Calcular percentuais
-        const percentualProteina = dataProteina.map(valor => totalProteina > 0 ? (valor / totalProteina * 100) : 0);
-        const percentualUmidade = dataUmidade.map(valor => totalUmidade > 0 ? (valor / totalUmidade * 100) : 0);
-        
-        // Atualizar dados do gráfico
-        chartInstances.weekdayChart.data.datasets[0].data = percentualProteina;
-        chartInstances.weekdayChart.data.datasets[1].data = percentualUmidade;
-        
-        // Atualizar escala Y
-        chartInstances.weekdayChart.options.scales.y.title.text = 'Percentual (%)';
-      } else {
-        // Restaurar dados de contagem
-        chartInstances.weekdayChart.data.datasets[0].data = dataProteina;
-        chartInstances.weekdayChart.data.datasets[1].data = dataUmidade;
-        
-        // Atualizar escala Y
-        chartInstances.weekdayChart.options.scales.y.title.text = 'Número de análises';
-      }
-      
-      chartInstances.weekdayChart.update();
-    });
-  }
-  
-  // Cria gráfico de tipo de amostra para umidade
-  function criarGraficoTipoUmidade() {
-    const ctx = document.getElementById('tipoUmidadeChart');
-    if (!ctx) return;
-    
-    // Preparar dados
-    const labels = [];
-    const dados = [];
-    const cores = [];
-    
-    if (tipos_umidade && tipos_umidade.length > 0) {
-      tipos_umidade.forEach((tipo, index) => {
-        labels.push(tipo.tipo_amostra_display || `Tipo ${tipo.tipo_amostra}`);
-        dados.push(tipo.total);
-        cores.push(CORES.chart[index % CORES.chart.length]);
-      });
-    }
-    
-    // Criação do gráfico
-    chartInstances.tipoUmidadeChart = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: dados,
-          backgroundColor: cores,
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: {
-              boxWidth: 15,
-              font: {
-                size: 11
-              }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                return `${label}: ${value} (${percentage}%)`;
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-  
-  // Cria gráfico de tipo de amostra para proteína
-  function criarGraficoTipoProteina() {
-    const ctx = document.getElementById('tipoProteinaChart');
-    if (!ctx) return;
-    
-    // Preparar dados
-    const labels = [];
-    const dados = [];
-    const mediaResultados = [];
-    const cores = [];
-    
-    if (tipos_proteina && tipos_proteina.length > 0) {
-      tipos_proteina.forEach((tipo, index) => {
-        labels.push(tipo.tipo_amostra_display || `Tipo ${tipo.tipo_amostra}`);
-        dados.push(tipo.total);
-        mediaResultados.push(tipo.media_resultado ? parseFloat(tipo.media_resultado).toFixed(2) : '0.00');
-        cores.push(CORES.chart[index % CORES.chart.length]);
-      });
-    }
-    
-    // Criação do gráfico
-    chartInstances.tipoProteinaChart = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: dados,
-          backgroundColor: cores,
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: {
-              boxWidth: 15,
-              font: {
-                size: 11
-              }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                const mediaIndex = context.dataIndex;
-                const media = mediaResultados[mediaIndex] || '0.00';
-                return [
-                  `${label}: ${value} (${percentage}%)`,
-                  `Média: ${media}%`
-                ];
-              }
-            }
-          }
-        }
-      }
-    });
-  } 
 });
 </script>
 {% endblock %}

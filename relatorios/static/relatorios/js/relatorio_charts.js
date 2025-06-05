@@ -23,6 +23,10 @@ const chartInstances = {
     umidade: {
         time: null,
         tipo: null
+    },
+    oleoDegomado: {
+        acidez: null,
+        tipo: null
     }
 };
 
@@ -97,6 +101,9 @@ function initRelatorioCharts() {
 
     // Renderiza gráficos de umidade
     renderUmidadeCharts(commonTimeOptions);
+    
+    // Renderiza gráficos de óleo degomado
+    renderOleoDegomadoCharts(commonTimeOptions);
 }
 
 /**
@@ -571,6 +578,256 @@ function renderUmidadeTipoChart(data) {
                         title: {
                             display: true,
                             text: 'Percentual (%)'
+                        }
+                    }
+                }
+            }
+        }
+    );
+}
+
+/**
+ * Renderiza os gráficos de óleo degomado
+ * @param {Object} commonTimeOptions - Opções comuns para gráficos de linha
+ */
+function renderOleoDegomadoCharts(commonTimeOptions) {
+    // Obter e processar dados de óleo degomado
+    let oleoDegomadoData = [];
+    
+    try {
+        const oleoJsonElement = document.getElementById('oleo-degomado-data');
+        if (!oleoJsonElement) {
+            console.warn('Elemento com ID "oleo-degomado-data" não encontrado');
+            return;
+        }
+        
+        const jsonStr = oleoJsonElement.textContent.trim();
+        if (!jsonStr) {
+            console.warn('Dados de óleo degomado vazios');
+            return;
+        }
+        
+        oleoDegomadoData = JSON.parse(jsonStr);
+        
+        if (!Array.isArray(oleoDegomadoData)) {
+            console.error('Dados de óleo degomado não estão em formato de array');
+            return;
+        }
+    } catch (e) {
+        console.error("Erro ao processar dados de óleo degomado:", e);
+        mostrarErroGrafico('Erro ao processar dados de óleo degomado. Formato inválido.');
+        return;
+    }
+
+    if (!oleoDegomadoData || oleoDegomadoData.length === 0) {
+        console.warn('Nenhum dado de óleo degomado disponível');
+        return;
+    }
+
+    // Estatísticas de óleo degomado
+    renderOleoDegomadoStats(oleoDegomadoData);
+
+    // Gráfico de evolução da acidez ao longo do tempo
+    renderOleoAcidezTimeChart(oleoDegomadoData, commonTimeOptions);
+    
+    // Gráfico de tipos de amostra de óleo
+    renderOleoTipoChart(oleoDegomadoData);
+}
+
+/**
+ * Renderiza estatísticas para dados de óleo degomado
+ * @param {Array} data - Dados de óleo degomado
+ */
+function renderOleoDegomadoStats(data) {
+    const statsDiv = document.getElementById('oleo-degomado-stats');
+    if (!statsDiv) return;
+    
+    // Calcular estatísticas para acidez, umidade e impurezas
+    const acidezValues = data.map(item => parseFloat(item.acidez || 0))
+                            .filter(val => !isNaN(val));
+    const umidadeValues = data.map(item => parseFloat(item.umidade || 0))
+                             .filter(val => !isNaN(val));
+    const impurezasValues = data.map(item => parseFloat(item.impurezas || 0))
+                               .filter(val => !isNaN(val));
+    
+    if (acidezValues.length === 0 && umidadeValues.length === 0 && impurezasValues.length === 0) {
+        statsDiv.innerHTML = '<div class="alert alert-warning">Sem dados para calcular estatísticas</div>';
+        return;
+    }
+    
+    const acidezStats = calcularEstatisticas(acidezValues);
+    const umidadeStats = calcularEstatisticas(umidadeValues);
+    const impurezasStats = calcularEstatisticas(impurezasValues);
+    
+    statsDiv.innerHTML = `
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">Estatísticas do Óleo Degomado</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <h6 class="text-danger">Acidez (%)</h6>
+                        <div class="stat-item">
+                            <span class="stat-label">Média:</span>
+                            <span class="stat-value">${acidezStats.media.toFixed(2)}%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Mínimo:</span>
+                            <span class="stat-value">${acidezStats.minimo.toFixed(2)}%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Máximo:</span>
+                            <span class="stat-value">${acidezStats.maximo.toFixed(2)}%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-info">Umidade (%)</h6>
+                        <div class="stat-item">
+                            <span class="stat-label">Média:</span>
+                            <span class="stat-value">${umidadeStats.media.toFixed(2)}%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Mínimo:</span>
+                            <span class="stat-value">${umidadeStats.minimo.toFixed(2)}%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Máximo:</span>
+                            <span class="stat-value">${umidadeStats.maximo.toFixed(2)}%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-secondary">Impurezas (%)</h6>
+                        <div class="stat-item">
+                            <span class="stat-label">Média:</span>
+                            <span class="stat-value">${impurezasStats.media.toFixed(2)}%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Mínimo:</span>
+                            <span class="stat-value">${impurezasStats.minimo.toFixed(2)}%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Máximo:</span>
+                            <span class="stat-value">${impurezasStats.maximo.toFixed(2)}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Renderiza o gráfico de evolução da acidez ao longo do tempo
+ * @param {Array} data - Dados de óleo degomado
+ * @param {Object} options - Opções do gráfico
+ */
+function renderOleoAcidezTimeChart(data, options) {
+    const chartCanvas = document.getElementById('oleoAcidezTimeChart');
+    if (!chartCanvas) return;
+    
+    const acidezTimeData = groupByDate(data, 'data', 'acidez');
+    const acidezTimeLabels = acidezTimeData.map(item => item.x);
+    const acidezTimeValues = acidezTimeData.map(item => item.y);
+    
+    if (acidezTimeLabels.length === 0) {
+        chartCanvas.parentNode.innerHTML = '<div class="alert alert-warning">Sem dados suficientes para o gráfico temporal</div>';
+        return;
+    }
+    
+    // Se já existe um gráfico, destrua-o antes de criar um novo
+    if (chartInstances.oleoDegomado.acidez) {
+        chartInstances.oleoDegomado.acidez.destroy();
+    }
+    
+    chartInstances.oleoDegomado.acidez = new Chart(
+        chartCanvas,
+        {
+            type: 'line',
+            data: {
+                labels: acidezTimeLabels,
+                datasets: [{
+                    label: 'Acidez (%)',
+                    data: acidezTimeValues,
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                ...options,
+                plugins: {
+                    ...options.plugins,
+                    title: {
+                        display: true,
+                        text: 'Evolução da Acidez ao Longo do Tempo'
+                    }
+                }
+            }
+        }
+    );
+}
+
+/**
+ * Renderiza o gráfico de tipos de amostra de óleo
+ * @param {Array} data - Dados de óleo degomado
+ */
+function renderOleoTipoChart(data) {
+    const chartCanvas = document.getElementById('oleoTipoChart');
+    if (!chartCanvas) return;
+    
+    const oleoTipoGrouped = groupByTipo(data, 'tipo_amostra', 'acidez');
+    
+    if (oleoTipoGrouped.labels.length === 0) {
+        chartCanvas.parentNode.innerHTML = '<div class="alert alert-warning">Sem dados suficientes para o gráfico de tipos</div>';
+        return;
+    }
+    
+    // Se já existe um gráfico, destrua-o antes de criar um novo
+    if (chartInstances.oleoDegomado.tipo) {
+        chartInstances.oleoDegomado.tipo.destroy();
+    }
+    
+    chartInstances.oleoDegomado.tipo = new Chart(
+        chartCanvas,
+        {
+            type: 'doughnut',
+            data: {
+                labels: oleoTipoGrouped.labels,
+                datasets: [{
+                    label: 'Análises por tipo',
+                    data: oleoTipoGrouped.data,
+                    backgroundColor: [
+                        'rgba(255, 193, 7, 0.8)',  // Amarelo
+                        'rgba(220, 53, 69, 0.8)',  // Vermelho
+                        'rgba(40, 167, 69, 0.8)',  // Verde
+                        'rgba(0, 123, 255, 0.8)'   // Azul
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribuição por Tipo de Amostra'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} análises (${percentage}%)`;
+                            }
                         }
                     }
                 }

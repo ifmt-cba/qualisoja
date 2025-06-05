@@ -15,17 +15,68 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 
 # Importar models e forms do app analises
-from analises.models import AnaliseUmidade, AnaliseProteina
+from analises.models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado
 from .forms import RelatorioFiltroForm
 
 
-class RelatorioDashboardView(TemplateView):
-    """Dashboard principal de relatórios"""
-    template_name = 'relatorios/relatorios_dashboard.html'
+class RelatorioGerarClassicoView(FormView):
+    """View clássica para selecionar parâmetros e gerar relatórios (BACKUP)"""
+    template_name = 'relatorios/gerar_relatorio_classico.html'
+    form_class = RelatorioFiltroForm
+
+    def get_initial(self):
+        """Pré-configura as datas para os últimos 7 dias"""
+        initial = super().get_initial()
+        tipo = self.request.GET.get('tipo', 'completo')
+        data_final = timezone.localdate()
+        data_inicial = data_final - timedelta(days=7)
+        
+        initial.update({
+            'data_inicial': data_inicial,
+            'data_final': data_final,
+            'tipo_relatorio': tipo
+        })
+        return initial
+    
+    def form_valid(self, form):
+        """Processa o formulário válido e gera o relatório"""
+        # Obter dados do formulário
+        tipo_relatorio = form.cleaned_data['tipo_relatorio']
+        data_inicial = form.cleaned_data['data_inicial']
+        data_final = form.cleaned_data['data_final']
+        tipo_amostra_umidade = form.cleaned_data.get('tipo_amostra_umidade', '')
+        tipo_amostra_proteina = form.cleaned_data.get('tipo_amostra_proteina', '')
+        formato_saida = form.cleaned_data.get('formato_saida', 'HTML')
+        
+        # Construir a URL de redirecionamento com query parameters
+        query_params = {
+            'tipo': tipo_relatorio,
+            'inicio': data_inicial.strftime('%Y-%m-%d'),
+            'fim': data_final.strftime('%Y-%m-%d'),
+            'formato': formato_saida,
+        }
+        
+        if tipo_amostra_umidade:
+            query_params['umidade_tipo'] = tipo_amostra_umidade
+        
+        if tipo_amostra_proteina:
+            query_params['proteina_tipo'] = tipo_amostra_proteina
+        
+        # Construir a URL com os parâmetros
+        url = reverse('relatorios:visualizar')
+        url = f"{url}?{urlencode(query_params)}"
+        
+        # Logs para depuração
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Redirecionando para URL: {url}")
+        
+        # Redirecionar para a visualização do relatório
+        return redirect(url)
 
 
 class RelatorioGerarView(FormView):
-    """View para selecionar parâmetros e gerar relatórios"""
+    """View moderna para selecionar parâmetros e gerar relatórios"""
     template_name = 'relatorios/gerar_relatorio.html'
     form_class = RelatorioFiltroForm
 
@@ -80,16 +131,17 @@ class RelatorioGerarView(FormView):
         return redirect(url)
 
 
-def obter_dados_relatorio(tipo_relatorio, data_inicial, data_final, tipo_amostra_umidade='', tipo_amostra_proteina=''):
+def obter_dados_relatorio(tipo_relatorio, data_inicial, data_final, tipo_amostra_umidade='', tipo_amostra_proteina='', tipo_amostra_oleo_degomado=''):
     """
     Obtém dados para o relatório com base nos parâmetros
     
     Args:
-        tipo_relatorio (str): Tipo de relatório ('umidade', 'proteina' ou 'completo')
+        tipo_relatorio (str): Tipo de relatório ('umidade', 'proteina', 'oleo_degomado' ou 'completo')
         data_inicial (date): Data inicial para o relatório
         data_final (date): Data final para o relatório
         tipo_amostra_umidade (str, optional): Filtro de tipo de amostra para umidade
         tipo_amostra_proteina (str, optional): Filtro de tipo de amostra para proteína
+        tipo_amostra_oleo_degomado (str, optional): Filtro de tipo de amostra para óleo degomado
         
     Returns:
         dict: Dicionário com os dados do relatório
@@ -212,6 +264,71 @@ def obter_dados_relatorio(tipo_relatorio, data_inicial, data_final, tipo_amostra
             logger = logging.getLogger(__name__)
             logger.error(f"Erro ao processar dados de proteína: {str(e)}")
             dados['erro_proteina'] = str(e)
+    
+    if tipo_relatorio in ['oleo_degomado', 'completo']:
+        try:
+            # Consulta para análises de óleo degomado
+            queryset = AnaliseOleoDegomado.objects.filter(
+                data__gte=data_inicial,
+                data__lte=data_final
+            )
+            
+            if tipo_amostra_oleo_degomado:
+                queryset = queryset.filter(tipo_amostra=tipo_amostra_oleo_degomado)
+            
+            dados['analises_oleo_degomado'] = queryset.order_by('-data', '-horario')
+            
+            # Preparar dados em JSON para os gráficos
+            import json
+            oleo_degomado_data = []
+            
+            for analise in queryset:
+                oleo_degomado_data.append({
+                    'data': analise.data.strftime('%Y-%m-%d'),
+                    'horario': analise.horario.strftime('%H:%M'),
+                    'tipo': analise.get_tipo_amostra_display(),
+                    'tipo_code': analise.tipo_amostra,
+                    'acidez': float(analise.acidez) if analise.acidez else 0,
+                    'umidade_oleo': float(analise.umidade_oleo) if analise.umidade_oleo else 0,
+                    'impurezas': float(analise.impurezas) if analise.impurezas else 0,
+                    'indice_iodo': float(analise.indice_iodo) if analise.indice_iodo else 0,
+                    'cor': analise.cor if analise.cor else '',
+                    'resultado': float(analise.resultado) if analise.resultado else 0,
+                    'observacoes': analise.observacoes if analise.observacoes else ''
+                })
+                
+            dados['analises_oleo_degomado_json'] = json.dumps(oleo_degomado_data)
+            
+            # Cálculo de estatísticas - usando 'resultado'
+            if queryset.exists():
+                from django.db.models import Avg, Min, Max
+                estatisticas = {
+                    'total': queryset.count(),
+                }
+                
+                # Estatísticas baseadas no resultado
+                estatisticas['media'] = queryset.aggregate(Avg('resultado'))['resultado__avg']
+                estatisticas['minimo'] = queryset.aggregate(Min('resultado'))['resultado__min']
+                estatisticas['maximo'] = queryset.aggregate(Max('resultado'))['resultado__max']
+                
+                # Estatísticas específicas do óleo degomado
+                try:
+                    estatisticas['acidez_media'] = queryset.aggregate(Avg('acidez'))['acidez__avg']
+                    estatisticas['acidez_min'] = queryset.aggregate(Min('acidez'))['acidez__min']
+                    estatisticas['acidez_max'] = queryset.aggregate(Max('acidez'))['acidez__max']
+                    
+                    estatisticas['umidade_oleo_media'] = queryset.aggregate(Avg('umidade_oleo'))['umidade_oleo__avg']
+                    estatisticas['impurezas_media'] = queryset.aggregate(Avg('impurezas'))['impurezas__avg']
+                    estatisticas['indice_iodo_media'] = queryset.aggregate(Avg('indice_iodo'))['indice_iodo__avg']
+                except:
+                    pass  # Ignorar se os campos não existirem
+                    
+                dados['estatisticas_oleo_degomado'] = estatisticas
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Erro ao processar dados de óleo degomado: {str(e)}")
+            dados['erro_oleo_degomado'] = str(e)
     
     return dados
 
@@ -618,3 +735,59 @@ class RelatorioVisualizarView(TemplateView):
             context['error'] = f"Erro ao gerar relatório: {str(e)}"
         
         return context
+
+
+class RelatorioGerarModernoView(FormView):
+    """View que aponta para a interface clássica (backup)"""
+    template_name = 'relatorios/gerar_relatorio_classico.html'
+    form_class = RelatorioFiltroForm
+
+    def get_initial(self):
+        """Pré-configura as datas para os últimos 7 dias"""
+        initial = super().get_initial()
+        tipo = self.request.GET.get('tipo', 'completo')
+        data_final = timezone.localdate()
+        data_inicial = data_final - timedelta(days=7)
+        
+        initial.update({
+            'data_inicial': data_inicial,
+            'data_final': data_final,
+            'tipo_relatorio': tipo
+        })
+        return initial
+    
+    def form_valid(self, form):
+        """Processa o formulário válido e gera o relatório"""
+        # Obter dados do formulário
+        tipo_relatorio = form.cleaned_data['tipo_relatorio']
+        data_inicial = form.cleaned_data['data_inicial']
+        data_final = form.cleaned_data['data_final']
+        tipo_amostra_umidade = form.cleaned_data.get('tipo_amostra_umidade', '')
+        tipo_amostra_proteina = form.cleaned_data.get('tipo_amostra_proteina', '')
+        formato_saida = form.cleaned_data.get('formato_saida', 'HTML')
+        
+        # Construir a URL de redirecionamento com query parameters
+        query_params = {
+            'tipo': tipo_relatorio,
+            'inicio': data_inicial.strftime('%Y-%m-%d'),
+            'fim': data_final.strftime('%Y-%m-%d'),
+            'formato': formato_saida,
+        }
+        
+        if tipo_amostra_umidade:
+            query_params['umidade_tipo'] = tipo_amostra_umidade
+        
+        if tipo_amostra_proteina:
+            query_params['proteina_tipo'] = tipo_amostra_proteina
+        
+        # Construir a URL com os parâmetros
+        url = reverse('relatorios:visualizar')
+        url = f"{url}?{urlencode(query_params)}"
+        
+        # Logs para depuração
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Redirecionando para URL: {url}")
+        
+        # Redirecionar para a visualização do relatório
+        return redirect(url)
