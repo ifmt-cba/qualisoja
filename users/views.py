@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from .models import Profile
 from django.contrib import auth
@@ -12,8 +13,6 @@ def cadastro(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
         confirmPassword = request.POST.get('confirmPassword')
-        telefone = request.POST.get('phone')
-        cpf = request.POST.get('cpf')
         tipo_funcionario = request.POST.get('tipo_funcionario')
 
         if User.objects.filter(username=username).exists():
@@ -31,8 +30,6 @@ def cadastro(request):
         try:
             user = User.objects.create_user(username=username, email=email, password=password)
             profile = Profile.objects.get(user=user)
-            profile.telefone = telefone
-            profile.cpf = cpf
             profile.tipo_funcionario = tipo_funcionario
             profile.save()
 
@@ -52,26 +49,28 @@ def loginViews(request):
         user = auth.authenticate(request, username=username, password=password)
 
         if not user:
-            print("Erro: Usuário ou senha inválidos")
-            return redirect('/users/login')
+            return redirect('users:login')
 
-        auth.login(request, user)
+    auth.login(request, user)
 
-        # Usuário autenticado! Agora redirecionar conforme tipo_funcionario
-        if user.is_superuser:
-            return redirect('/admin/')  # ou uma tela personalizada
+    if user.is_superuser:
+        return redirect('/admin/')
 
-        try:
-            profile = user.profile
-            if profile.tipo_funcionario == 'analista':
-                return redirect('analises:umidade_list')  # ou dashboard analista
-            elif profile.tipo_funcionario == 'produção':
-                return redirect('relatorios:dashboard')  # ou o que quiser
-            else:
-                print("Erro: Tipo de funcionário desconhecido")
-                return redirect('/users/login')
-        except Profile.DoesNotExist:
-            print("Erro: Perfil não encontrado")
-            return redirect('/users/login')
+    try:
+        profile = user.profile
+        if profile.tipo_funcionario == 'analista':
+            return redirect('analises:umidade_list')
+        elif profile.tipo_funcionario == 'producao':
+            return redirect('relatorios:gerar')
+        else:
+            return redirect('users:login')
+
+    except ObjectDoesNotExist:
+        print("Usuário sem profile! Criando agora...")
+        Profile.objects.create(user=user)
+        return redirect('users:login')
         
 
+def logout(request):
+    auth.logout(request)
+    return redirect('users:login')

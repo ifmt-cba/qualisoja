@@ -97,6 +97,28 @@
                     <a class="nav-link" href="{% url 'relatorios:gerar' %}">Relatórios</a>
                 </li>
             </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                      <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                         <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Perfil" width="30" height="30" class="rounded-circle me-2">
+                         {{ user.username }}
+                        </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li class="dropdown-item disabled">
+                    Tipo: 
+                    {% if user.is_superuser %}
+                        Administrador
+                    {% else %}
+                        {{ user.profile.tipo_funcionario|title }}
+                    {% endif %}
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="{% url 'users:logout' %}">Sair</a></li>
+                </ul>
+            </li>
+        {% endif %}
+    </ul>
         </div>
     </div>
 </nav>
