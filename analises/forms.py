@@ -64,7 +64,7 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date'}),
             'horario': forms.TimeInput(attrs={'type': 'time'}),
-            'observacoes': forms.Textarea(attrs={'rows': 3}),
+            # 'observacoes': forms.Textarea(attrs={'rows': 3}),
         }
     
     def clean(self):
