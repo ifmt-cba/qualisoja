@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.views.generic import CreateView, ListView, TemplateView
 from django.urls import reverse_lazy
 from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado
