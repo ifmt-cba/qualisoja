@@ -37,18 +37,21 @@ class OleoDegomadoCreateView(CreateView):
         if tipo_analise == 'UMI':
             if tara and fator_correcao and peso_amostra:
                 resultado = ((tara + peso_amostra) - (liquido))/peso_amostra*100
-                form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
+                # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
 
-        if tipo_analise == 'ACI':
+        elif tipo_analise == 'ACI':
             if titulacao and fator_correcao and peso_amostra:
                 # Use Decimal para valores numéricos literais
                 resultado = (titulacao * fator_correcao * Decimal('28.2') * Decimal('100')) / peso_amostra
-                form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
+                # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
 
-        if tipo_analise == 'SAB':
+        elif tipo_analise == 'SAB':
             if titulacao and fator_correcao and peso_amostra:
                 resultado = (titulacao * fator_correcao * Decimal('300.4') * Decimal('100')) / peso_amostra
-                form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
+                # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
+        else:
+            resultado = None
+        form.instance.resultado = resultado        
         return super().form_valid(form)
 
 
