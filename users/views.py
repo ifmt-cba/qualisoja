@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from .models import Profile
 from django.contrib import auth
+from analises import views 
 
 def cadastro(request):
     if request.method == "GET":
@@ -59,7 +60,7 @@ def loginViews(request):
     try:
         profile = user.profile
         if profile.tipo_funcionario == 'analista':
-            return redirect('analises:umidade_list')
+            return redirect('analises:home')
         elif profile.tipo_funcionario == 'producao':
             return redirect('relatorios:gerar')
         else:

@@ -17,6 +17,7 @@ except ImportError:
     csrf_test_available = False
 
 urlpatterns = [
+    path('', include('users.urls', namespace='users')),
     path('', home, name='home'),
     path('simple/', home_simple, name='home_simple'),
     path('admin/', admin.site.urls),

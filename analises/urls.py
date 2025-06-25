@@ -8,7 +8,7 @@ from .views import (
 app_name = 'analises'
 
 urlpatterns = [
-    path('', AnaliseHomeView.as_view(), name='home'),
+    path('home/', AnaliseHomeView.as_view(), name='home'),
     path('umidade/nova/', UmidadeCreateView.as_view(), name='umidade_create'),
     path('proteina/nova/', ProteinaCreateView.as_view(), name='proteina_create'),
     path('oleo/nova/', OleoDegomadoCreateView.as_view(), name='oleo_create'),
