@@ -1,9 +1,6 @@
 from django.shortcuts import render, redirect
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.models import User
-from .models import Profile
+from django.contrib.auth.models import User, Group
 from django.contrib import auth
-from analises import views 
 
 def cadastro(request):
     if request.method == "GET":
@@ -30,21 +27,23 @@ def cadastro(request):
 
         try:
             user = User.objects.create_user(username=username, email=email, password=password)
-            profile = Profile.objects.get(user=user)
-            profile.tipo_funcionario = tipo_funcionario
-            profile.save()
+
+            # Atribui grupo ao usuário
+            grupo = Group.objects.get(name=tipo_funcionario)
+            user.groups.add(grupo)
 
             return redirect('/users/login')
         except Exception as e:
             print(f'Erro ao criar usuário: {e}')
             return redirect('/users/login')
-        
+
+
 def loginViews(request):
     if request.method == "GET":
         return render(request, 'login.html')
 
     elif request.method == "POST":
-        username = request.POST.get('username')  # nome do input é "email", mas o valor é o username mesmo
+        username = request.POST.get('username')
         password = request.POST.get('password')
 
         user = auth.authenticate(request, username=username, password=password)
@@ -52,25 +51,20 @@ def loginViews(request):
         if not user:
             return redirect('users:login')
 
-    auth.login(request, user)
+        auth.login(request, user)
 
-    if user.is_superuser:
-        return redirect('/admin/')
+        # Redirecionamento por grupo
+        if user.is_superuser:
+            return redirect('/admin/')
 
-    try:
-        profile = user.profile
-        if profile.tipo_funcionario == 'analista':
+        if user.groups.filter(name='Analista').exists():
             return redirect('analises:home')
-        elif profile.tipo_funcionario == 'producao':
+        elif user.groups.filter(name='Produção').exists():
             return redirect('relatorios:gerar')
         else:
+            print("Usuário sem grupo definido")
             return redirect('users:login')
 
-    except ObjectDoesNotExist:
-        print("Usuário sem profile! Criando agora...")
-        Profile.objects.create(user=user)
-        return redirect('users:login')
-        
 
 def logout(request):
     auth.logout(request)
