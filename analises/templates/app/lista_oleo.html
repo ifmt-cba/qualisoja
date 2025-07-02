@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Lista de Análises de Óleo Degomado</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Horário</th>
+            <th>Tipo de Amostra</th>
+            <th>Tipo de Analise</th>
+            <th>Peso da Amostra (g)<v/th>
+            <th>Tara </th>
+            <th>Liquido</th>
+            <th>Fator de Correção</th>
+            <th>Titulacao</th>
+            <th>Resultado (%)</th>
+    
+        </tr>
+    </thead>
+    <tbody>
+    {% for analise in object_list %}
+        <tr>
+            <td>{{ analise.data }}</td>
+            <td>{{ analise.horario }}</td>
+            <td>{{ analise.get_tipo_amostra_display }}</td>
+            <td>{{ analise.get_tipo_analise_display }}</td>
+            <td>{{ analise.peso_amostra }}</td>
+            <td>{{ analise.tara }}</td>
+            <td>{{ analise.liquido }}</td>
+            <td>{{ analise.fator_correcao }}</td>
+            <td>{{ analise.titulacao }}</td>
+            <td>{{ analise.resultado }}</td>
+            
+            
+        </tr>
+    {% empty %}
+        <tr><td colspan="8">Nenhuma análise encontrada.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
