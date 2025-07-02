@@ -96,6 +96,12 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'relatorios:gerar' %}">Relatórios</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'analises:oleo_list' %}">Análise Óleo Degomado</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'analises:oleo_create' %}">Cadastrar Óleo Degomado</a>
+                </li>
             </ul>
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
