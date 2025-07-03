@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, Group
+from django.contrib import messages
 from django.contrib import auth
 
 def cadastro(request):
@@ -49,11 +50,11 @@ def loginViews(request):
         user = auth.authenticate(request, username=username, password=password)
 
         if not user:
+            messages.error(request, "Usuário ou senha inválidos.")
             return redirect('users:login')
 
         auth.login(request, user)
 
-        # Redirecionamento por grupo
         if user.is_superuser:
             return redirect('/admin/')
 
@@ -62,9 +63,8 @@ def loginViews(request):
         elif user.groups.filter(name='Produção').exists():
             return redirect('relatorios:gerar')
         else:
-            print("Usuário sem grupo definido")
+            messages.warning(request, "Usuário sem grupo definido.")
             return redirect('users:login')
-
 
 def logout(request):
     auth.logout(request)

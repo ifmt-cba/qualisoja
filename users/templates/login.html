@@ -4,18 +4,38 @@
 {% block 'title' %}Login{% endblock 'title' %}
 
 {% block 'body' %}
+  <style>
+    .error-message {
+      color: #dc3545; /* vermelho Bootstrap */
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+
   <h1>Login</h1>
   <p>Preencha os dados abaixo para entrar no sistema</p>
+
   <form action="{% url 'users:login' %}" method="POST">
     {% csrf_token %}
-    <div class="form-group">
-      <label for="username">Nome de Usuário</label>
-      <input type="username" name="username" id="username" required>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="error-message" style="border: 1px solid #dc3545; background-color: #f8d7da; padding: 10px; border-radius: 5px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="form-group mb-3">
+      <label for="username" class="form-label">Nome de Usuário</label>
+      <input type="text" name="username" id="username" required class="form-control">
     </div>
-    <div class="form-group">
-      <label for="senha">Senha</label>
-      <input type="password" name="password" id="senha" required>
+
+    <div class="form-group mb-4">
+      <label for="senha" class="form-label">Senha</label>
+      <input type="password" name="password" id="senha" required class="form-control">
     </div>
-    <button type="submit" class="btn">Entrar</button>
+
+    <button type="submit" class="btn btn-success">Entrar</button>
   </form>
 {% endblock 'body' %}
