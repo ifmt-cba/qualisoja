@@ -125,5 +125,5 @@ Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE.md par
 
 ## Equipe
 
-- Coordenação: Prof. Dr. João Silva
+- Coordenação: Prof. Dr. João Paulo Delgado Preti
 - Desenvolvimento: Equipe de Engenharia de Software IFMT

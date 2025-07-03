@@ -58,28 +58,27 @@
         </button>
         <div class="collapse navbar-collapse justify-content-start" id="navbarNav">
             <ul class="navbar-nav ms-3">
-                {% if user.is_authenticated %}
-                    {% if user|in_group:'Analista' or user.is_superuser %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:umidade_list' %}">Análise Umidade</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:umidade_create' %}">Cadastrar Umidade</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:proteina_list' %}">Análise Proteína</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:proteina_create' %}">Cadastrar Proteína</a>
-                        </li>
-                    {% endif %}
-
-                    {% if user|in_group:'Produção' or user.is_superuser or user|in_group:'Analista' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'relatorios:gerar' %}">Relatórios</a>
-                        </li>
-                    {% endif %}
-                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'analises:umidade_list' %}">Análise Umidade</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'analises:umidade_create' %}">Cadastrar Umidade</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'analises:proteina_list' %}">Análise Proteina</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'analises:proteina_create' %}">Cadastrar Proteina</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'relatorios:gerar' %}">Relatórios</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'analises:oleo_list' %}">Análise Óleo Degomado</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'analises:oleo_create' %}">Cadastrar Óleo Degomado</a>
+                </li>
             </ul>
 
             <ul class="navbar-nav ms-auto">

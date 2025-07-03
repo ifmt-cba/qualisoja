@@ -134,92 +134,151 @@ class AnaliseProteina(BaseModel):
         verbose_name_plural = "Análises de Proteína"
         ordering = ['-data', '-horario']
 
+# class AnaliseOleoDegomado(BaseModel):
+#     """
+#     Modelo para armazenar análises de óleo degomado de soja.
+#     """
+#     TIPO_AMOSTRA_CHOICES = [
+#         ('CR', 'Óleo Cru'),
+#         ('DG', 'Óleo Degomado'),
+#         ('RF', 'Óleo Refinado'),
+#         ('RS', 'Resíduo'),
+#     ]
+    
+#     data = models.DateField(
+#         verbose_name="Data da Análise", 
+#         default=timezone.localdate,
+#         validators=[validate_not_future_date]
+#     )
+#     horario = models.TimeField(
+#         verbose_name="Horário da Análise",
+#         default=timezone.localtime().time()
+#     )
+#     tipo_amostra = models.CharField(
+#         max_length=2,
+#         choices=TIPO_AMOSTRA_CHOICES,
+#         verbose_name="Tipo de Amostra",
+#         default='DG'  # Óleo Degomado como padrão
+#     )
+#     acidez = models.DecimalField(
+#         max_digits=6,
+#         decimal_places=3,
+#         verbose_name="Acidez (mg KOH/g)",
+#         blank=True,
+#         null=True,
+#         validators=[MinValueValidator(0)]
+#     )
+#     umidade_oleo = models.DecimalField(
+#         max_digits=5,
+#         decimal_places=2,
+#         verbose_name="Umidade do Óleo (%)",
+#         blank=True,
+#         null=True,
+#         validators=[MinValueValidator(0), MaxValueValidator(100)]
+#     )
+#     impurezas = models.DecimalField(
+#         max_digits=5,
+#         decimal_places=2,
+#         verbose_name="Impurezas (%)",
+#         blank=True,
+#         null=True,
+#         validators=[MinValueValidator(0), MaxValueValidator(100)]
+#     )
+#     indice_iodo = models.DecimalField(
+#         max_digits=6,
+#         decimal_places=2,
+#         verbose_name="Índice de Iodo (g I₂/100g)",
+#         blank=True,
+#         null=True,
+#         validators=[MinValueValidator(0)]
+#     )
+#     cor = models.CharField(
+#         max_length=10,
+#         verbose_name="Cor (Lovibond)",
+#         blank=True,
+#         null=True
+#     )
+#     resultado = models.DecimalField(
+#         max_digits=6,
+#         decimal_places=2,
+#         verbose_name="Resultado da Análise (%)",
+#         blank=True,
+#         null=True,
+#         validators=[MinValueValidator(0), MaxValueValidator(100)]
+#     )
+#     observacoes = models.TextField(
+#         verbose_name="Observações",
+#         blank=True,
+#         null=True,
+#         max_length=500
+#     )
+    
+#     def __str__(self):
+#         return f"Análise de Óleo Degomado - {self.get_tipo_amostra_display()} - {self.data}"
+    
+#     class Meta:
+#         verbose_name = "Análise de Óleo Degomado"
+#         verbose_name_plural = "Análises de Óleo Degomado"
+#         ordering = ['-data', '-horario']
+
+# # O modelo ConfiguracaoRelatorio foi removido e suas funcionalidades 
+# # foram migradas para o aplicativo 'relatorios'
+
 class AnaliseOleoDegomado(BaseModel):
     """
-    Modelo para armazenar análises de óleo degomado de soja.
+    Modelo para armazenar análises de Oleo Degomado
     """
     TIPO_AMOSTRA_CHOICES = [
-        ('CR', 'Óleo Cru'),
-        ('DG', 'Óleo Degomado'),
-        ('RF', 'Óleo Refinado'),
-        ('RS', 'Resíduo'),
+        ('OP', 'Óleo Produção'),
+        ('OE', 'Óleo Expedição'),
     ]
-    
+
+    TIPO_ANALISE_CHOICES =[
+        ('UMI', 'Analise de Umidade'),
+        ('ACI', 'Analise de Acidez'),
+        ('SAB', 'Analise de Sabões')
+    ]
+
+
     data = models.DateField(
         verbose_name="Data da Análise", 
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
     )
+
     tipo_amostra = models.CharField(
         max_length=2,
         choices=TIPO_AMOSTRA_CHOICES,
         verbose_name="Tipo de Amostra",
-        default='DG'  # Óleo Degomado como padrão
+        default='OP'  # Oleo de Produção como padrão
     )
-    acidez = models.DecimalField(
-        max_digits=6,
-        decimal_places=3,
-        verbose_name="Acidez (mg KOH/g)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0)]
-    )
-    umidade_oleo = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        verbose_name="Umidade do Óleo (%)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
-    )
-    impurezas = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        verbose_name="Impurezas (%)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
-    )
-    indice_iodo = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        verbose_name="Índice de Iodo (g I₂/100g)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0)]
-    )
-    cor = models.CharField(
-        max_length=10,
-        verbose_name="Cor (Lovibond)",
-        blank=True,
-        null=True
-    )
-    resultado = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        verbose_name="Resultado da Análise (%)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
-    )
-    observacoes = models.TextField(
-        verbose_name="Observações",
-        blank=True,
-        null=True,
-        max_length=500
-    )
-    
-    def __str__(self):
-        return f"Análise de Óleo Degomado - {self.get_tipo_amostra_display()} - {self.data}"
-    
-    class Meta:
-        verbose_name = "Análise de Óleo Degomado"
-        verbose_name_plural = "Análises de Óleo Degomado"
-        ordering = ['-data', '-horario']
 
-# O modelo ConfiguracaoRelatorio foi removido e suas funcionalidades 
-# foram migradas para o aplicativo 'relatorios'
+    tipo_analise = models.CharField(
+        max_length=3,
+        choices=TIPO_ANALISE_CHOICES,
+        verbose_name="Tipo de Analise",
+        default='UMI'  # Analise de Umidade como padrão
+    )
+
+    tara = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Tara")
+    liquido = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Líquido")
+    peso_amostra = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="Peso da Amostra")
+    resultado = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Resultado")
+    titulacao = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Titulação")
+    fator_correcao = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        blank=True, 
+        null=True, 
+        verbose_name="Fator de Correção",
+        validators=[MinValueValidator(-1000), MaxValueValidator(1000)]
+    )
+
+    def __str__(self):
+        return f"Análise de Oleo Degomado - {self.get_tipo_amostra_display()} - {self.data}"
+
