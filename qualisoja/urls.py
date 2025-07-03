@@ -18,7 +18,7 @@ except ImportError:
 
 urlpatterns = [
     path('', include('users.urls', namespace='users')),
-    path('analises/', home, name='home'),
+    #path('analises/', home, name='home'),
     path('simple/', home_simple, name='home_simple'),
     path('admin/', admin.site.urls),
     path('analises/',include('analises.urls', namespace='analises')),
