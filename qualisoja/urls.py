@@ -17,10 +17,10 @@ except ImportError:
     csrf_test_available = False
 
 urlpatterns = [
-    path('', home, name='home'),
+    path('', include('users.urls', namespace='users')),
+    #path('analises/', home, name='home'),
     path('simple/', home_simple, name='home_simple'),
     path('admin/', admin.site.urls),
-    path('users/',include('users.urls', namespace='users')),
     path('analises/',include('analises.urls', namespace='analises')),
     path('relatorios/',include('relatorios.urls', namespace='relatorios'))
 ]
