@@ -3,9 +3,9 @@
 
 {% block content %}
 <div class="card shadow-sm border-0">
-    <div class="card-header bg-secondary bg-opacity-10 border-secondary border-opacity-25">
-        <h2 class="mb-0 text-secondary">
-            <i class="bi bi-fire me-2"></i>Nova Análise de Cinza
+    <div class="card-header bg-warning bg-opacity-10 border-warning border-opacity-25">
+        <h2 class="mb-0 text-warning">
+            <i class="bi bi-droplet-fill me-2"></i>Nova Análise de Teor de Óleo
         </h2>
     </div>
     <div class="card-body">
@@ -52,27 +52,36 @@
                         {% if form.peso_amostra.errors %}
                             <div class="invalid-feedback d-block">{{ form.peso_amostra.errors }}</div>
                         {% endif %}
+                        <div class="form-text">
+                            <small class="text-muted">{{ form.peso_amostra.help_text }}</small>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Terceira linha -->
                 <div class="col-md-6">
                     <div class="form-floating mb-3">
-                        {{ form.peso_cadinho|add_class:"form-control" }}
-                        <label for="{{ form.peso_cadinho.id_for_label }}">{{ form.peso_cadinho.label }}</label>
-                        {% if form.peso_cadinho.errors %}
-                            <div class="invalid-feedback d-block">{{ form.peso_cadinho.errors }}</div>
+                        {{ form.peso_liquido|add_class:"form-control" }}
+                        <label for="{{ form.peso_liquido.id_for_label }}">{{ form.peso_liquido.label }}</label>
+                        {% if form.peso_liquido.errors %}
+                            <div class="invalid-feedback d-block">{{ form.peso_liquido.errors }}</div>
                         {% endif %}
+                        <div class="form-text">
+                            <small class="text-muted">{{ form.peso_liquido.help_text }}</small>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="col-md-6">
                     <div class="form-floating mb-3">
-                        {{ form.peso_cinza|add_class:"form-control" }}
-                        <label for="{{ form.peso_cinza.id_for_label }}">{{ form.peso_cinza.label }}</label>
-                        {% if form.peso_cinza.errors %}
-                            <div class="invalid-feedback d-block">{{ form.peso_cinza.errors }}</div>
+                        {{ form.teor_oleo|add_class:"form-control"|attr:"readonly:readonly" }}
+                        <label for="{{ form.teor_oleo.id_for_label }}">{{ form.teor_oleo.label }}</label>
+                        {% if form.teor_oleo.errors %}
+                            <div class="invalid-feedback d-block">{{ form.teor_oleo.errors }}</div>
                         {% endif %}
+                        <div class="form-text">
+                            <small class="text-muted">{{ form.teor_oleo.help_text }}</small>
+                        </div>
                     </div>
                 </div>
                 
@@ -90,10 +99,10 @@
             
             <!-- Botões -->
             <div class="d-flex gap-2 mt-4">
-                <button type="submit" class="btn btn-secondary">
+                <button type="submit" class="btn btn-warning">
                     <i class="bi bi-save me-2"></i>Salvar Análise
                 </button>
-                <a href="{% url 'analises:cinza_list' %}" class="btn btn-outline-secondary">
+                <a href="{% url 'analises:teor_oleo_list' %}" class="btn btn-outline-warning">
                     <i class="bi bi-arrow-left me-2"></i>Voltar para Lista
                 </a>
             </div>
@@ -126,6 +135,75 @@ document.addEventListener('DOMContentLoaded', function() {
         const now = new Date();
         const timeString = now.toTimeString().substr(0, 5);
         horarioField.value = timeString;
+    }
+    
+    // Cálculo automático do teor de óleo
+    const pesoAmostraField = document.querySelector('#{{ form.peso_amostra.id_for_label }}');
+    const pesoLiquidoField = document.querySelector('#{{ form.peso_liquido.id_for_label }}');
+    const teorOleoField = document.querySelector('#{{ form.teor_oleo.id_for_label }}');
+    
+    function calcularTeorOleo() {
+        const pesoAmostra = parseFloat(pesoAmostraField.value);
+        const pesoLiquido = parseFloat(pesoLiquidoField.value);
+        
+        if (pesoAmostra && pesoLiquido && pesoAmostra > 0) {
+            // Fórmula: ((peso_liquido - peso_amostra) / peso_amostra) * 100
+            const teorOleo = ((pesoLiquido - pesoAmostra) / pesoAmostra) * 100;
+            teorOleoField.value = teorOleo.toFixed(2);
+            
+            // Feedback visual
+            if (teorOleo < -100 || teorOleo > 25) {
+                teorOleoField.classList.add('is-invalid');
+            } else {
+                teorOleoField.classList.remove('is-invalid');
+                teorOleoField.classList.add('is-valid');
+            }
+        } else {
+            teorOleoField.value = '';
+            teorOleoField.classList.remove('is-valid', 'is-invalid');
+        }
+    }
+    
+    // Validação de peso da amostra
+    function validarPesoAmostra() {
+        const peso = parseFloat(pesoAmostraField.value);
+        if (peso && (peso < 2.000 || peso > 2.500)) {
+            pesoAmostraField.classList.add('is-invalid');
+        } else if (peso) {
+            pesoAmostraField.classList.remove('is-invalid');
+            pesoAmostraField.classList.add('is-valid');
+        }
+    }
+    
+    // Validação de peso líquido
+    function validarPesoLiquido() {
+        const pesoAmostra = parseFloat(pesoAmostraField.value);
+        const pesoLiquido = parseFloat(pesoLiquidoField.value);
+        
+        if (pesoLiquido && pesoAmostra && pesoLiquido > pesoAmostra) {
+            pesoLiquidoField.classList.add('is-invalid');
+        } else if (pesoLiquido && pesoLiquido < 0) {
+            pesoLiquidoField.classList.add('is-invalid');
+        } else if (pesoLiquido) {
+            pesoLiquidoField.classList.remove('is-invalid');
+            pesoLiquidoField.classList.add('is-valid');
+        }
+    }
+    
+    // Event listeners
+    if (pesoAmostraField && pesoLiquidoField && teorOleoField) {
+        pesoAmostraField.addEventListener('input', function() {
+            validarPesoAmostra();
+            calcularTeorOleo();
+        });
+        
+        pesoLiquidoField.addEventListener('input', function() {
+            validarPesoLiquido();
+            calcularTeorOleo();
+        });
+        
+        // Calcular na inicialização se já houver valores
+        calcularTeorOleo();
     }
 });
 </script>

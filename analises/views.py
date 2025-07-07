@@ -1,8 +1,8 @@
 from decimal import Decimal
 from django.views.generic import CreateView, ListView, TemplateView
 from django.urls import reverse_lazy
-from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase
-from .forms import AnaliseUmidadeForm, AnaliseProteinaForm, AnaliseOleoDegomadoForm, AnaliseUraseForm
+from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo
+from .forms import AnaliseUmidadeForm, AnaliseProteinaForm, AnaliseOleoDegomadoForm, AnaliseUraseForm, AnaliseCinzaForm, AnaliseTeorOleoForm, AnaliseFibraForm, AnaliseFosforoForm
 
 
 class AnaliseHomeView(TemplateView):
@@ -99,3 +99,63 @@ class UraseListView(ListView):
         Retorna as análises ordenadas por data e horário mais recentes.
         """
         return AnaliseUrase.objects.all().order_by('-data', '-horario')
+
+# Importar as novas análises
+from .models import AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo
+from .forms import AnaliseCinzaForm, AnaliseTeorOleoForm, AnaliseFibraForm, AnaliseFosforoForm
+
+# Views para Análise de Cinza
+class CinzaCreateView(CreateView):
+    model = AnaliseCinza
+    form_class = AnaliseCinzaForm
+    template_name = 'app/cadastro_cinza.html'
+    success_url = reverse_lazy('analises:cinza_list')
+
+class CinzaListView(ListView):
+    model = AnaliseCinza
+    template_name = 'app/lista_cinza.html'
+    context_object_name = 'analises'
+    ordering = ['-data', '-horario']
+    paginate_by = 10
+
+# Views para Análise de Teor de Óleo
+class TeorOleoCreateView(CreateView):
+    model = AnaliseTeorOleo
+    form_class = AnaliseTeorOleoForm
+    template_name = 'app/cadastro_teor_oleo.html'
+    success_url = reverse_lazy('analises:teor_oleo_list')
+
+class TeorOleoListView(ListView):
+    model = AnaliseTeorOleo
+    template_name = 'app/lista_teor_oleo.html'
+    context_object_name = 'analises'
+    ordering = ['-data', '-horario']
+    paginate_by = 10
+
+# Views para Análise de Fibra
+class FibraCreateView(CreateView):
+    model = AnaliseFibra
+    form_class = AnaliseFibraForm
+    template_name = 'app/cadastro_fibra.html'
+    success_url = reverse_lazy('analises:fibra_list')
+
+class FibraListView(ListView):
+    model = AnaliseFibra
+    template_name = 'app/lista_fibra.html'
+    context_object_name = 'analises'
+    ordering = ['-data', '-horario']
+    paginate_by = 10
+
+# Views para Análise de Fósforo
+class FosforoCreateView(CreateView):
+    model = AnaliseFosforo
+    form_class = AnaliseFosforoForm
+    template_name = 'app/cadastro_fosforo.html'
+    success_url = reverse_lazy('analises:fosforo_list')
+
+class FosforoListView(ListView):
+    model = AnaliseFosforo
+    template_name = 'app/lista_fosforo.html'
+    context_object_name = 'analises'
+    ordering = ['-data', '-horario']
+    paginate_by = 10

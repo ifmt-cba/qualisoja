@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-warning bg-opacity-10 border-warning border-opacity-25 d-flex justify-content-between align-items-center">
+        <h2 class="mb-0 text-warning">
+            <i class="bi bi-droplet-fill me-2"></i>Análises de Teor de Óleo
+        </h2>
+        <a href="{% url 'analises:teor_oleo_create' %}" class="btn btn-warning">
+            <i class="bi bi-plus-lg me-2"></i>Nova Análise
+        </a>
+    </div>
+    <div class="card-body">
+        {% if object_list %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-warning">
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso Amostra (g)</th>
+                            <th>Peso Líquido (g)</th>
+                            <th>Teor de Óleo (%)</th>
+                            <th>Observações</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for analise in object_list %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>
+                                <span class="badge bg-warning bg-opacity-20 text-warning">
+                                    {{ analise.get_tipo_amostra_display }}
+                                </span>
+                            </td>
+                            <td>{{ analise.peso_amostra|floatformat:3 }}</td>
+                            <td>{{ analise.peso_liquido|floatformat:3 }}</td>
+                            <td>
+                                {% if analise.teor_oleo %}
+                                    <strong class="text-warning">{{ analise.teor_oleo|floatformat:2 }}%</strong>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if analise.observacoes %}
+                                    <span title="{{ analise.observacoes }}">
+                                        {{ analise.observacoes|truncatechars:30 }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-info" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#detailModal{{ analise.id }}"
+                                            title="Ver detalhes">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Navegação de páginas">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-droplet display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">Nenhuma análise encontrada</h4>
+                <p class="text-muted">Comece criando sua primeira análise de teor de óleo.</p>
+                <a href="{% url 'analises:teor_oleo_create' %}" class="btn btn-warning">
+                    <i class="bi bi-plus-lg me-2"></i>Nova Análise
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modais de detalhes -->
+{% for analise in object_list %}
+<div class="modal fade" id="detailModal{{ analise.id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ analise.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning bg-opacity-10">
+                <h5 class="modal-title text-warning" id="detailModalLabel{{ analise.id }}">
+                    <i class="bi bi-droplet-fill me-2"></i>Detalhes da Análise
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <strong>Data:</strong><br>
+                        {{ analise.data|date:"d/m/Y" }}
+                    </div>
+                    <div class="col-6">
+                        <strong>Horário:</strong><br>
+                        {{ analise.horario|time:"H:i" }}
+                    </div>
+                    <div class="col-12">
+                        <strong>Tipo de Amostra:</strong><br>
+                        <span class="badge bg-warning bg-opacity-20 text-warning">
+                            {{ analise.get_tipo_amostra_display }}
+                        </span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Peso da Amostra:</strong><br>
+                        {{ analise.peso_amostra|floatformat:3 }} g
+                    </div>
+                    <div class="col-6">
+                        <strong>Peso Líquido:</strong><br>
+                        {{ analise.peso_liquido|floatformat:3 }} g
+                    </div>
+                    <div class="col-12">
+                        <strong>Teor de Óleo:</strong><br>
+                        {% if analise.teor_oleo %}
+                            <span class="badge bg-warning fs-6">{{ analise.teor_oleo|floatformat:2 }}%</span>
+                        {% else %}
+                            <span class="text-muted">Não calculado</span>
+                        {% endif %}
+                    </div>
+                    {% if analise.observacoes %}
+                    <div class="col-12">
+                        <strong>Observações:</strong><br>
+                        {{ analise.observacoes }}
+                    </div>
+                    {% endif %}
+                    <div class="col-6">
+                        <strong>Criado em:</strong><br>
+                        <small class="text-muted">{{ analise.criado_em|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% if analise.atualizado_em != analise.criado_em %}
+                    <div class="col-6">
+                        <strong>Última atualização:</strong><br>
+                        <small class="text-muted">{{ analise.atualizado_em|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

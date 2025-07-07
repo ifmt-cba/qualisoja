@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Cadastro de Análise de Fibra{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-leaf me-2"></i>
+                        Nova Análise de Fibra
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.data.id_for_label }}" class="form-label">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Data da Análise
+                                </label>
+                                {{ form.data|add_class:"form-control" }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.horario.id_for_label }}" class="form-label">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Horário
+                                </label>
+                                {{ form.horario|add_class:"form-control" }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tipo_amostra.id_for_label }}" class="form-label">
+                                    <i class="fas fa-vial me-1"></i>
+                                    Tipo de Amostra
+                                </label>
+                                {{ form.tipo_amostra|add_class:"form-select" }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.teor_fibra.id_for_label }}" class="form-label">
+                                    <i class="fas fa-percentage me-1"></i>
+                                    Teor de Fibra (%)
+                                </label>
+                                {{ form.teor_fibra|add_class:"form-control" }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.observacoes.id_for_label }}" class="form-label">
+                                    <i class="fas fa-comment me-1"></i>
+                                    Observações
+                                </label>
+                                {{ form.observacoes|add_class:"form-control" }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'analises:fibra_list' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                Salvar Análise
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

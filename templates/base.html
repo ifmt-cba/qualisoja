@@ -74,31 +74,137 @@
             <ul class="navbar-nav ms-3">
                 {% if user.is_authenticated %}
                     {% if user|in_group:"Analista" or user.is_superuser %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:umidade_list' %}">Análise Umidade</a>
+                        <!-- Dropdown para Análises -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarAnalises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-flask-fill me-1"></i>Análises
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarAnalises">
+                                <!-- Análises Básicas -->
+                                <li><h6 class="dropdown-header"><i class="bi bi-gear-fill me-1"></i>Análises Básicas</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:umidade_create' %}">
+                                        <i class="bi bi-droplet me-2 text-info"></i>Nova Umidade
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:proteina_create' %}">
+                                        <i class="bi bi-egg-fill me-2 text-success"></i>Nova Proteína
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:oleo_create' %}">
+                                        <i class="bi bi-droplet-fill me-2 text-primary"></i>Novo Óleo Degomado
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:urase_create' %}">
+                                        <i class="bi bi-activity me-2 text-danger"></i>Nova Urase
+                                    </a>
+                                </li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Análises Avançadas -->
+                                <li><h6 class="dropdown-header"><i class="bi bi-star-fill me-1"></i>Análises Avançadas</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:cinza_create' %}">
+                                        <i class="bi bi-fire me-2 text-secondary"></i>Nova Cinza
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:teor_oleo_create' %}">
+                                        <i class="bi bi-droplet-half me-2 text-warning"></i>Novo Teor de Óleo
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:fibra_create' %}">
+                                        <i class="bi bi-graph-up me-2 text-info"></i>Nova Fibra
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:fosforo_create' %}">
+                                        <i class="bi bi-lightning-fill me-2 text-success"></i>Novo Fósforo
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:umidade_create' %}">Cadastrar Umidade</a>
+                        
+                        <!-- Dropdown para Visualizar Análises -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarVisualizarAnalises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-list-ul me-1"></i>Visualizar
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarVisualizarAnalises">
+                                <!-- Listas de Análises Básicas -->
+                                <li><h6 class="dropdown-header"><i class="bi bi-gear-fill me-1"></i>Análises Básicas</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:umidade_list' %}">
+                                        <i class="bi bi-droplet me-2 text-info"></i>Lista Umidade
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:proteina_list' %}">
+                                        <i class="bi bi-egg-fill me-2 text-success"></i>Lista Proteína
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:oleo_list' %}">
+                                        <i class="bi bi-droplet-fill me-2 text-primary"></i>Lista Óleo Degomado
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:urase_list' %}">
+                                        <i class="bi bi-activity me-2 text-danger"></i>Lista Urase
+                                    </a>
+                                </li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Listas de Análises Avançadas -->
+                                <li><h6 class="dropdown-header"><i class="bi bi-star-fill me-1"></i>Análises Avançadas</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:cinza_list' %}">
+                                        <i class="bi bi-fire me-2 text-secondary"></i>Lista Cinza
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:teor_oleo_list' %}">
+                                        <i class="bi bi-droplet-half me-2 text-warning"></i>Lista Teor de Óleo
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:fibra_list' %}">
+                                        <i class="bi bi-graph-up me-2 text-info"></i>Lista Fibra
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'analises:fosforo_list' %}">
+                                        <i class="bi bi-lightning-fill me-2 text-success"></i>Lista Fósforo
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+                        
+                        <!-- Link direto para Home das Análises -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:proteina_list' %}">Análise Proteína</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:proteina_create' %}">Cadastrar Proteína</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:oleo_list' %}">Análise Óleo Degomado</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'analises:oleo_create' %}">Cadastrar Óleo Degomado</a>
+                            <a class="nav-link" href="{% url 'analises:home' %}">
+                                <i class="bi bi-house-fill me-1"></i>Dashboard
+                            </a>
                         </li>
                     {% endif %}
-                    {% if user|in_group:"Produção" %}
+                    
+                    {% if user|in_group:"Produção" or user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'relatorios:gerar' %}">
+                                <i class="bi bi-file-earmark-text me-1"></i>Relatórios
+                            </a>
+                        </li>
+                    {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'relatorios:gerar' %}">Relatórios</a>
                         </li>
                     {% endif %}
-                {% endif %}
             </ul>
 
             <ul class="navbar-nav ms-auto">
