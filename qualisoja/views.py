@@ -7,6 +7,10 @@ from django.utils import timezone
 from django.db.models import Count, Avg, Min, Max, StdDev
 from django.db.models.functions import Extract
 from analises.models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado
+from django.http import JsonResponse
+from django.db import connection
+from django.core.cache import cache
+import time
 
 def convert_decimal_to_float(stats_dict):
     """Converte valores Decimal para float em um dicionário de estatísticas"""
@@ -110,3 +114,50 @@ def home(request):
 def home_simple(request):
     """View para a página inicial simples/dashboard do QualiSoja"""
     return render(request, 'home_simple.html')
+
+def health_check(request):
+    """
+    Endpoint de verificação de saúde da aplicação
+    """
+    start_time = time.time()
+    status = {
+        'status': 'healthy',
+        'timestamp': time.time(),
+        'checks': {}
+    }
+    
+    # Verificar conexão com banco de dados
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        status['checks']['database'] = 'healthy'
+    except Exception as e:
+        status['checks']['database'] = f'unhealthy: {str(e)}'
+        status['status'] = 'unhealthy'
+    
+    # Verificar cache (Redis/memcache)
+    try:
+        cache.set('health_check', 'ok', 10)
+        cache_value = cache.get('health_check')
+        if cache_value == 'ok':
+            status['checks']['cache'] = 'healthy'
+        else:
+            status['checks']['cache'] = 'unhealthy: cache not working'
+            status['status'] = 'degraded'
+    except Exception as e:
+        status['checks']['cache'] = f'unhealthy: {str(e)}'
+        status['status'] = 'degraded'
+    
+    # Tempo de resposta
+    response_time = time.time() - start_time
+    status['response_time'] = round(response_time * 1000, 2)  # em ms
+    
+    # Status code baseado na saúde geral
+    if status['status'] == 'healthy':
+        status_code = 200
+    elif status['status'] == 'degraded':
+        status_code = 200  # Ainda funcional, mas com problemas
+    else:
+        status_code = 503  # Service Unavailable
+    
+    return JsonResponse(status, status=status_code)

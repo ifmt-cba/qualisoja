@@ -1,0 +1,93 @@
+name: Docker Build e Test
+
+on:
+  push:
+    paths:
+      - 'devops/docker/**'
+      - 'requirements.txt'
+      - 'Dockerfile*'
+  pull_request:
+    paths:
+      - 'devops/docker/**'
+      - 'requirements.txt'
+      - 'Dockerfile*'
+
+jobs:
+  docker-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build imagem de desenvolvimento
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./devops/docker/development/Dockerfile
+        push: false
+        tags: qualisoja:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Testar container
+      run: |
+        # Criar arquivo .env para teste
+        cat > .env << EOF
+        SECRET_KEY=test-secret-key-for-ci-docker
+        DEBUG=True
+        ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+        EOF
+        
+        # Executar container em background
+        docker run -d --name qualisoja-test -p 8000:8000 --env-file .env qualisoja:test
+        
+        # Aguardar inicialização
+        sleep 30
+        
+        # Testar se o servidor está respondendo
+        curl -f http://localhost:8000/ || exit 1
+        
+        # Parar container
+        docker stop qualisoja-test
+        docker rm qualisoja-test
+
+    - name: Verificar logs do container
+      if: failure()
+      run: |
+        docker logs qualisoja-test || true
+
+  docker-security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build imagem para análise de segurança
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./devops/docker/development/Dockerfile
+        push: false
+        tags: qualisoja:security-scan
+        load: true
+
+    - name: Scan de segurança com Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'qualisoja:security-scan'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload resultados do Trivy para GitHub Security
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
