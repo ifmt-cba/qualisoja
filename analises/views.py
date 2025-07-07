@@ -1,8 +1,9 @@
 from decimal import Decimal
 from django.views.generic import CreateView, ListView, TemplateView
 from django.urls import reverse_lazy
-from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado
-from .forms import AnaliseUmidadeForm, AnaliseProteinaForm, AnaliseOleoDegomadoForm
+from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase
+from .forms import AnaliseUmidadeForm, AnaliseProteinaForm, AnaliseOleoDegomadoForm, AnaliseUraseForm
+
 
 class AnaliseHomeView(TemplateView):
     """View para a página inicial do módulo de análises"""
@@ -66,3 +67,35 @@ class ProteinaListView(ListView):
 class OleoDegomadoListView(ListView):
     model = AnaliseOleoDegomado
     template_name = 'app/lista_oleo.html'
+    
+# Adicione estas classes no seu views.py
+
+class UraseCreateView(CreateView):
+    model = AnaliseUrase
+    form_class = AnaliseUraseForm
+    template_name = 'app/cadastro_urase.html'
+    success_url = reverse_lazy('analises:urase_list')
+
+    def form_valid(self, form):
+        """
+        O cálculo é feito automaticamente no método save() do modelo,
+        mas você pode adicionar validações extras aqui se necessário.
+        """
+        return super().form_valid(form)
+
+class UraseListView(ListView):
+    model = AnaliseUrase
+    template_name = 'app/lista_urase.html'
+    context_object_name = 'analises'
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_farelo'] = self.get_queryset().filter(tipo_amostra='FL').count()
+        return context
+
+    def get_queryset(self):
+        """
+        Retorna as análises ordenadas por data e horário mais recentes.
+        """
+        return AnaliseUrase.objects.all().order_by('-data', '-horario')

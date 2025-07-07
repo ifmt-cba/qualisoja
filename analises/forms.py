@@ -1,6 +1,6 @@
 import datetime
 from django import forms
-from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado
+from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase
 from django.utils import timezone  # Use o timezone do Django, não o datetime padrão
 
 class AnaliseUmidadeForm(forms.ModelForm):
@@ -149,4 +149,51 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
         # if acidez is not None and acidez < 0:
         #     self.add_error('acidez', 'A acidez não pode ser negativa.')
 
+        return cleaned_data
+    
+class AnaliseUraseForm(forms.ModelForm):
+    """
+    Formulário para cadastro e edição de análises de urase.
+    """
+    class Meta:
+        model = AnaliseUrase
+        fields = '__all__'
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+            'horario': forms.TimeInput(attrs={'type': 'time'}),
+            'amostra_1': forms.NumberInput(attrs={
+                'step': '0.01',
+                'placeholder': 'Digite o valor da Amostra 1'
+            }),
+            'amostra_2': forms.NumberInput(attrs={
+                'step': '0.01',
+                'placeholder': 'Digite o valor da Amostra 2'
+            }),
+        }
+    
+    def clean(self):
+        """Validação específica do formulário de urase"""
+        cleaned_data = super().clean()
+        
+        amostra_1 = cleaned_data.get('amostra_1')
+        amostra_2 = cleaned_data.get('amostra_2')
+        
+        # Validar se ambas as amostras foram fornecidas
+        if amostra_1 is None or amostra_2 is None:
+            raise forms.ValidationError('Ambas as amostras são obrigatórias.')
+        
+        # Validar se os valores são positivos
+        if amostra_1 < 0:
+            self.add_error('amostra_1', 'O valor da Amostra 1 não pode ser negativo.')
+        
+        if amostra_2 < 0:
+            self.add_error('amostra_2', 'O valor da Amostra 2 não pode ser negativo.')
+        
+        # Validar se os valores são razoáveis
+        if amostra_1 > 1000:
+            self.add_error('amostra_1', 'O valor da Amostra 1 parece muito alto.')
+        
+        if amostra_2 > 1000:
+            self.add_error('amostra_2', 'O valor da Amostra 2 parece muito alto.')
+        
         return cleaned_data

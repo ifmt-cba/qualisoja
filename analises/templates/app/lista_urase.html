@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Lista de Análises de Urase</h2>
+<a href="{% url 'analises:urase_create' %}" class="btn btn-success mb-3">+ Nova Análise</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Horário</th>
+            <th>Tipo de Amostra</th>
+            <th>Amostra 1</th>
+            <th>Amostra 2</th>
+            <th>Resultado</th>
+            <th>Criado em</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for analise in analises %}
+        <tr>
+            <td>{{ analise.data|date:"d/m/Y" }}</td>
+            <td>{{ analise.horario|time:"H:i" }}</td>
+            <td>{{ analise.get_tipo_amostra_display }}</td>
+            <td>{{ analise.amostra_1|floatformat:2 }}</td>
+            <td>{{ analise.amostra_2|floatformat:2 }}</td>
+            <td>
+                {% if analise.resultado > 0 %}
+                    <span class="text-success fw-bold">+{{ analise.resultado|floatformat:2 }}</span>
+                {% elif analise.resultado < 0 %}
+                    <span class="text-danger fw-bold">{{ analise.resultado|floatformat:2 }}</span>
+                {% else %}
+                    <span class="text-secondary fw-bold">{{ analise.resultado|floatformat:2 }}</span>
+                {% endif %}
+            </td>
+            <td>{{ analise.criado_em|date:"d/m/Y H:i" }}</td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="7" class="text-center">Nenhuma análise encontrada.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if is_paginated %}
+<div class="pagination mt-3">
+    {% if page_obj.has_previous %}
+        <a href="?page=1" class="btn btn-outline-primary btn-sm">&laquo; primeira</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-primary btn-sm">anterior</a>
+    {% endif %}
+    <span class="current btn btn-primary btn-sm disabled">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    </span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-primary btn-sm">próxima</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-primary btn-sm">última &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
