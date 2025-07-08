@@ -31,7 +31,7 @@ class AnaliseProteinaForm(forms.ModelForm):
         }
         help_texts = {
             "peso_amostra": "Informe o peso da amostra em gramas (ex: 0.5 para 0,5g ou 1.00 para 1g)",
-            "ml_amostra": "Informe o volume de titulante gasto em mL",
+            "ml_gasto": "Informe o volume de titulante gasto em mL",
             "ml_branco": "Informe o valor do branco em mL (entre 0 e 0,5)",
             "normalidade": "O valor máximo de normalidade é 0.3 N.",
         }
@@ -40,44 +40,50 @@ class AnaliseProteinaForm(forms.ModelForm):
         from decimal import Decimal
 
         cleaned_data = super().clean()
-        normalidade = cleaned_data.get("normalidade")
+        tipo_amostra = cleaned_data.get("tipo_amostra")
+
+        # Se for um caso especial, não há mais validações a fazer.
+        if tipo_amostra in ["FP", "SA"]:
+            return cleaned_data
+
+        # Para análises normais, os campos são obrigatórios.
         peso_amostra = cleaned_data.get("peso_amostra")
-        ml_amostra = cleaned_data.get("ml_amostra")
+        ml_gasto = cleaned_data.get("ml_gasto")
         ml_branco = cleaned_data.get("ml_branco")
-        # Validação dos campos obrigatórios e faixas realistas
-        if normalidade is not None:
-            if normalidade <= 0:
-                self.add_error(
-                    "normalidade", "A normalidade deve ser um valor positivo."
-                )
-            elif normalidade > Decimal("0.3"):
-                self.add_error(
-                    "normalidade", "O valor máximo para a normalidade é 0.3 N."
-                )
-        if peso_amostra is not None and (peso_amostra <= 0 or peso_amostra > 100):
+        normalidade = cleaned_data.get("normalidade")
+
+        # Validação de obrigatoriedade
+        if not peso_amostra:
+            self.add_error("peso_amostra", "Este campo é obrigatório.")
+        if not ml_gasto:
+            self.add_error("ml_gasto", "Este campo é obrigatório.")
+        if not ml_branco:
+            self.add_error("ml_branco", "Este campo é obrigatório.")
+        if not normalidade:
+            self.add_error("normalidade", "Este campo é obrigatório.")
+
+        # Se algum campo obrigatório estiver faltando, não continue com as outras validações.
+        if self.errors:
+            return cleaned_data
+
+        # Validação de faixas de valores
+        if normalidade <= 0:
+            self.add_error("normalidade", "A normalidade deve ser um valor positivo.")
+        elif normalidade > Decimal("0.3"):
+            self.add_error("normalidade", "O valor máximo para a normalidade é 0.3 N.")
+        if peso_amostra <= 0 or peso_amostra > 100:
             self.add_error(
-                "peso_amostra",
-                "O peso da amostra deve ser informado em gramas e estar entre 0,01g e 100g.",
+                "peso_amostra", "O peso da amostra deve estar entre 0,01g e 100g."
             )
-        if ml_amostra is not None and (ml_amostra <= 0 or ml_amostra > 100):
+        if ml_gasto <= 0 or ml_gasto > 100:
             self.add_error(
-                "ml_amostra",
-                "O volume da amostra deve ser informado em mL e estar entre 0,01mL e 100mL.",
+                "ml_gasto", "O volume da amostra deve estar entre 0,01mL e 100mL."
             )
-        if ml_branco is not None and (ml_branco < 0 or ml_branco > 0.5):
+        if ml_branco < 0 or ml_branco > 0.5:
             self.add_error(
                 "ml_branco", "O valor do branco deve estar entre 0 e 0,5 mL."
             )
         return cleaned_data
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        # Garante que ml_gasto do model recebe o valor de ml_amostra do form ANTES de salvar
-        if hasattr(instance, "ml_gasto") and "ml_amostra" in self.cleaned_data:
-            instance.ml_gasto = self.cleaned_data["ml_amostra"]
-        if commit:
-            instance.save()
-        return instance
 
 
 class AnaliseOleoDegomadoForm(forms.ModelForm):

@@ -33,18 +33,24 @@ class ProteinaCreateView(CreateView):
     def form_valid(self, form):
         proteina = form.save(commit=False)
 
-        # Busca a umidade da mesma data e tipo de amostra, a mais recente por horário
-        umidade_obj = (
-            AnaliseUmidade.objects.filter(
-                data=proteina.data, tipo_amostra=proteina.tipo_amostra
+        # Só calcula a proteína se for um tipo de amostra válido para análise
+        if proteina.tipo_amostra not in ["FP", "SA"]:
+            # Busca a umidade da mesma data e tipo de amostra, a mais recente por horário
+            umidade_obj = (
+                AnaliseUmidade.objects.filter(
+                    data=proteina.data, tipo_amostra=proteina.tipo_amostra
+                )
+                .order_by("-horario")
+                .first()
             )
-            .order_by("-horario")
-            .first()
-        )
 
-        umidade_valor = umidade_obj.resultado if umidade_obj else None
+            umidade_valor = umidade_obj.resultado if umidade_obj else None
 
-        proteina.calcular_proteina(umidade_valor)
+            proteina.calcular_proteina(umidade_valor)
+        else:
+            # Garante que os resultados sejam nulos para "Fábrica parada" e "Sem amostra"
+            proteina.resultado = None
+            proteina.resultado_corrigido = None
 
         proteina.save()
         return super().form_valid(form)

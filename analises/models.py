@@ -91,6 +91,8 @@ class AnaliseProteina(BaseModel):
     TIPO_AMOSTRA_CHOICES = [
         ("FL", "Farelo"),
         ("SI", "Soja Industrializada"),
+        ("FP", "Fábrica parada"),
+        ("SA", "Sem amostra"),
     ]
 
     data = models.DateField(
@@ -111,8 +113,9 @@ class AnaliseProteina(BaseModel):
         max_digits=6,  # Aceita até 9999.99
         decimal_places=2,
         verbose_name="Peso da Amostra (g)",
-        default=0.50,
         validators=[MinValueValidator(0.01)],
+        blank=True,
+        null=True,
     )
     ml_gasto = models.DecimalField(
         max_digits=6, decimal_places=2, verbose_name="mL Amostra", blank=True, null=True
@@ -121,17 +124,19 @@ class AnaliseProteina(BaseModel):
         max_digits=3,
         decimal_places=2,
         verbose_name="mL Branco",
-        default=Decimal("0.0"),
         help_text="Valor do branco, entre 0 e 0.5",
         validators=[MinValueValidator(0.0), MaxValueValidator(0.5)],
+        blank=True,
+        null=True,
     )
     normalidade = models.DecimalField(
         max_digits=7,
         decimal_places=5,
         verbose_name="Normalidade do titulante (N)",
-        default=0.10000,
         help_text="O valor máximo de normalidade é 0.3 N.",
         validators=[MinValueValidator(0.0), MaxValueValidator(Decimal("0.3"))],
+        blank=True,
+        null=True,
     )
     resultado = models.DecimalField(
         max_digits=5,

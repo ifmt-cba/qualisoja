@@ -57,64 +57,73 @@
           </div>
         </div>
 
-        <div class="col-md-6">
-          <div class="form-floating mb-3">
-            {{ form.peso_amostra|add_class:"form-control" }}
-            <label for="{{ form.peso_amostra.id_for_label }}"
-              >{{ form.peso_amostra.label }}</label
-            >
-            {% if form.peso_amostra.errors %}
-            <div class="invalid-feedback d-block">
-              {{ form.peso_amostra.errors }}
-            </div>
-            {% endif %}
-          </div>
+        <!-- Mensagem para casos especiais -->
+        <div
+          id="special-case-message"
+          class="text-center my-4"
+          style="display: none"
+        >
+          <h3 class="text-danger fw-bold"></h3>
         </div>
 
-        <!-- Terceira linha -->
-        <div class="col-md-4">
-          <div class="form-floating mb-3">
-            {{ form.ml_gasto|add_class:"form-control" }}
-            <label for="{{ form.ml_gasto.id_for_label }}"
-              >{{ form.ml_gasto.label }}</label
-            >
-            {% if form.ml_gasto.errors %}
-            <div class="invalid-feedback d-block">
-              {{ form.ml_gasto.errors }}
+        <!-- Wrapper para os campos de análise -->
+        <div id="analise-fields-wrapper" class="row g-3 col-12">
+          <div class="col-md-6">
+            <div class="form-floating mb-3">
+              {{ form.peso_amostra|add_class:"form-control" }}
+              <label for="{{ form.peso_amostra.id_for_label }}"
+                >{{ form.peso_amostra.label }}</label
+              >
+              {% if form.peso_amostra.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.peso_amostra.errors }}
+              </div>
+              {% endif %}
             </div>
-            {% endif %}
           </div>
-        </div>
 
-        <div class="col-md-4">
-          <div class="form-floating mb-3">
-            {{ form.ml_branco|add_class:"form-control" }}
-            <label for="{{ form.ml_branco.id_for_label }}"
-              >{{ form.ml_branco.label }}</label
-            >
-            {% if form.ml_branco.help_text %}
-            <div class="form-text">{{ form.ml_branco.help_text }}</div>
-            {% endif %} {% if form.ml_branco.errors %}
-            <div class="invalid-feedback d-block">
-              {{ form.ml_branco.errors }}
+          <div class="col-md-4">
+            <div class="form-floating mb-3">
+              {{ form.ml_gasto|add_class:"form-control" }}
+              <label for="{{ form.ml_gasto.id_for_label }}"
+                >{{ form.ml_gasto.label }}</label
+              >
+              {% if form.ml_gasto.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.ml_gasto.errors }}
+              </div>
+              {% endif %}
             </div>
-            {% endif %}
           </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="form-floating mb-3">
-            {{ form.normalidade|add_class:"form-control" }}
-            <label for="{{ form.normalidade.id_for_label }}"
-              >{{ form.normalidade.label }}</label
-            >
-            {% if form.normalidade.help_text %}
-            <div class="form-text">{{ form.normalidade.help_text }}</div>
-            {% endif %} {% if form.normalidade.errors %}
-            <div class="invalid-feedback d-block">
-              {{ form.normalidade.errors }}
+          <div class="col-md-4">
+            <div class="form-floating mb-3">
+              {{ form.ml_branco|add_class:"form-control" }}
+              <label for="{{ form.ml_branco.id_for_label }}"
+                >{{ form.ml_branco.label }}</label
+              >
+              {% if form.ml_branco.help_text %}
+              <div class="form-text">{{ form.ml_branco.help_text }}</div>
+              {% endif %} {% if form.ml_branco.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.ml_branco.errors }}
+              </div>
+              {% endif %}
             </div>
-            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <div class="form-floating mb-3">
+              {{ form.normalidade|add_class:"form-control" }}
+              <label for="{{ form.normalidade.id_for_label }}"
+                >{{ form.normalidade.label }}</label
+              >
+              {% if form.normalidade.help_text %}
+              <div class="form-text">{{ form.normalidade.help_text }}</div>
+              {% endif %} {% if form.normalidade.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.normalidade.errors }}
+              </div>
+              {% endif %}
+            </div>
           </div>
         </div>
 
@@ -171,5 +180,44 @@
       );
     });
   })();
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tipoAmostraSelect = document.getElementById("id_tipo_amostra");
+    const analiseFieldsWrapper = document.getElementById(
+      "analise-fields-wrapper"
+    );
+    const messageContainer = document.getElementById("special-case-message");
+    const messageText = messageContainer.querySelector("h3");
+
+    function toggleAnaliseFields() {
+      const selectedValue = tipoAmostraSelect.value;
+      const camposAnalise = analiseFieldsWrapper.querySelectorAll("input");
+
+      // Reseta o estado
+      messageContainer.style.display = "none";
+      analiseFieldsWrapper.style.display = "";
+      camposAnalise.forEach((input) => (input.disabled = false));
+
+      if (selectedValue === "FP") {
+        messageText.textContent = "FÁBRICA PARADA";
+        messageContainer.style.display = "block";
+        analiseFieldsWrapper.style.display = "none";
+        camposAnalise.forEach((input) => (input.disabled = true));
+      } else if (selectedValue === "SA") {
+        messageText.textContent = "SEM AMOSTRA";
+        messageContainer.style.display = "block";
+        analiseFieldsWrapper.style.display = "none";
+        camposAnalise.forEach((input) => (input.disabled = true));
+      }
+    }
+
+    // Executa a função quando a página carrega
+    toggleAnaliseFields();
+
+    // Adiciona o listener para o evento de mudança
+    tipoAmostraSelect.addEventListener("change", toggleAnaliseFields);
+  });
 </script>
 {% endblock %}
