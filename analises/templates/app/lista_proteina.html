@@ -1,40 +1,37 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <h2>Lista de Análises de Proteína</h2>
 <table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Horário</th>
-            <th>Tipo de Amostra</th>
-            <th>Peso da Amostra (g)</th>
-            <th>ML Gasto</th>
-            <th>Resultado (%)</th>
-            <th>Resultado Corrigido (%)</th>
-            <th>Média 24h?</th>
-        </tr>
-    </thead>
-    <tbody>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Horário</th>
+      <th>Tipo de Amostra</th>
+      <th>Peso da Amostra (g)</th>
+      <th>ML Gasto</th>
+      <th>ML Branco</th>
+      <th>Resultado (%)</th>
+      <th>Resultado Corrigido (%)</th>
+      <th>Média 24h?</th>
+    </tr>
+  </thead>
+  <tbody>
     {% for analise in object_list %}
-        <tr>
-            <td>{{ analise.data }}</td>
-            <td>{{ analise.horario }}</td>
-            <td>{{ analise.get_tipo_amostra_display }}</td>
-            <td>{{ analise.peso_amostra }}</td>
-            <td>{{ analise.ml_gasto }}</td>
-            <td>{{ analise.resultado }}</td>
-            <td>{{ analise.resultado_corrigido }}</td>
-            <td>
-                {% if analise.eh_media_24h %}
-                    Sim
-                {% else %}
-                    Não
-                {% endif %}
-            </td>
-        </tr>
+    <tr>
+      <td>{{ analise.data }}</td>
+      <td>{{ analise.horario }}</td>
+      <td>{{ analise.get_tipo_amostra_display }}</td>
+      <td>{{ analise.peso_amostra }}</td>
+      <td>{{ analise.ml_gasto }}</td>
+      <td>{{ analise.ml_branco }}</td>
+      <td>{{ analise.resultado }}</td>
+      <td>{{ analise.resultado_corrigido }}</td>
+      <td>{% if analise.eh_media_24h %} Sim {% else %} Não {% endif %}</td>
+    </tr>
     {% empty %}
-        <tr><td colspan="8">Nenhuma análise encontrada.</td></tr>
+    <tr>
+      <td colspan="9">Nenhuma análise encontrada.</td>
+    </tr>
     {% endfor %}
-    </tbody>
+  </tbody>
 </table>
 {% endblock %}
