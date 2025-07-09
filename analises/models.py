@@ -282,3 +282,65 @@ class AnaliseOleoDegomado(BaseModel):
     def __str__(self):
         return f"Análise de Oleo Degomado - {self.get_tipo_amostra_display()} - {self.data}"
 
+class AnaliseUrase(BaseModel):
+    """
+    Modelo para armazenar análises de urase na soja.
+    """
+    TIPO_AMOSTRA_CHOICES = [
+        ('FL', 'Farelo'),
+        ('SI', 'Soja Industrializada'),
+        ('PE', 'Peletizado'),
+    ]
+    
+    data = models.DateField(
+        verbose_name="Data da Análise", 
+        default=timezone.localdate,
+        validators=[validate_not_future_date]
+    )
+    horario = models.TimeField(
+        verbose_name="Horário da Análise",
+        default=timezone.localtime().time()
+    )
+    tipo_amostra = models.CharField(
+        max_length=2,
+        choices=TIPO_AMOSTRA_CHOICES,
+        verbose_name="Tipo de Amostra",
+        default='FL'
+    )
+    amostra_1 = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Amostra 1",
+        help_text="Valor da primeira amostra"
+    )
+    amostra_2 = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Amostra 2",
+        help_text="Valor da segunda amostra"
+    )
+    resultado = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Resultado",
+        blank=True,
+        null=True,
+        help_text="Resultado calculado automaticamente (Amostra 1 - Amostra 2)"
+    )
+    
+    def save(self, *args, **kwargs):
+        """
+        Calcula o resultado automaticamente antes de salvar.
+        Resultado = Amostra 1 - Amostra 2
+        """
+        if self.amostra_1 is not None and self.amostra_2 is not None:
+            self.resultado = self.amostra_1 - self.amostra_2
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Análise de Urase - {self.get_tipo_amostra_display()} - {self.data}"
+    
+    class Meta:
+        verbose_name = "Análise de Urase"
+        verbose_name_plural = "Análises de Urase"
+        ordering = ['-data', '-horario']
