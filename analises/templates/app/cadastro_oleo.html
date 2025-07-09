@@ -96,6 +96,7 @@
                 <div class="col-md-3">
                     <div class="form-floating mb-3">
                         {{ form.fator_correcao|add_class:"form-control" }}
+                        
                         <label for="{{ form.fator_correcao.id_for_label }}">{{ form.fator_correcao.label }}</label>
                         {% if form.fator_correcao.errors %}
                             <div class="invalid-feedback d-block">{{ form.fator_correcao.errors }}</div>

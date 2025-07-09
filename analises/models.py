@@ -265,11 +265,11 @@ class AnaliseOleoDegomado(BaseModel):
         default='UMI'  # Analise de Umidade como padrão
     )
 
-    tara = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Tara")
-    liquido = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Líquido")
-    peso_amostra = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="Peso da Amostra")
+    tara = models.DecimalField(max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Tara")
+    liquido = models.DecimalField(max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Líquido")
+    peso_amostra = models.DecimalField(max_digits=10, decimal_places=4, default=0.0, verbose_name="Peso da Amostra")
     resultado = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Resultado")
-    titulacao = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Titulação")
+    titulacao = models.DecimalField(max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Titulação")
     fator_correcao = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
