@@ -425,6 +425,43 @@ class AnaliseOleoDegomado(BaseModel):
     def __str__(self):
         return f"Análise de Oleo Degomado - {self.get_tipo_amostra_display()} - {self.data}"
 
+    def save(self, *args, **kwargs):
+        """
+        Calcula o resultado automaticamente com base no tipo de análise
+        antes de salvar o objeto.
+        """
+        # Garante que os valores sejam Decimais para o cálculo, tratando Nones
+        tara = self.tara or Decimal("0")
+        liquido = self.liquido or Decimal("0")
+        peso_amostra = self.peso_amostra or Decimal("0")
+        titulacao = self.titulacao or Decimal("0")
+        fator_correcao = self.fator_correcao or Decimal("0")
+
+        resultado_calculado = None
+
+        if self.tipo_analise == "UMI":
+            if peso_amostra > 0:
+                resultado_calculado = (
+                    ((tara + peso_amostra) - liquido) / peso_amostra * 100
+                )
+
+        elif self.tipo_analise == "ACI":
+            if peso_amostra > 0:
+                resultado_calculado = (
+                    titulacao * fator_correcao * Decimal("28.2") * 100
+                ) / peso_amostra
+
+        elif self.tipo_analise == "SAB":
+            if peso_amostra > 0:
+                resultado_calculado = (
+                    titulacao * fator_correcao * Decimal("300.4") * 100
+                ) / peso_amostra
+
+        if resultado_calculado is not None:
+            self.resultado = resultado_calculado.quantize(Decimal("0.01"))
+
+        super().save(*args, **kwargs)
+
 
 class AnaliseUrase(BaseModel):
     """

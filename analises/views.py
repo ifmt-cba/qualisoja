@@ -66,33 +66,12 @@ class OleoDegomadoCreateView(CreateView):
     template_name = "app/cadastro_oleo.html"
     success_url = reverse_lazy("analises:oleo_list")
 
+    # A lógica de cálculo foi movida para o método save() do modelo AnaliseOleoDegomado.
+    # A view agora só precisa validar e salvar o formulário.
     def form_valid(self, form):
-        titulacao = form.cleaned_data["titulacao"]
-        fator_correcao = form.cleaned_data["fator_correcao"]
-        peso_amostra = form.cleaned_data["peso_amostra"]
-        tipo_analise = form.cleaned_data["tipo_analise"]  # corrigido typo aqui
-        tara = form.cleaned_data["tara"]
-        liquido = form.cleaned_data["liquido"]
-
-        if tipo_analise == "UMI":
-            if tara and fator_correcao and peso_amostra:
-                resultado = ((tara + peso_amostra) - liquido) / peso_amostra * 100
-
-        elif tipo_analise == "ACI":
-            if titulacao and fator_correcao and peso_amostra:
-                resultado = (
-                    titulacao * fator_correcao * Decimal("28.2") * Decimal("100")
-                ) / peso_amostra
-
-        elif tipo_analise == "SAB":
-            if titulacao and fator_correcao and peso_amostra:
-                resultado = (
-                    titulacao * fator_correcao * Decimal("300.4") * Decimal("100")
-                ) / peso_amostra
-        else:
-            resultado = None
-
-        form.instance.resultado = resultado
+        # O form.save() irá disparar o método save() do modelo,
+        # que agora contém toda a lógica de cálculo.
+        self.object = form.save()
         return super().form_valid(form)
 
 
