@@ -161,7 +161,7 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
                 self.add_error('peso_amostra', 'Para análise de Sabões, o peso da amostra deve estar entre 10 à 10,5.')
             if titulacao is not None and not (0 <= titulacao <= 100):    
                 self.add_error('titulacao', 'Para análise de Sabões, o valor da Titulação deve estar entre 0 e 100.')
-            if fator_correcao is not None and not (0.01 < fator_correcao <= 0.1):
+            if fator_correcao is not None and not (0.01 <= fator_correcao <= 0.1):
                 self.add_error('fator_correcao', 'Para análise de Sabões, o valor de Fator de Correção deve estar entre 0,01 à 0,1.')
         
         if resultado is not None and not (0 <= resultado <= 100):

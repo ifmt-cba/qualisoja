@@ -272,7 +272,7 @@ class AnaliseOleoDegomado(BaseModel):
     titulacao = models.DecimalField(max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Titulação")
     fator_correcao = models.DecimalField(
         max_digits=10, 
-        decimal_places=2, 
+        decimal_places=4, 
         blank=True, 
         null=True, 
         verbose_name="Fator de Correção",
