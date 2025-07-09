@@ -36,7 +36,7 @@ class OleoDegomadoCreateView(CreateView):
         
         if tipo_analise == 'UMI':
             if tara and fator_correcao and peso_amostra:
-                resultado = ((tara + peso_amostra) - (liquido))/peso_amostra*100
+                resultado = (((tara + peso_amostra) - (liquido))/peso_amostra)*100
                 # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
 
         elif tipo_analise == 'ACI':
