@@ -1,4 +1,7 @@
-{% extends "base_producao.html" %}
+{% extends "base.html" %}
+
+{% load static %}
+
 {% load widget_tweaks %}
 
 {% block title %}Gerador de Relatórios - QualiSoja{% endblock %}
@@ -1388,7 +1391,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mt-4 pt-3">
-                    <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'analises:home' %}" class="btn btn-outline-secondary">
                         <i class="fas fa-home me-2"></i>Voltar à Página Inicial
                     </a>
                     <div class="d-flex gap-2">
@@ -1733,6 +1736,12 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script src="{% static 'relatorios/js/interface_enhancements.js' %}"></script>
+<script src="{% static 'relatorios/js/interface_manager.js' %}"></script>
+<script src="{% static 'relatorios/js/relatorio_charts.js' %}"></script>
+<!-- e outros que quiser -->
+
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const reportForm = document.getElementById('report-form');

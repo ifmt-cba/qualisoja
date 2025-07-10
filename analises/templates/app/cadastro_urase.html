@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-success border-opacity-50">
+        <h2 class="mb-0 text-success">
+            <i class="bi bi-flask me-2"></i>Nova Análise de Urase
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <a href="{% url 'analises:urase_list' %}" class="btn btn-success">
+                <i class="bi bi-list"></i> Ver Lista de Análises
+            </a>
+        </div>
+        <div class="alert alert-success mb-4 text-success bg-white border-success">
+            <strong>Informação:</strong> O resultado será calculado automaticamente como <b>Amostra 1 - Amostra 2</b>.
+        </div>
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.data|add_class:"form-control text-success border-success" }}
+                        <label for="{{ form.data.id_for_label }}" class="text-success">{{ form.data.label }}</label>
+                        {% if form.data.errors %}
+                            <div class="invalid-feedback d-block text-success">{{ form.data.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.horario|add_class:"form-control text-success border-success" }}
+                        <label for="{{ form.horario.id_for_label }}" class="text-success">{{ form.horario.label }}</label>
+                        {% if form.horario.errors %}
+                            <div class="invalid-feedback d-block text-success">{{ form.horario.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-floating mb-3">
+                        {{ form.tipo_amostra|add_class:"form-select text-success border-success" }}
+                        <label for="{{ form.tipo_amostra.id_for_label }}" class="text-success">{{ form.tipo_amostra.label }}</label>
+                        {% if form.tipo_amostra.errors %}
+                            <div class="invalid-feedback d-block text-success">{{ form.tipo_amostra.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.amostra_1|add_class:"form-control text-success border-success" }}
+                        <label for="{{ form.amostra_1.id_for_label }}" class="text-success">{{ form.amostra_1.label }}</label>
+                        {% if form.amostra_1.errors %}
+                            <div class="invalid-feedback d-block text-success">{{ form.amostra_1.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.amostra_2|add_class:"form-control text-success border-success" }}
+                        <label for="{{ form.amostra_2.id_for_label }}" class="text-success">{{ form.amostra_2.label }}</label>
+                        {% if form.amostra_2.errors %}
+                            <div class="invalid-feedback d-block text-success">{{ form.amostra_2.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="alert text-center mt-4 bg-success bg-opacity-10 border-success">
+                <h5 class="mb-1 text-success">Resultado Calculado</h5>
+                <div class="fw-bold fs-3 text-success" id="resultado-preview">-</div>
+                <small class="text-success">Amostra 1 - Amostra 2</small>
+            </div>
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger mt-2">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'analises:urase_list' %}" class="btn btn-outline-success">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Salvar Análise
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Função para calcular e exibir o resultado em tempo real
+    function calcularResultado() {
+        const amostra1 = parseFloat(document.getElementById('{{ form.amostra_1.id_for_label }}').value) || 0;
+        const amostra2 = parseFloat(document.getElementById('{{ form.amostra_2.id_for_label }}').value) || 0;
+        const resultado = amostra1 - amostra2;
+        document.getElementById('resultado-preview').textContent = resultado.toFixed(2);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const amostra1Input = document.getElementById('{{ form.amostra_1.id_for_label }}');
+        const amostra2Input = document.getElementById('{{ form.amostra_2.id_for_label }}');
+        amostra1Input.addEventListener('input', calcularResultado);
+        amostra2Input.addEventListener('input', calcularResultado);
+        calcularResultado();
+    });
+</script>
+{% endblock content %}
