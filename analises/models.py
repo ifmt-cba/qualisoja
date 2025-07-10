@@ -48,9 +48,7 @@ class AnaliseUmidade(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date],
     )
-    horario = models.TimeField(
-        verbose_name="Horário da Análise", default=timezone.localtime().time()
-    )
+    horario = models.TimeField(verbose_name="Horário da Análise")
     tipo_amostra = models.CharField(
         max_length=2,
         choices=TIPO_AMOSTRA_CHOICES,
@@ -100,9 +98,7 @@ class AnaliseProteina(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date],
     )
-    horario = models.TimeField(
-        verbose_name="Horário da Análise", default=timezone.localtime().time()
-    )
+    horario = models.TimeField(verbose_name="Horário da Análise")
     tipo_amostra = models.CharField(
         max_length=2,
         choices=TIPO_AMOSTRA_CHOICES,
@@ -215,30 +211,30 @@ class AnaliseOleoDegomado(BaseModel):
         ("RF", "Óleo Refinado"),
         ("RS", "Resíduo"),
     ]
+    TIPO_ANALISE_CHOICES = [
+        ("UMI", "Análise de Umidade"),
+        ("ACI", "Análise de Acidez"),
+        ("SAB", "Análise de Sabões"),
+    ]
 
     data = models.DateField(
         verbose_name="Data da Análise",
         default=timezone.localdate,
         validators=[validate_not_future_date],
     )
-    horario = models.TimeField(
-        verbose_name="Horário da Análise", default=timezone.localtime().time()
-    )
+    horario = models.TimeField(verbose_name="Horário da Análise")
     tipo_amostra = models.CharField(
         max_length=2,
         choices=TIPO_AMOSTRA_CHOICES,
         verbose_name="Tipo de Amostra",
         default="DG",  # Óleo Degomado como padrão
     )
-    acidez = models.DecimalField(
-        max_digits=6,
-        decimal_places=3,
-        verbose_name="Acidez (mg KOH/g)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0)],
+    tipo_analise = models.CharField(
+        max_length=3,
+        choices=TIPO_ANALISE_CHOICES,
+        verbose_name="Tipo de Análise",
+        default="ACI",
     )
-
     tara = models.DecimalField(
         max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Tara"
     )
@@ -246,7 +242,10 @@ class AnaliseOleoDegomado(BaseModel):
         max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Líquido"
     )
     peso_amostra = models.DecimalField(
-        max_digits=10, decimal_places=4, default=0.0, verbose_name="Peso da Amostra"
+        max_digits=10,
+        decimal_places=4,
+        default=Decimal("0.0"),
+        verbose_name="Peso da Amostra",
     )
     resultado = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Resultado"
@@ -288,9 +287,7 @@ class AnaliseUrase(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date],
     )
-    horario = models.TimeField(
-        verbose_name="Horário da Análise", default=timezone.localtime().time()
-    )
+    horario = models.TimeField(verbose_name="Horário da Análise")
     tipo_amostra = models.CharField(
         max_length=2,
         choices=TIPO_AMOSTRA_CHOICES,
