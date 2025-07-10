@@ -35,22 +35,32 @@ class ProteinaCreateView(CreateView):
 
         # Só calcula a proteína se for um tipo de amostra válido para análise
         if proteina.tipo_amostra not in ["FP", "SA"]:
+            # Define os tipos de amostra de umidade correspondentes
+            umidade_tipos_lookup = [proteina.tipo_amostra]
+            if proteina.tipo_amostra == "FL":  # Farelo
+                umidade_tipos_lookup = ["FG", "FF"]  # Farelo Grosso e Fino
+
             # Busca a umidade da mesma data e tipo de amostra, a mais recente por horário
             umidade_obj = (
                 AnaliseUmidade.objects.filter(
-                    data=proteina.data, tipo_amostra=proteina.tipo_amostra
+                    data=proteina.data, tipo_amostra__in=umidade_tipos_lookup
                 )
                 .order_by("-horario")
                 .first()
             )
 
-            umidade_valor = umidade_obj.resultado if umidade_obj else None
+            # Garante que um valor decimal seja passado, mesmo que a umidade não seja encontrada.
+            umidade_valor = (
+                umidade_obj.resultado
+                if umidade_obj and umidade_obj.resultado is not None
+                else Decimal("0.00")
+            )
 
             proteina.calcular_proteina(umidade_valor)
         else:
-            # Garante que os resultados sejam nulos para "Fábrica parada" e "Sem amostra"
-            proteina.resultado = None
-            proteina.resultado_corrigido = None
+            # Garante que os resultados sejam zero para casos especiais, evitando erros nos relatórios.
+            proteina.resultado = Decimal("0.00")
+            proteina.resultado_corrigido = Decimal("0.00")
 
         proteina.save()
         return super().form_valid(form)
@@ -66,11 +76,9 @@ class OleoDegomadoCreateView(CreateView):
     template_name = "app/cadastro_oleo.html"
     success_url = reverse_lazy("analises:oleo_list")
 
-    # A lógica de cálculo foi movida para o método save() do modelo AnaliseOleoDegomado.
-    # A view agora só precisa validar e salvar o formulário.
     def form_valid(self, form):
-        # O form.save() irá disparar o método save() do modelo,
-        # que agora contém toda a lógica de cálculo.
+        # O modelo AnaliseOleoDegomado não possui cálculos automáticos.
+        # A view simplesmente salva os dados inseridos no formulário.
         self.object = form.save()
         return super().form_valid(form)
 
@@ -83,21 +91,37 @@ class UmidadeListView(ListView):
 class ProteinaListView(ListView):
     model = AnaliseProteina
     template_name = "app/lista_proteina.html"
+    context_object_name = "analises"
+    paginate_by = 20
 
     def get_queryset(self):
-        from django.db.models import OuterRef, Subquery
+        from django.db.models import Case, When, Subquery, OuterRef, Value, DecimalField
 
-        umidade_subquery = (
+        # Subquery para buscar a umidade correspondente para 'Soja Industrializada'
+        umidade_si_subquery = (
+            AnaliseUmidade.objects.filter(data=OuterRef("data"), tipo_amostra="SI")
+            .order_by("-horario")
+            .values("resultado")[:1]
+        )
+
+        # Subquery para buscar a umidade correspondente para 'Farelo' (Grosso ou Fino)
+        umidade_fl_subquery = (
             AnaliseUmidade.objects.filter(
-                data=OuterRef("data"), tipo_amostra=OuterRef("tipo_amostra")
+                data=OuterRef("data"), tipo_amostra__in=["FG", "FF"]
             )
             .order_by("-horario")
             .values("resultado")[:1]
         )
 
-        return AnaliseProteina.objects.annotate(
-            umidade=Subquery(umidade_subquery)
+        # Anota cada análise de proteína com a umidade correta usada no cálculo
+        queryset = AnaliseProteina.objects.annotate(
+            umidade_usada=Case(
+                When(tipo_amostra="SI", then=Subquery(umidade_si_subquery)),
+                When(tipo_amostra="FL", then=Subquery(umidade_fl_subquery)),
+                default=Value(None, output_field=DecimalField()),
+            )
         ).order_by("-data", "-horario")
+        return queryset
 
 
 class OleoDegomadoListView(ListView):

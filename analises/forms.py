@@ -1,11 +1,7 @@
 from django import forms
 from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase
-<<<<<<< HEAD
-=======
-from django.utils import timezone  # Use o timezone do Django, não o datetime padrão
+from django.utils import timezone
 from django.core.exceptions import ValidationError
-from django.utils.timezone import localdate
->>>>>>> 0251c042b18e6b562386a62acdea273799be044e
 
 
 class AnaliseUmidadeForm(forms.ModelForm):
@@ -41,6 +37,17 @@ class AnaliseProteinaForm(forms.ModelForm):
             "ml_branco": "Informe o valor do branco em mL (entre 0 e 0,5)",
             "normalidade": "O valor máximo de normalidade é 0.3 N.",
         }
+
+    def __init__(self, *args, **kwargs):
+        """
+        Torna os campos de análise não obrigatórios no nível do formulário.
+        A obrigatoriedade será validada no método clean() dependendo do tipo_amostra.
+        """
+        super().__init__(*args, **kwargs)
+        self.fields["peso_amostra"].required = False
+        self.fields["ml_gasto"].required = False
+        self.fields["ml_branco"].required = False
+        self.fields["normalidade"].required = False
 
     def clean(self):
         from decimal import Decimal
@@ -92,7 +99,6 @@ class AnaliseProteinaForm(forms.ModelForm):
         return cleaned_data
 
 
-
 class AnaliseOleoDegomadoForm(forms.ModelForm):
     class Meta:
         model = AnaliseOleoDegomado
@@ -101,84 +107,39 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
             "data": forms.DateInput(attrs={"type": "date"}),
             "horario": forms.TimeInput(attrs={"type": "time"}),
         }
-    
-    #impede que o usuario acesse datas posteriores a de hoje 
+
     def __init__(self, *args, **kwargs):
+        """
+        Melhora a experiência do usuário no frontend, restringindo o
+        date-picker do navegador para apenas a data de hoje.
+        """
         super().__init__(*args, **kwargs)
-        today = localdate()  # Usa o fuso horário configurado no Django
-        self.fields['data'].widget.attrs['min'] = today.isoformat()
+        today_iso = timezone.localdate().isoformat()
+        # Restringe o calendário no frontend para não permitir seleção de datas passadas ou futuras
+        self.fields["data"].widget.attrs["min"] = today_iso
+        self.fields["data"].widget.attrs["max"] = today_iso
 
-
-    
-    #metodo que impede de adicionar datas diferentes da de hj
     def clean_data(self):
-            data = self.cleaned_data.get('data')
-            hoje = timezone.localdate()
-            if data and data < hoje:
-                raise ValidationError('A data não pode ser anterior/posterior à data HOJE.')
-            return data
-    
-    
+        """
+        Validação de backend que garante que a data da análise seja exatamente a data de hoje.
+        Isso complementa o validador do modelo, que já impede datas futuras.
+        """
+        data = self.cleaned_data.get("data")
+        hoje = timezone.localdate()
+        if data and data != hoje:
+            raise ValidationError("A data da análise deve ser a data de hoje.")
+        return data
+
     def clean(self):
+        """
+        Validações customizadas para o formulário de Óleo Degomado.
+        O método anterior foi removido pois estava validando campos que não existem mais no modelo.
+        As validações de MinValueValidator e MaxValueValidator nos campos do modelo
+        já cuidam das faixas de valores básicos.
+        """
         cleaned_data = super().clean()
-        tipo_analise = cleaned_data.get("tipo_analise")
-        peso_amostra = cleaned_data.get("peso_amostra")
-        liquido = cleaned_data.get("liquido")
-        resultado = cleaned_data.get("resultado")
-        titulacao = cleaned_data.get("titulacao")
-        fator_correcao = cleaned_data.get("fator_correcao")
-        if tipo_analise == "UMI":
-            if peso_amostra is not None and not (5 <= peso_amostra <= 5.5):
-                self.add_error(
-                    "peso_amostra",
-                    "Para análise de umidade, o peso da amostra deve estar entre 5 e 5,5.",
-                )
-            if liquido is not None and not (0 <= liquido <= 100):
-                self.add_error(
-                    "liquido",
-                    "Para análise de umidade, o valor do líquido deve estar entre 0 e 100.",
-                )
-            if titulacao is not None and not (0 <= titulacao <= 100):
-                self.add_error(
-                    "titulacao",
-                    "Para análise de umidade, o valor da Titulação deve estar entre 0 e 100.",
-                )
-        if tipo_analise == "ACI":
-            if peso_amostra is not None and not (7 <= peso_amostra <= 7.5):
-                self.add_error(
-                    "peso_amostra",
-                    "Para análise de Acidez, o peso da amostra deve estar entre 7 e 7,5.",
-                )
-            if titulacao is not None and not (0 <= titulacao <= 100):
-                self.add_error(
-                    "titulacao",
-                    "Para análise de Acidez, o valor da Titulação deve estar entre 0 e 100.",
-                )
-            if fator_correcao is not None and not (0 < fator_correcao <= 1):
-                self.add_error(
-                    "fator_correcao",
-                    "Para análise de Acidez, o valor de Fator de Correção deve estar entre 0,1 à 1,0.",
-                )
-        if tipo_analise == "SAB":
-            if peso_amostra is not None and not (10 <= peso_amostra <= 10.5):
-                self.add_error(
-                    "peso_amostra",
-                    "Para análise de Sabões, o peso da amostra deve estar entre 10 à 10,5.",
-                )
-            if titulacao is not None and not (0 <= titulacao <= 100):
-                self.add_error(
-                    "titulacao",
-                    "Para análise de Sabões, o valor da Titulação deve estar entre 0 e 100.",
-                )
-            if fator_correcao is not None and not (0.01 < fator_correcao <= 0.1):
-                self.add_error(
-                    "fator_correcao",
-                    "Para análise de Sabões, o valor de Fator de Correção deve estar entre 0,01 à 0,1.",
-                )
-        if resultado is not None and not (0 <= resultado <= 100):
-            self.add_error(
-                "resultado", "O valor do resultado deve estar entre 0% e 100%."
-            )
+        # Adicione aqui validações mais complexas se necessário.
+        # Por exemplo: if cleaned_data.get("acidez") > 5: ...
         return cleaned_data
 
 

@@ -67,14 +67,18 @@
         </div>
 
         <!-- Wrapper para os campos de análise -->
-        <div id="analise-fields-wrapper" class="row g-3 col-12">
-          <div class="col-md-6">
+        <!-- Corrigido: Removido 'col-12' da div do 'row' e ajustado o grid interno -->
+        <div id="analise-fields-wrapper" class="row g-3">
+          <!-- As colunas agora somam 12 para 'md' e 'lg' (ex: 6+6 ou 3+3+3+3) -->
+          <div class="col-md-6 col-lg-3">
             <div class="form-floating mb-3">
               {{ form.peso_amostra|add_class:"form-control" }}
               <label for="{{ form.peso_amostra.id_for_label }}"
                 >{{ form.peso_amostra.label }}</label
               >
-              {% if form.peso_amostra.errors %}
+              {% if form.peso_amostra.help_text %}
+              <div class="form-text">{{ form.peso_amostra.help_text }}</div>
+              {% endif %} {% if form.peso_amostra.errors %}
               <div class="invalid-feedback d-block">
                 {{ form.peso_amostra.errors }}
               </div>
@@ -82,20 +86,22 @@
             </div>
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-6 col-lg-3">
             <div class="form-floating mb-3">
               {{ form.ml_gasto|add_class:"form-control" }}
               <label for="{{ form.ml_gasto.id_for_label }}"
                 >{{ form.ml_gasto.label }}</label
               >
-              {% if form.ml_gasto.errors %}
+              {% if form.ml_gasto.help_text %}
+              <div class="form-text">{{ form.ml_gasto.help_text }}</div>
+              {% endif %} {% if form.ml_gasto.errors %}
               <div class="invalid-feedback d-block">
                 {{ form.ml_gasto.errors }}
               </div>
               {% endif %}
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-6 col-lg-3">
             <div class="form-floating mb-3">
               {{ form.ml_branco|add_class:"form-control" }}
               <label for="{{ form.ml_branco.id_for_label }}"
@@ -110,7 +116,7 @@
               {% endif %}
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-6 col-lg-3">
             <div class="form-floating mb-3">
               {{ form.normalidade|add_class:"form-control" }}
               <label for="{{ form.normalidade.id_for_label }}"

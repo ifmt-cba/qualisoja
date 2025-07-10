@@ -15,6 +15,7 @@ class AnaliseProteinaAdmin(admin.ModelAdmin):
         "data",
         "horario",
         "tipo_amostra",
+        "peso_amostra",
         "ml_gasto",
         "ml_branco",
         "normalidade",
