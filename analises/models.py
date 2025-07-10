@@ -211,6 +211,11 @@ class AnaliseOleoDegomado(BaseModel):
         ("RF", "Óleo Refinado"),
         ("RS", "Resíduo"),
     ]
+    TIPO_ANALISE_CHOICES = [
+        ("UMI", "Análise de Umidade"),
+        ("ACI", "Análise de Acidez"),
+        ("SAB", "Análise de Sabões"),
+    ]
 
     data = models.DateField(
         verbose_name="Data da Análise",
@@ -224,15 +229,12 @@ class AnaliseOleoDegomado(BaseModel):
         verbose_name="Tipo de Amostra",
         default="DG",  # Óleo Degomado como padrão
     )
-    acidez = models.DecimalField(
-        max_digits=6,
-        decimal_places=3,
-        verbose_name="Acidez (mg KOH/g)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0)],
+    tipo_analise = models.CharField(
+        max_length=3,
+        choices=TIPO_ANALISE_CHOICES,
+        verbose_name="Tipo de Análise",
+        default="ACI",
     )
-
     tara = models.DecimalField(
         max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Tara"
     )
