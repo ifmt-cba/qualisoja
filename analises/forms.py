@@ -138,8 +138,74 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
         já cuidam das faixas de valores básicos.
         """
         cleaned_data = super().clean()
-        # Adicione aqui validações mais complexas se necessário.
-        # Por exemplo: if cleaned_data.get("acidez") > 5: ...
+
+        tipo_analise = cleaned_data.get("tipo_analise")
+        peso_amostra = cleaned_data.get("peso_amostra")
+        liquido = cleaned_data.get("liquido")
+        resultado = cleaned_data.get("resultado")
+        # acidez = cleaned_data.get('acidez')
+        titulacao = cleaned_data.get("titulacao")
+        fator_correcao = cleaned_data.get("fator_correcao")
+
+        if tipo_analise == "UMI":
+            if peso_amostra is not None and not (5 <= peso_amostra <= 5.5):
+                self.add_error(
+                    "peso_amostra",
+                    "Para análise de umidade, o peso da amostra deve estar entre 5 e 5,5.",
+                )
+            if liquido is not None and not (0 <= liquido <= 100):
+                self.add_error(
+                    "liquido",
+                    "Para análise de umidade, o valor do líquido deve estar entre 0 e 100.",
+                )
+            if titulacao is not None and not (0 <= titulacao <= 100):
+                self.add_error(
+                    "titulacao",
+                    "Para análise de umidade, o valor da Titulação deve estar entre 0 e 100.",
+                )
+
+        if tipo_analise == "ACI":
+            if peso_amostra is not None and not (7 <= peso_amostra <= 7.5):
+                self.add_error(
+                    "peso_amostra",
+                    "Para análise de Acidez, o peso da amostra deve estar entre 7 e 7,5.",
+                )
+            if titulacao is not None and not (0 <= titulacao <= 100):
+                self.add_error(
+                    "titulacao",
+                    "Para análise de Acidez, o valor da Titulação deve estar entre 0 e 100.",
+                )
+            if fator_correcao is not None and not (0 < fator_correcao <= 1):
+                self.add_error(
+                    "fator_correcao",
+                    "Para análise de Acidez, o valor de Fator de Correção deve estar entre 0,1 à 1,0.",
+                )
+
+        if tipo_analise == "SAB":
+            if peso_amostra is not None and not (10 <= peso_amostra <= 10.5):
+                self.add_error(
+                    "peso_amostra",
+                    "Para análise de Sabões, o peso da amostra deve estar entre 10 à 10,5.",
+                )
+            if titulacao is not None and not (0 <= titulacao <= 100):
+                self.add_error(
+                    "titulacao",
+                    "Para análise de Sabões, o valor da Titulação deve estar entre 0 e 100.",
+                )
+            if fator_correcao is not None and not (0.01 <= fator_correcao <= 0.1):
+                self.add_error(
+                    "fator_correcao",
+                    "Para análise de Sabões, o valor de Fator de Correção deve estar entre 0,01 à 0,1.",
+                )
+
+        if resultado is not None and not (0 <= resultado <= 100):
+            self.add_error(
+                "resultado", "O valor do resultado deve estar entre 0% e 100%."
+            )
+
+        # if acidez is not None and acidez < 0:
+        #     self.add_error('acidez', 'A acidez não pode ser negativa.')
+
         return cleaned_data
 
 

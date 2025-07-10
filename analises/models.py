@@ -238,43 +238,29 @@ class AnaliseOleoDegomado(BaseModel):
         null=True,
         validators=[MinValueValidator(0)],
     )
-    umidade_oleo = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        verbose_name="Umidade do Óleo (%)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
+
+    tara = models.DecimalField(
+        max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Tara"
     )
-    impurezas = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        verbose_name="Impurezas (%)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    liquido = models.DecimalField(
+        max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Líquido"
     )
-    indice_iodo = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        verbose_name="Índice de Iodo (g I₂/100g)",
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0)],
-    )
-    cor = models.CharField(
-        max_length=10, verbose_name="Cor (Lovibond)", blank=True, null=True
+    peso_amostra = models.DecimalField(
+        max_digits=10, decimal_places=4, default=0.0, verbose_name="Peso da Amostra"
     )
     resultado = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        verbose_name="Resultado da Análise (%)",
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Resultado"
+    )
+    titulacao = models.DecimalField(
+        max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Titulação"
+    )
+    fator_correcao = models.DecimalField(
+        max_digits=10,
+        decimal_places=4,
         blank=True,
         null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-    )
-    observacoes = models.TextField(
-        verbose_name="Observações", blank=True, null=True, max_length=500
+        verbose_name="Fator de Correção",
+        validators=[MinValueValidator(-1000), MaxValueValidator(1000)],
     )
 
     def __str__(self):
