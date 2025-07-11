@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes da Análise de Sílica - QualiSoja{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-layers me-2"></i>
+                        Detalhes da Análise de Sílica
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-calendar3 me-1"></i>Data da Análise
+                                </label>
+                                <p class="form-control-plaintext">{{ analise.data|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-clock me-1"></i>Horário
+                                </label>
+                                <p class="form-control-plaintext">{{ analise.horario|time:"H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-collection me-1"></i>Tipo de Amostra
+                        </label>
+                        <p class="form-control-plaintext">
+                            <span class="badge bg-info fs-6">{{ analise.get_tipo_amostra_display }}</span>
+                        </p>
+                    </div>
+
+                    <h5 class="mt-4 mb-3">
+                        <i class="bi bi-calculator me-2"></i>Dados da Análise
+                    </h5>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-link-45deg me-1"></i>Análise de Cinza Vinculada
+                        </label>
+                        <p class="form-control-plaintext">
+                            {% if analise.analise_cinza %}
+                                {{ analise.analise_cinza.get_tipo_amostra_display }} - {{ analise.analise_cinza.data|date:"d/m/Y" }}
+                                {% if analise.analise_cinza.resultado %}
+                                    <span class="badge bg-info ms-2">{{ analise.analise_cinza.resultado|floatformat:2 }}%</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">Não vinculada</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-percent me-1"></i>Resultado Sílica
+                        </label>
+                        <p class="form-control-plaintext">
+                            {% if analise.resultado_silica %}
+                                <span class="badge bg-secondary fs-6">{{ analise.resultado_silica|floatformat:2 }}%</span>
+                            {% else %}
+                                <span class="text-muted">Não informado</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <h5 class="mt-4 mb-3">
+                        <i class="bi bi-graph-up me-2"></i>Resultado Final
+                    </h5>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-trophy me-1"></i>Resultado Final (Cinza - Sílica)
+                        </label>
+                        <p class="form-control-plaintext">
+                            {% if analise.resultado_final %}
+                                <span class="badge bg-success fs-6">{{ analise.resultado_final|floatformat:2 }}%</span>
+                            {% else %}
+                                <span class="text-muted">Não calculado</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if analise.analise_cinza and analise.resultado_silica and analise.resultado_final %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-calculator me-2"></i>
+                        <strong>Cálculo:</strong> {{ analise.analise_cinza.resultado|floatformat:2 }}% - {{ analise.resultado_silica|floatformat:2 }}% = {{ analise.resultado_final|floatformat:2 }}%
+                    </div>
+                    {% endif %}
+
+                    <h5 class="mt-4 mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Informações do Sistema
+                    </h5>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Criado em</label>
+                                <p class="form-control-plaintext">{{ analise.criado_em|date:"d/m/Y H:i" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Última atualização</label>
+                                <p class="form-control-plaintext">{{ analise.atualizado_em|date:"d/m/Y H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'analises:silica_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Voltar à Lista
+                        </a>
+                        <div>
+                            <a href="{% url 'analises:silica_update' analise.pk %}" class="btn btn-warning me-2">
+                                <i class="bi bi-pencil me-1"></i>Editar
+                            </a>
+                            <a href="{% url 'analises:silica_delete' analise.pk %}" class="btn btn-danger">
+                                <i class="bi bi-trash me-1"></i>Excluir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

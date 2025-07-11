@@ -15,7 +15,7 @@
             </a>
         </div>
         <div class="alert alert-success mb-4 text-success bg-white border-success">
-            <strong>Informação:</strong> O resultado será calculado automaticamente como <b>Amostra 1 - Amostra 2</b>.
+            <strong>Informação:</strong> O resultado será calculado automaticamente como <b>PH 1 - PH 2</b>.
         </div>
         <form method="post" class="needs-validation" novalidate>
             {% csrf_token %}
@@ -89,17 +89,17 @@
 <script>
     // Função para calcular e exibir o resultado em tempo real
     function calcularResultado() {
-        const amostra1 = parseFloat(document.getElementById('{{ form.amostra_1.id_for_label }}').value) || 0;
-        const amostra2 = parseFloat(document.getElementById('{{ form.amostra_2.id_for_label }}').value) || 0;
-        const resultado = amostra1 - amostra2;
+        const PH1 = parseFloat(document.getElementById('{{ form.PH1.id_for_label }}').value) || 0;
+        const PH2 = parseFloat(document.getElementById('{{ form.PH2.id_for_label }}').value) || 0;
+        const resultado = PH1 - PH2;
         document.getElementById('resultado-preview').textContent = resultado.toFixed(2);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const amostra1Input = document.getElementById('{{ form.amostra_1.id_for_label }}');
-        const amostra2Input = document.getElementById('{{ form.amostra_2.id_for_label }}');
-        amostra1Input.addEventListener('input', calcularResultado);
-        amostra2Input.addEventListener('input', calcularResultado);
+        const PH11Input = document.getElementById('{{ form.PH1.id_for_label }}');
+        const PH2Input = document.getElementById('{{ form.PH2.id_for_label }}');
+        PH11Input.addEventListener('input', calcularResultado);
+        PH2Input.addEventListener('input', calcularResultado);
         calcularResultado();
     });
 </script>

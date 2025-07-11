@@ -1,0 +1,26 @@
+apiVersion: v2
+name: qualisoja
+description: A Helm chart for QualiSoja Django Application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - django
+  - postgresql
+  - redis
+  - python
+home: https://github.com/qualisoja/qualisoja
+sources:
+  - https://github.com/qualisoja/qualisoja
+maintainers:
+  - name: QualiSoja Team
+    email: admin@qualisoja.com
+dependencies:
+  - name: postgresql
+    version: 12.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: redis
+    version: 17.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled

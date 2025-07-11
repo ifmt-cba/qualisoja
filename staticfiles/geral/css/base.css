@@ -1,0 +1,27 @@
+/* static/geral/css/base.css */
+body {
+    background-color: #f9fafb; /* tom suave para fundo geral */
+    color: #1f2937; /* texto cinza escuro */
+    font-family: sans-serif;
+}
+  
+  /* Header verde claro tipo imagem enviada */
+header {
+    background-color: #C5E1D1;
+}
+  
+  /* Estilo da navbar secundária */
+nav {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+  
+  /* Botões padrão */
+button {
+    cursor: pointer;
+}
+  
+button:hover {
+    opacity: 0.9;
+}
+  

@@ -34,6 +34,10 @@ db.sqlite3.backup
 db.sqlite3.backup.*
 media/
 
+# Migrations (exceto __init__.py)
+*/migrations/[0-9]*.py
+migrations/[0-9]*.py
+
 # Node/JavaScript
 node_modules/
 npm-debug.log

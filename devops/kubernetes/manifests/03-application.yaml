@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qualisoja-app
+  namespace: qualisoja
+  labels:
+    app: qualisoja
+    tier: app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: qualisoja
+      tier: app
+  template:
+    metadata:
+      labels:
+        app: qualisoja
+        tier: app
+    spec:
+      initContainers:
+      - name: migrate
+        image: qualisoja:production
+        command: ['python', 'manage.py', 'migrate']
+        envFrom:
+        - configMapRef:
+            name: qualisoja-config
+        - secretRef:
+            name: qualisoja-secrets
+      containers:
+      - name: qualisoja
+        image: qualisoja:production
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: qualisoja-config
+        - secretRef:
+            name: qualisoja-secrets
+        livenessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: static-volume
+          mountPath: /app/staticfiles
+        - name: media-volume
+          mountPath: /app/media
+      volumes:
+      - name: static-volume
+        emptyDir: {}
+      - name: media-volume
+        persistentVolumeClaim:
+          claimName: media-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media-pvc
+  namespace: qualisoja
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qualisoja-service
+  namespace: qualisoja
+  labels:
+    app: qualisoja
+    tier: app
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+  selector:
+    app: qualisoja
+    tier: app
+  type: ClusterIP
