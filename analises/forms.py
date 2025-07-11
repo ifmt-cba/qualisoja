@@ -1,7 +1,9 @@
 import datetime
 from django import forms
 from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo, AnaliseSilica
-from django.utils import timezone  # Use o timezone do Django, não o datetime padrão
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.utils.timezone import localdate
 
 class AnaliseUmidadeForm(forms.ModelForm):
     """
@@ -105,6 +107,17 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
             'data': forms.DateInput(attrs={'type': 'date'}),
             'horario': forms.TimeInput(attrs={'type': 'time'}),
         }
+    def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            today = localdate()  # Usa o fuso horário configurado no Django
+            self.fields['data'].widget.attrs['min'] = today.isoformat()
+
+    def clean_data(self):
+            data = self.cleaned_data.get('data')
+            hoje = timezone.localdate()  # Usa o fuso horário correto
+            if data and data < hoje:
+                raise ValidationError('A data não pode ser anterior à data atual.')
+            return data
 
     def clean(self):
         """Validação específica do formulário de óleo degomado"""
@@ -119,8 +132,8 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
         fator_correcao = cleaned_data.get('fator_correcao')
 
         if tipo_analise == "UMI":
-            if peso_amostra is not None and not (7 <= peso_amostra <= 7.5):
-                self.add_error('peso_amostra', 'Para análise de umidade, o peso da amostra deve estar entre 7 e 7,5.')
+            if peso_amostra is not None and not (5 <= peso_amostra <= 5.5):
+                self.add_error('peso_amostra', 'Para análise de umidade, o peso da amostra deve estar entre 5 e 5,5.')
             if liquido is not None and not (0 <= liquido <= 100):
                 self.add_error('liquido', 'Para análise de umidade, o valor do líquido deve estar entre 0 e 100.')
             if titulacao is not None and not (0 <= titulacao <= 100):    
