@@ -1,60 +1,86 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Lista de Análises de Urase</h2>
-<a href="{% url 'analises:urase_create' %}" class="btn btn-success mb-3">+ Nova Análise</a>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Horário</th>
-            <th>Tipo de Amostra</th>
-            <th>Amostra 1</th>
-            <th>Amostra 2</th>
-            <th>Resultado</th>
-            <th>Criado em</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for analise in analises %}
-        <tr>
-            <td>{{ analise.data|date:"d/m/Y" }}</td>
-            <td>{{ analise.horario|time:"H:i" }}</td>
-            <td>{{ analise.get_tipo_amostra_display }}</td>
-            <td>{{ analise.amostra_1|floatformat:2 }}</td>
-            <td>{{ analise.amostra_2|floatformat:2 }}</td>
-            <td>
-                {% if analise.resultado > 0 %}
-                    <span class="text-success fw-bold">+{{ analise.resultado|floatformat:2 }}</span>
-                {% elif analise.resultado < 0 %}
-                    <span class="text-danger fw-bold">{{ analise.resultado|floatformat:2 }}</span>
-                {% else %}
-                    <span class="text-secondary fw-bold">{{ analise.resultado|floatformat:2 }}</span>
-                {% endif %}
-            </td>
-            <td>{{ analise.criado_em|date:"d/m/Y H:i" }}</td>
-        </tr>
-    {% empty %}
-        <tr>
-            <td colspan="7" class="text-center">Nenhuma análise encontrada.</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-primary bg-opacity-10 border-primary border-opacity-25">
+        <h2 class="mb-0 text-primary">
+            <i class="bi bi-graph-up me-2"></i>
+            Lista de Análises de Urase
+        </h2>
+    </div>
+    <div class="card-body">
+        <a href="{% url 'analises:urase_create' %}" class="btn btn-primary mb-3">
+            <i class="bi bi-plus-circle me-2"></i>Nova Análise
+        </a>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Tipo de Amostra</th>
+                        <th>Amostra 1</th>
+                        <th>Amostra 2</th>
+                        <th>Resultado</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for analise in object_list %}
+                    <tr>
+                        <td>{{ analise.data|date:"d/m/Y" }}</td>
+                        <td>{{ analise.horario|time:"H:i" }}</td>
+                        <td>{{ analise.get_tipo_amostra_display }}</td>
+                        <td>{{ analise.amostra_1|floatformat:2 }}</td>
+                        <td>{{ analise.amostra_2|floatformat:2 }}</td>
+                        <td>
+                            {% if analise.resultado > 0 %}
+                                <span class="text-success fw-bold">+{{ analise.resultado|floatformat:2 }}</span>
+                            {% elif analise.resultado < 0 %}
+                                <span class="text-danger fw-bold">{{ analise.resultado|floatformat:2 }}</span>
+                            {% else %}
+                                <span class="text-secondary fw-bold">{{ analise.resultado|floatformat:2 }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'analises:urase_detail' analise.pk %}" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'analises:urase_update' analise.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'analises:urase_delete' analise.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">Nenhuma análise encontrada.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-{% if is_paginated %}
-<div class="pagination mt-3">
-    {% if page_obj.has_previous %}
-        <a href="?page=1" class="btn btn-outline-primary btn-sm">&laquo; primeira</a>
-        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-primary btn-sm">anterior</a>
-    {% endif %}
-    <span class="current btn btn-primary btn-sm disabled">
-        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-    </span>
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-primary btn-sm">próxima</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-primary btn-sm">última &raquo;</a>
-    {% endif %}
+        {% if is_paginated %}
+        <div class="pagination mt-3">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn btn-outline-primary btn-sm">&laquo; primeira</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-primary btn-sm">anterior</a>
+            {% endif %}
+            <span class="current btn btn-primary btn-sm disabled">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-primary btn-sm">próxima</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-primary btn-sm">última &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
 </div>
-{% endif %}
 {% endblock %}

@@ -237,6 +237,10 @@ class AnaliseTeorOleoForm(forms.ModelForm):
                 'max': '2.500',
                 'placeholder': 'Entre 2,000 e 2,500 g'
             }),
+            'peso_tara': forms.NumberInput(attrs={
+                'step': '0.001',
+                'placeholder': 'Peso da tara (recipiente vazio)'
+            }),
             'peso_liquido': forms.NumberInput(attrs={
                 'step': '0.001',
                 'placeholder': 'Peso líquido de óleo'
@@ -252,6 +256,7 @@ class AnaliseTeorOleoForm(forms.ModelForm):
         cleaned_data = super().clean()
         
         peso_amostra = cleaned_data.get('peso_amostra')
+        peso_tara = cleaned_data.get('peso_tara')
         peso_liquido = cleaned_data.get('peso_liquido')
         teor_oleo = cleaned_data.get('teor_oleo')
         
@@ -260,16 +265,21 @@ class AnaliseTeorOleoForm(forms.ModelForm):
             if not (2.000 <= float(peso_amostra) <= 2.500):
                 self.add_error('peso_amostra', 'O peso da amostra deve estar entre 2,000 g e 2,500 g.')
         
+        # Validar peso da tara
+        if peso_tara is not None:
+            if peso_tara <= 0:
+                self.add_error('peso_tara', 'O peso da tara deve ser positivo.')
+        
         # Validar peso líquido
-        if peso_liquido is not None and peso_amostra is not None:
-            if peso_liquido > peso_amostra:
-                self.add_error('peso_liquido', 'O peso líquido não pode ser maior que o peso da amostra.')
-            if peso_liquido < 0:
-                self.add_error('peso_liquido', 'O peso líquido não pode ser negativo.')
+        if peso_liquido is not None:
+            if peso_liquido <= 0:
+                self.add_error('peso_liquido', 'O peso líquido deve ser positivo.')
+            if peso_tara is not None and peso_liquido < peso_tara:
+                self.add_error('peso_liquido', 'O peso líquido (tara + óleo) deve ser maior que o peso da tara vazia.')
         
         # Validar teor de óleo (se fornecido manualmente)
-        if teor_oleo is not None and (teor_oleo < -100 or teor_oleo > 25):
-            self.add_error('teor_oleo', 'O teor de óleo deve estar entre -100% e 25%.')
+        if teor_oleo is not None and (teor_oleo < 0 or teor_oleo > 30):
+            self.add_error('teor_oleo', 'O teor de óleo deve estar entre 0% e 30%.')
         
         return cleaned_data
 
@@ -280,19 +290,64 @@ class AnaliseFibraForm(forms.ModelForm):
     """
     class Meta:
         model = AnaliseFibra
-        fields = '__all__'
+        fields = ['data', 'horario', 'tipo_amostra', 'peso_amostra', 'peso_tara', 'peso_fibra', 'peso_branco', 'resultado']
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date'}),
             'horario': forms.TimeInput(attrs={'type': 'time'}),
+            'peso_amostra': forms.NumberInput(attrs={
+                'step': '0.0001',
+                'placeholder': 'Peso da amostra'
+            }),
+            'peso_tara': forms.NumberInput(attrs={
+                'step': '0.0001',
+                'placeholder': 'Peso da tara (recipiente vazio)'
+            }),
+            'peso_fibra': forms.NumberInput(attrs={
+                'step': '0.0001',
+                'placeholder': 'Peso da fibra'
+            }),
+            'peso_branco': forms.NumberInput(attrs={
+                'step': '0.0001',
+                'placeholder': 'Peso do branco'
+            }),
         }
     
     def clean(self):
         """Validação específica do formulário de fibra"""
         cleaned_data = super().clean()
         
+        peso_amostra = cleaned_data.get('peso_amostra')
+        peso_tara = cleaned_data.get('peso_tara')
+        peso_fibra = cleaned_data.get('peso_fibra')
+        peso_branco = cleaned_data.get('peso_branco')
+        
+        # Validações lógicas para análise de fibra
+        # O peso da fibra não pode ser maior que o peso da tara
+        if peso_fibra is not None and peso_tara is not None:
+            if peso_fibra > peso_tara:
+                self.add_error('peso_fibra', 'O peso da fibra não pode ser maior que o peso da tara.')
+        
+        # O peso do branco não pode ser maior que o peso da tara
+        if peso_branco is not None and peso_tara is not None:
+            if peso_branco > peso_tara:
+                self.add_error('peso_branco', 'O peso do branco não pode ser maior que o peso da tara.')
+        
+        # A soma de peso_fibra + peso_branco não pode ser maior que peso_tara
+        if peso_fibra is not None and peso_branco is not None and peso_tara is not None:
+            if (peso_fibra + peso_branco) > peso_tara:
+                self.add_error('peso_fibra', 'A soma do peso da fibra e peso do branco não pode ser maior que o peso da tara.')
+        
+        # Validar se o resultado calculado é razoável (entre 0% e 50%)
+        if all([peso_amostra, peso_tara, peso_fibra, peso_branco]):
+            resultado_calc = ((peso_tara - peso_fibra - peso_branco) / peso_amostra) * 100
+            if resultado_calc < 0:
+                self.add_error('peso_tara', 'Os valores informados resultam em um teor de fibra negativo. Verifique os pesos.')
+            elif resultado_calc > 50:
+                self.add_error('resultado', 'O teor de fibra calculado é muito alto (>50%). Verifique os valores.')
+        
         resultado = cleaned_data.get('resultado')
-        if resultado is not None and (resultado < 0 or resultado > 15):
-            self.add_error('resultado', 'O teor de fibra deve estar entre 0% e 15%.')
+        if resultado is not None and (resultado < 0 or resultado > 50):
+            self.add_error('resultado', 'O teor de fibra deve estar entre 0% e 50%.')
         
         return cleaned_data
 
@@ -300,21 +355,89 @@ class AnaliseFibraForm(forms.ModelForm):
 class AnaliseFosforoForm(forms.ModelForm):
     """
     Formulário para cadastro e edição de análises de fósforo.
+    Focado na absorbância da amostra, com valores padrão para outros campos.
     """
     class Meta:
         model = AnaliseFosforo
-        fields = '__all__'
+        fields = ['data', 'horario', 'tipo_amostra', 'absorbancia_amostra',
+                 'casas_decimais', 'peso_amostra', 'concentracao_padrao', 'volume_solucao',
+                 'volume_aliquota', 'absorbancia_padrao']
         widgets = {
-            'data': forms.DateInput(attrs={'type': 'date'}),
-            'horario': forms.TimeInput(attrs={'type': 'time'}),
+            'data': forms.DateInput(attrs={
+                'type': 'date', 
+                'class': 'form-control'
+            }),
+            'horario': forms.TimeInput(attrs={
+                'type': 'time', 
+                'class': 'form-control'
+            }),
+            'tipo_amostra': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'absorbancia_amostra': forms.NumberInput(attrs={
+                'class': 'form-control campo-principal',
+                'step': '0.000001',
+                'min': '0.000001',
+                'placeholder': 'Ex: 0.125000',
+                'style': 'font-size: 1.1rem; font-weight: 600; border: 2px solid #0d6efd;'
+            }),
+            'casas_decimais': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'max': '6',
+                'step': '1',
+                'style': 'width: 80px;'
+            }),
+            'peso_amostra': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.0001',
+                'min': '0.0001',
+                'placeholder': '1.0000'
+            }),
+            'concentracao_padrao': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.0001',
+                'min': '0.0001',
+                'placeholder': '10.0000'
+            }),
+            'volume_solucao': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0.01',
+                'placeholder': '100.00'
+            }),
+            'volume_aliquota': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0.01',
+                'placeholder': '10.00'
+            }),
+            'absorbancia_padrao': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.000001',
+                'min': '0.000001',
+                'placeholder': '0.250000'
+            }),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Marcar o campo principal como obrigatório
+        self.fields['absorbancia_amostra'].required = True
+        
+        # Adicionar classes de destaque
+        self.fields['absorbancia_amostra'].widget.attrs.update({
+            'autofocus': True,
+            'title': 'Campo principal - Digite apenas o valor da absorbância'
+        })
     
     def clean(self):
         """Validação específica do formulário de fósforo"""
         cleaned_data = super().clean()
         
-        resultado = cleaned_data.get('resultado')
-        if resultado is not None and (resultado < 0 or resultado > 2):
-            self.add_error('resultado', 'O teor de fósforo deve estar entre 0% e 2%.')
+        # Validar que a absorbância da amostra foi informada
+        absorbancia_amostra = cleaned_data.get('absorbancia_amostra')
+        if not absorbancia_amostra or absorbancia_amostra <= 0:
+            self.add_error('absorbancia_amostra', 'A absorbância da amostra é obrigatória e deve ser maior que zero.')
         
         return cleaned_data

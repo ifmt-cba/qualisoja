@@ -12,6 +12,7 @@ urlpatterns = [
     path('analises/', include('analises.urls', namespace='analises')),
     path('relatorios/', include('relatorios.urls', namespace='relatorios')),
     path('health/', views.health_check, name='health_check'),
+    path('teste/', views.teste_acesso, name='teste_acesso'),
 ]
 
 # Importar e adicionar URLs opcionais de debug e CSRF
