@@ -96,6 +96,7 @@
                 <div class="col-md-3">
                     <div class="form-floating mb-3">
                         {{ form.fator_correcao|add_class:"form-control" }}
+                        
                         <label for="{{ form.fator_correcao.id_for_label }}">{{ form.fator_correcao.label }}</label>
                         {% if form.fator_correcao.errors %}
                             <div class="invalid-feedback d-block">{{ form.fator_correcao.errors }}</div>
@@ -154,4 +155,31 @@
         });
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tipoAnaliseField = document.querySelector("#id_tipo_analise");
+        const fatorCorrecaoDiv = document.querySelector("#id_fator_correcao").closest(".col-md-3");
+        const titulacaoDiv = document.querySelector("#id_titulacao").closest(".col-md-3");
+
+        function toggleCamposPorAnalise() {
+            const tipo = tipoAnaliseField.value;
+            if (tipo === "UMI") {
+                fatorCorrecaoDiv.style.display = "none";
+                titulacaoDiv.style.display = "none";
+            } else {
+                fatorCorrecaoDiv.style.display = "";
+                titulacaoDiv.style.display = "";
+            }
+        }
+
+        // Executa na inicialização
+        toggleCamposPorAnalise();
+
+        // Executa ao mudar o valor do select
+        tipoAnaliseField.addEventListener("change", toggleCamposPorAnalise);
+    });
+</script>
+
+
 {% endblock %}
+
