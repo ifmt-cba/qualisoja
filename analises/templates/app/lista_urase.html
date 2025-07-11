@@ -44,14 +44,20 @@
                             {% endif %}
                         </td>
                         <td>
-                            <div class="btn-group" role="group">
-                                <a href="{% url 'analises:urase_detail' analise.pk %}" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'analises:urase_detail' analise.pk %}" 
+                                   class="btn btn-outline-info" 
+                                   title="Visualizar">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{% url 'analises:urase_update' analise.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                <a href="{% url 'analises:urase_update' analise.pk %}" 
+                                   class="btn btn-outline-warning" 
+                                   title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="{% url 'analises:urase_delete' analise.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                <a href="{% url 'analises:urase_delete' analise.pk %}" 
+                                   class="btn btn-outline-danger" 
+                                   title="Excluir">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </div>

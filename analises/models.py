@@ -759,3 +759,73 @@ class AnaliseFosforo(BaseModel):
         verbose_name = "Análise de Fósforo"
         verbose_name_plural = "Análises de Fósforo"
         ordering = ['-data', '-horario']
+
+class AnaliseSilica(BaseModel):
+    """
+    Modelo para armazenar análises de sílica na soja.
+    Fórmula: Resultado Final = Resultado Cinza - Resultado Sílica
+    """
+    TIPO_AMOSTRA_CHOICES = [
+        ('FL', 'Farelo'),
+        ('SI', 'Soja Industrializada'),
+        ('FP', 'Fábrica Parada'),
+        ('SA', 'Sem Amostra'),
+    ]
+    
+    data = models.DateField(
+        verbose_name="Data da Análise", 
+        default=timezone.localdate,
+        validators=[validate_not_future_date]
+    )
+    horario = models.TimeField(
+        verbose_name="Horário da Análise",
+        default=timezone.localtime().time()
+    )
+    tipo_amostra = models.CharField(
+        max_length=2,
+        choices=TIPO_AMOSTRA_CHOICES,
+        verbose_name="Tipo de Amostra",
+        default='FL'
+    )
+    
+    # Campo para referenciar análise de cinza (obrigatório)
+    analise_cinza = models.ForeignKey(
+        'AnaliseCinza',
+        on_delete=models.CASCADE,
+        null=True,  # Temporário para migração
+        blank=True,  # Temporário para migração
+        verbose_name="Análise de Cinza",
+        help_text="Selecione a análise de cinza correspondente"
+    )
+    
+    # Resultado da sílica (inserido manualmente)
+    resultado_silica = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        verbose_name="Resultado Sílica (%)",
+        help_text="Digite o resultado da análise de sílica"
+    )
+    
+    # Resultado final calculado automaticamente
+    resultado_final = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Resultado Final (%)",
+        help_text="Resultado final: Cinza - Sílica (calculado automaticamente)"
+    )
+    
+    def save(self, *args, **kwargs):
+        """Calcular resultado final automaticamente: Cinza - Sílica"""
+        if self.analise_cinza and self.analise_cinza.resultado and self.resultado_silica:
+            self.resultado_final = self.analise_cinza.resultado - self.resultado_silica
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Análise de Sílica - {self.get_tipo_amostra_display()} - {self.data}"
+    
+    class Meta:
+        verbose_name = "Análise de Sílica"
+        verbose_name_plural = "Análises de Sílica"
+        ordering = ['-data', '-horario']

@@ -2,8 +2,8 @@ from decimal import Decimal
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView, DetailView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
-from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo
-from .forms import AnaliseUmidadeForm, AnaliseProteinaForm, AnaliseOleoDegomadoForm, AnaliseUraseForm, AnaliseCinzaForm, AnaliseTeorOleoForm, AnaliseFibraForm, AnaliseFosforoForm
+from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo, AnaliseSilica
+from .forms import AnaliseUmidadeForm, AnaliseProteinaForm, AnaliseOleoDegomadoForm, AnaliseUraseForm, AnaliseCinzaForm, AnaliseTeorOleoForm, AnaliseFibraForm, AnaliseFosforoForm, AnaliseSilicaForm
 
 
 class AnaliseHomeView(TemplateView):
@@ -14,6 +14,22 @@ class UmidadeCreateView(CreateView):
     model = AnaliseUmidade
     form_class = AnaliseUmidadeForm
     template_name = 'app/cadastro_umidade.html'
+    success_url = reverse_lazy('analises:umidade_list')
+
+class UmidadeUpdateView(UpdateView):
+    model = AnaliseUmidade
+    form_class = AnaliseUmidadeForm
+    template_name = 'app/cadastro_umidade.html'
+    success_url = reverse_lazy('analises:umidade_list')
+
+class UmidadeDetailView(DetailView):
+    model = AnaliseUmidade
+    template_name = 'app/detalhe_umidade.html'
+    context_object_name = 'analise'
+
+class UmidadeDeleteView(DeleteView):
+    model = AnaliseUmidade
+    template_name = 'app/confirmar_exclusao_umidade.html'
     success_url = reverse_lazy('analises:umidade_list')
 
 class ProteinaCreateView(CreateView):
@@ -64,6 +80,26 @@ class UmidadeListView(ListView):
 class ProteinaListView(ListView):
     model = AnaliseProteina
     template_name = 'app/lista_proteina.html'
+
+class ProteinaUpdateView(UpdateView):
+    model = AnaliseProteina
+    form_class = AnaliseProteinaForm
+    template_name = 'app/cadastro_proteina.html'
+    success_url = reverse_lazy('analises:proteina_list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Análise de proteína atualizada com sucesso!')
+        return super().form_valid(form)
+
+class ProteinaDetailView(DetailView):
+    model = AnaliseProteina
+    template_name = 'app/detalhe_proteina.html'
+    context_object_name = 'analise'
+
+class ProteinaDeleteView(DeleteView):
+    model = AnaliseProteina
+    template_name = 'app/confirmar_exclusao_proteina.html'
+    success_url = reverse_lazy('analises:proteina_list')
 
 class OleoDegomadoListView(ListView):
     model = AnaliseOleoDegomado
@@ -308,3 +344,61 @@ class FosforoDeleteView(DeleteView):
     model = AnaliseFosforo
     template_name = 'app/confirmar_exclusao_fosforo.html'
     success_url = reverse_lazy('analises:lista_fosforo')
+
+class OleoDegomadoUpdateView(UpdateView):
+    model = AnaliseOleoDegomado
+    form_class = AnaliseOleoDegomadoForm
+    template_name = 'app/cadastro_oleo.html'
+    success_url = reverse_lazy('analises:oleo_list')
+
+class OleoDegomadoDetailView(DetailView):
+    model = AnaliseOleoDegomado
+    template_name = 'app/detalhe_oleo.html'
+    context_object_name = 'analise'
+
+class OleoDegomadoDeleteView(DeleteView):
+    model = AnaliseOleoDegomado
+    template_name = 'app/confirmar_exclusao_oleo.html'
+    success_url = reverse_lazy('analises:oleo_list')
+
+# Views para Análise de Sílica
+class SilicaCreateView(CreateView):
+    model = AnaliseSilica
+    form_class = AnaliseSilicaForm
+    template_name = 'app/cadastro_silica.html'
+    success_url = reverse_lazy('analises:silica_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Análise de Sílica cadastrada com sucesso!')
+        return super().form_valid(form)
+
+class SilicaListView(ListView):
+    model = AnaliseSilica
+    template_name = 'app/lista_silica.html'
+    context_object_name = 'analises'
+    paginate_by = 10
+    ordering = ['-data', '-horario']
+
+class SilicaUpdateView(UpdateView):
+    model = AnaliseSilica
+    form_class = AnaliseSilicaForm
+    template_name = 'app/cadastro_silica.html'
+    success_url = reverse_lazy('analises:silica_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Análise de Sílica atualizada com sucesso!')
+        return super().form_valid(form)
+
+class SilicaDetailView(DetailView):
+    model = AnaliseSilica
+    template_name = 'app/detalhe_silica.html'
+    context_object_name = 'analise'
+
+class SilicaDeleteView(DeleteView):
+    model = AnaliseSilica
+    template_name = 'app/confirmar_exclusao_silica.html'
+    success_url = reverse_lazy('analises:silica_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Análise de Sílica excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)

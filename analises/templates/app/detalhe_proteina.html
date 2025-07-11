@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-success bg-opacity-10 border-success border-opacity-25">
+        <h2 class="mb-0 text-success">
+            <i class="bi bi-bar-chart-fill me-2"></i>
+            Detalhes da Análise de Proteína
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Informações Básicas</h6>
+                        <p class="card-text">
+                            <strong>Data:</strong> {{ analise.data|date:"d/m/Y" }}<br>
+                            <strong>Horário:</strong> {{ analise.horario|time:"H:i" }}<br>
+                            <strong>Tipo de Amostra:</strong> {{ analise.get_tipo_amostra_display }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Medições</h6>
+                        <p class="card-text">
+                            <strong>Peso da Amostra:</strong> {{ analise.peso_amostra }} g<br>
+                            <strong>ML Gastos:</strong> 
+                            {% if analise.ml_gasto %}
+                                {{ analise.ml_gasto }}
+                            {% else %}
+                                N/A
+                            {% endif %}<br>
+                            <strong>Média 24h:</strong> 
+                            {% if analise.eh_media_24h %}
+                                <i class="bi bi-check-circle-fill text-success"></i> Sim
+                            {% else %}
+                                <i class="bi bi-x-circle text-muted"></i> Não
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Resultado</h6>
+                        <h3 class="text-info">
+                            {% if analise.resultado %}
+                                {{ analise.resultado }}%
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </h3>
+                        <p class="text-muted">Proteína</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Resultado Corrigido</h6>
+                        <h3 class="text-success">
+                            {% if analise.resultado_corrigido %}
+                                {{ analise.resultado_corrigido }}%
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </h3>
+                        <p class="text-muted">Proteína Corrigida</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 d-flex gap-2 justify-content-between">
+            <a href="{% url 'analises:proteina_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar à Lista
+            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'analises:proteina_update' analise.pk %}" class="btn btn-warning">
+                    <i class="bi bi-pencil me-2"></i>Editar
+                </a>
+                <a href="{% url 'analises:proteina_delete' analise.pk %}" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-2"></i>Excluir
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

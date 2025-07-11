@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar Exclusão - Análise de Sílica - QualiSoja{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Confirmar Exclusão
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+                    </div>
+
+                    <p class="mb-3">Tem certeza que deseja excluir a seguinte análise de sílica?</p>
+
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="bi bi-layers me-2"></i>
+                                Análise de Sílica
+                            </h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>Data:</strong> {{ object.data|date:"d/m/Y" }}</li>
+                                <li><strong>Horário:</strong> {{ object.horario|time:"H:i" }}</li>
+                                <li><strong>Tipo de Amostra:</strong> {{ object.get_tipo_amostra_display }}</li>
+                                {% if object.analise_cinza %}
+                                <li><strong>Análise de Cinza:</strong> {{ object.analise_cinza.data|date:"d/m/Y" }} ({{ object.analise_cinza.resultado|floatformat:2 }}%)</li>
+                                {% endif %}
+                                {% if object.resultado_silica %}
+                                <li><strong>Resultado Sílica:</strong> {{ object.resultado_silica|floatformat:2 }}%</li>
+                                {% endif %}
+                                {% if object.resultado_final %}
+                                <li><strong>Resultado Final:</strong> {{ object.resultado_final|floatformat:2 }}%</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'analises:silica_detail' object.pk %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash me-1"></i>Sim, Excluir
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

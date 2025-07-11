@@ -7,7 +7,8 @@ from .models import (
     AnaliseCinza, 
     AnaliseTeorOleo, 
     AnaliseFibra, 
-    AnaliseFosforo
+    AnaliseFosforo,
+    AnaliseSilica
 )
 
 
@@ -80,3 +81,12 @@ class AnaliseFosforoAdmin(admin.ModelAdmin):
     list_filter = ["tipo_amostra", "data"]
     search_fields = ["tipo_amostra"]
     readonly_fields = ["resultado"]
+
+
+@admin.register(AnaliseSilica)
+class AnaliseSilicaAdmin(admin.ModelAdmin):
+    list_display = ["data", "horario", "tipo_amostra", "resultado_silica", "resultado_final", "analise_cinza"]
+    list_filter = ["tipo_amostra", "data"]
+    search_fields = ["tipo_amostra"]
+    readonly_fields = ["resultado_final"]
+    autocomplete_fields = ["analise_cinza"]

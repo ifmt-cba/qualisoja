@@ -1,6 +1,6 @@
 import datetime
 from django import forms
-from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo
+from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo, AnaliseSilica
 from django.utils import timezone  # Use o timezone do Django, não o datetime padrão
 
 class AnaliseUmidadeForm(forms.ModelForm):
@@ -440,4 +440,53 @@ class AnaliseFosforoForm(forms.ModelForm):
         if not absorbancia_amostra or absorbancia_amostra <= 0:
             self.add_error('absorbancia_amostra', 'A absorbância da amostra é obrigatória e deve ser maior que zero.')
         
+        return cleaned_data
+
+class AnaliseSilicaForm(forms.ModelForm):
+    """
+    Formulário para cadastro e edição de análises de sílica.
+    """
+    class Meta:
+        model = AnaliseSilica
+        fields = '__all__'
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+            'horario': forms.TimeInput(attrs={'type': 'time'}),
+            'resultado_silica': forms.NumberInput(attrs={
+                'step': '0.01',
+                'placeholder': 'Ex: 1.25',
+                'class': 'form-control'
+            }),
+            'analise_cinza': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Definir hora atual como padrão
+        if not self.instance.pk:
+            self.fields['horario'].initial = timezone.localtime().time()
+        
+        # Filtrar análises de cinza recentes para facilitar seleção
+        self.fields['analise_cinza'].queryset = AnaliseCinza.objects.filter(
+            data__gte=timezone.now().date() - datetime.timedelta(days=30)
+        ).order_by('-data', '-horario')
+        self.fields['analise_cinza'].empty_label = "Selecione uma análise de cinza"
+    
+    def clean(self):
+        """Validação específica do formulário de sílica"""
+        cleaned_data = super().clean()
+        
+        resultado_silica = cleaned_data.get('resultado_silica')
+        analise_cinza = cleaned_data.get('analise_cinza')
+        
+        # Validar se o resultado da sílica é positivo
+        if resultado_silica and resultado_silica <= 0:
+            self.add_error('resultado_silica', 'O resultado da sílica deve ser maior que zero.')
+        
+        # Validar se a análise de cinza foi selecionada
+        if not analise_cinza:
+            self.add_error('analise_cinza', 'Selecione uma análise de cinza.')
+            
         return cleaned_data
