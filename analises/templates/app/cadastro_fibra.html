@@ -15,6 +15,13 @@
                     </h4>
                 </div>
                 <div class="card-body">
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Erro no formulário:</h6>
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+                    
                     <form method="post" class="needs-validation" novalidate>
                         {% csrf_token %}
                         
@@ -44,21 +51,60 @@
                                 {{ form.tipo_amostra|add_class:"form-select" }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.teor_fibra.id_for_label }}" class="form-label">
-                                    <i class="fas fa-percentage me-1"></i>
-                                    Teor de Fibra (%)
+                                <label for="{{ form.peso_amostra.id_for_label }}" class="form-label">
+                                    <i class="fas fa-weight me-1"></i>
+                                    Peso da Amostra (g)
                                 </label>
-                                {{ form.teor_fibra|add_class:"form-control" }}
+                                {{ form.peso_amostra|add_class:"form-control" }}
+                                {% if form.peso_amostra.errors %}
+                                    <div class="text-danger small mt-1">{{ form.peso_amostra.errors.0 }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label for="{{ form.observacoes.id_for_label }}" class="form-label">
-                                    <i class="fas fa-comment me-1"></i>
-                                    Observações
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.peso_tara.id_for_label }}" class="form-label">
+                                    <i class="fas fa-balance-scale me-1"></i>
+                                    Peso da Tara (g)
                                 </label>
-                                {{ form.observacoes|add_class:"form-control" }}
+                                {{ form.peso_tara|add_class:"form-control" }}
+                                {% if form.peso_tara.errors %}
+                                    <div class="text-danger small mt-1">{{ form.peso_tara.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.peso_fibra.id_for_label }}" class="form-label">
+                                    <i class="fas fa-leaf me-1"></i>
+                                    Peso da Fibra (g)
+                                </label>
+                                {{ form.peso_fibra|add_class:"form-control" }}
+                                {% if form.peso_fibra.errors %}
+                                    <div class="text-danger small mt-1">{{ form.peso_fibra.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.peso_branco.id_for_label }}" class="form-label">
+                                    <i class="fas fa-circle me-1"></i>
+                                    Peso do Branco (g)
+                                </label>
+                                {{ form.peso_branco|add_class:"form-control" }}
+                                {% if form.peso_branco.errors %}
+                                    <div class="text-danger small mt-1">{{ form.peso_branco.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.resultado.id_for_label }}" class="form-label">
+                                    <i class="fas fa-percentage me-1"></i>
+                                    Teor de Fibra (%) - Calculado Automaticamente
+                                </label>
+                                {{ form.resultado|add_class:"form-control"|attr:"readonly:readonly" }}
+                                {% if form.resultado.errors %}
+                                    <div class="text-danger small mt-1">{{ form.resultado.errors.0 }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -78,4 +124,46 @@
         </div>
     </div>
 </div>
+
+<script>
+// Cálculo automático do teor de fibra
+document.addEventListener('DOMContentLoaded', function() {
+    const horarioField = document.querySelector('#{{ form.horario.id_for_label }}');
+    if (horarioField && !horarioField.value) {
+        const now = new Date();
+        const timeString = now.toTimeString().substr(0, 5);
+        horarioField.value = timeString;
+    }
+    
+    // Campos para cálculo
+    const pesoAmostraField = document.querySelector('#{{ form.peso_amostra.id_for_label }}');
+    const pesoTaraField = document.querySelector('#{{ form.peso_tara.id_for_label }}');
+    const pesoFibraField = document.querySelector('#{{ form.peso_fibra.id_for_label }}');
+    const pesoBrancoField = document.querySelector('#{{ form.peso_branco.id_for_label }}');
+    const resultadoField = document.querySelector('#{{ form.resultado.id_for_label }}');
+    
+    function calcularTeorFibra() {
+        const pesoAmostra = parseFloat(pesoAmostraField.value);
+        const pesoTara = parseFloat(pesoTaraField.value);
+        const pesoFibra = parseFloat(pesoFibraField.value);
+        const pesoBranco = parseFloat(pesoBrancoField.value);
+        
+        if (pesoAmostra && pesoTara && pesoFibra && pesoBranco && pesoAmostra > 0) {
+            // Fórmula: (peso_tara - peso_fibra - peso_branco) / peso_amostra * 100
+            const teorFibra = ((pesoTara - pesoFibra - pesoBranco) / pesoAmostra) * 100;
+            resultadoField.value = teorFibra.toFixed(2);
+        } else {
+            resultadoField.value = '';
+        }
+    }
+    
+    // Event listeners
+    if (pesoAmostraField && pesoTaraField && pesoFibraField && pesoBrancoField && resultadoField) {
+        pesoAmostraField.addEventListener('input', calcularTeorFibra);
+        pesoTaraField.addEventListener('input', calcularTeorFibra);
+        pesoFibraField.addEventListener('input', calcularTeorFibra);
+        pesoBrancoField.addEventListener('input', calcularTeorFibra);
+    }
+});
+</script>
 {% endblock %}

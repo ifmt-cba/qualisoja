@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-primary bg-opacity-10 border-primary border-opacity-25">
+        <h2 class="mb-0 text-primary">
+            <i class="bi bi-graph-up me-2"></i>
+            Detalhes da Análise de Urase
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Informações Básicas</h6>
+                        <p class="card-text">
+                            <strong>Data:</strong> {{ analise.data|date:"d/m/Y" }}<br>
+                            <strong>Horário:</strong> {{ analise.horario|time:"H:i" }}<br>
+                            <strong>Tipo de Amostra:</strong> {{ analise.get_tipo_amostra_display }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Medições</h6>
+                        <p class="card-text">
+                            <strong>Amostra 1:</strong> {{ analise.amostra_1 }}<br>
+                            <strong>Amostra 2:</strong> {{ analise.amostra_2 }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Resultado</h6>
+                        <h3 class="text-success">
+                            {% if analise.resultado %}
+                                {{ analise.resultado }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </h3>
+                        <p class="text-muted">Resultado da Urase</p>
+                        <small class="text-muted">
+                            Fórmula: {{ analise.amostra_1 }} - {{ analise.amostra_2 }} = {{ analise.resultado }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex gap-2 mt-4">
+            <a href="{% url 'analises:urase_update' analise.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            <a href="{% url 'analises:urase_list' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar para Lista
+            </a>
+            <a href="{% url 'analises:urase_delete' analise.pk %}" class="btn btn-outline-danger">
+                <i class="bi bi-trash me-2"></i>Excluir
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -161,3 +161,7 @@ def health_check(request):
         status_code = 503  # Service Unavailable
     
     return JsonResponse(status, status=status_code)
+
+def teste_acesso(request):
+    from django.shortcuts import render
+    return render(request, 'teste_acesso.html')
