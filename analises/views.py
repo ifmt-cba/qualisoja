@@ -44,6 +44,35 @@ class OleoDegomadoCreateView(CreateView):
     template_name = 'app/cadastro_oleo.html'
     success_url = reverse_lazy('analises:oleo_list')
 
+    # def form_valid(self, form):
+    #     titulacao = form.cleaned_data['titulacao']
+    #     fator_correcao = form.cleaned_data['fator_correcao']
+    #     peso_amostra = form.cleaned_data['peso_amostra']
+    #     tipo_analise = form.cleaned_data['tipo_analise']
+    #     tara = form.cleaned_data['tara']
+    #     liquido = form.cleaned_data['liquido']
+        
+    #     resultado = None  # <- ✅ isso evita o erro
+
+    #     if tipo_analise == 'UMI':
+    #         if tara and fator_correcao and peso_amostra:
+    #             resultado = ((tara + peso_amostra) - (liquido))/peso_amostra*100
+    #             # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
+
+    #     elif tipo_analise == 'ACI':
+    #         if titulacao and fator_correcao and peso_amostra:
+    #             # Use Decimal para valores numéricos literais
+    #             resultado = (titulacao * fator_correcao * Decimal('28.2') * Decimal('100')) / peso_amostra
+    #             # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
+
+    #     elif tipo_analise == 'SAB':
+    #         if titulacao and fator_correcao and peso_amostra:
+    #             resultado = (titulacao * fator_correcao * Decimal('300.4') * Decimal('100')) / peso_amostra
+    #             # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
+    #     else:
+    #         resultado = None
+    #     form.instance.resultado = resultado        
+    #     return super().form_valid(form)
     def form_valid(self, form):
         titulacao = form.cleaned_data['titulacao']
         fator_correcao = form.cleaned_data['fator_correcao']
@@ -51,25 +80,22 @@ class OleoDegomadoCreateView(CreateView):
         tipo_analise = form.cleaned_data['tipo_analise']
         tara = form.cleaned_data['tara']
         liquido = form.cleaned_data['liquido']
-        
+
+        resultado = None  # evita erro se nenhum cálculo for feito
+
         if tipo_analise == 'UMI':
-            if tara and fator_correcao and peso_amostra:
-                resultado = ((tara + peso_amostra) - (liquido))/peso_amostra*100
-                # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
+            if tara is not None and liquido is not None and peso_amostra is not None:
+                resultado = (((tara + peso_amostra) - liquido) / peso_amostra) * 100
 
         elif tipo_analise == 'ACI':
-            if titulacao and fator_correcao and peso_amostra:
-                # Use Decimal para valores numéricos literais
+            if titulacao is not None and fator_correcao is not None and peso_amostra is not None:
                 resultado = (titulacao * fator_correcao * Decimal('28.2') * Decimal('100')) / peso_amostra
-                # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
 
         elif tipo_analise == 'SAB':
-            if titulacao and fator_correcao and peso_amostra:
+            if titulacao is not None and fator_correcao is not None and peso_amostra is not None:
                 resultado = (titulacao * fator_correcao * Decimal('300.4') * Decimal('100')) / peso_amostra
-                # form.instance.resultado = resultado.quantize(Decimal('0.01'))  # arredonda para 2 casas decimais
-        else:
-            resultado = None
-        form.instance.resultado = resultado        
+
+        form.instance.resultado = resultado
         return super().form_valid(form)
 
 

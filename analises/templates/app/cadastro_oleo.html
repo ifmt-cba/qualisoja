@@ -95,8 +95,8 @@
 
                 <div class="col-md-3">
                     <div class="form-floating mb-3">
-                        {{ form.fator_correcao|add_class:"form-control" }}
                         
+                        {{ form.fator_correcao|add_class:"form-control"|attr:"required:False" }}
                         <label for="{{ form.fator_correcao.id_for_label }}">{{ form.fator_correcao.label }}</label>
                         {% if form.fator_correcao.errors %}
                             <div class="invalid-feedback d-block">{{ form.fator_correcao.errors }}</div>
@@ -106,7 +106,8 @@
 
                 <div class="col-md-3">
                     <div class="form-floating mb-3">
-                        {{ form.titulacao|add_class:"form-control" }}
+                        
+                        {{ form.titulacao|add_class:"form-control"|attr:"required:False" }}
                         <label for="{{ form.titulacao.id_for_label }}">{{ form.titulacao.label }}</label>
                         {% if form.titulacao.errors %}
                             <div class="invalid-feedback d-block">{{ form.titulacao.errors }}</div>
