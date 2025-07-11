@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -290,6 +291,8 @@ class AnaliseUrase(BaseModel):
         ('FL', 'Farelo'),
         ('SI', 'Soja Industrializada'),
         ('PE', 'Peletizado'),
+        ('FP', 'Fábrica Parada'),
+        ('SA', 'Sem Amostra'),
     ]
     
     data = models.DateField(
@@ -343,4 +346,416 @@ class AnaliseUrase(BaseModel):
     class Meta:
         verbose_name = "Análise de Urase"
         verbose_name_plural = "Análises de Urase"
+        ordering = ['-data', '-horario']
+
+class AnaliseCinza(BaseModel):
+    """
+    Modelo para armazenar análises de cinza na soja.
+    """
+    TIPO_AMOSTRA_CHOICES = [
+        ('FL', 'Farelo'),
+        ('SI', 'Soja Industrializada'),
+        ('FP', 'Fábrica Parada'),
+        ('SA', 'Sem Amostra'),
+    ]
+    
+    data = models.DateField(
+        verbose_name="Data da Análise", 
+        default=timezone.localdate,
+        validators=[validate_not_future_date]
+    )
+    horario = models.TimeField(
+        verbose_name="Horário da Análise",
+        default=timezone.localtime().time()
+    )
+    tipo_amostra = models.CharField(
+        max_length=2,
+        choices=TIPO_AMOSTRA_CHOICES,
+        verbose_name="Tipo de Amostra",
+        default='FL'
+    )
+    peso_amostra = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        verbose_name="Peso da Amostra (g)",
+        validators=[MinValueValidator(0.0001)]
+    )
+    peso_cadinho = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        verbose_name="Peso do Cadinho (g)",
+        validators=[MinValueValidator(0.0001)]
+    )
+    peso_cinza = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        verbose_name="Peso da Cinza (g)",
+        validators=[MinValueValidator(0.0001)]
+    )
+    resultado = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Resultado (%)"
+    )
+    
+    def save(self, *args, **kwargs):
+        """Calcular resultado automaticamente"""
+        if self.peso_amostra and self.peso_cadinho and self.peso_cinza:
+            self.resultado = ((self.peso_cinza - self.peso_cadinho) / self.peso_amostra) * 100
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Análise de Cinza - {self.get_tipo_amostra_display()} - {self.data}"
+    
+    class Meta:
+        verbose_name = "Análise de Cinza"
+        verbose_name_plural = "Análises de Cinza"
+        ordering = ['-data', '-horario']
+
+
+class AnaliseTeorOleo(BaseModel):
+    """
+    Modelo para armazenar análises de teor de óleo na soja.
+    """
+    TIPO_AMOSTRA_CHOICES = [
+        ('FL', 'Farelo'),
+        ('SI', 'Soja Industrializada'),
+        ('LE', 'Lex'),
+        ('CA', 'Casca'),
+        ('FP', 'Fábrica Parada'),
+        ('SA', 'Sem Amostra'),
+    ]
+    
+    data = models.DateField(
+        verbose_name="Data da Análise", 
+        default=timezone.localdate,
+        validators=[validate_not_future_date]
+    )
+    horario = models.TimeField(
+        verbose_name="Horário da Análise",
+        default=timezone.localtime().time()
+    )
+    tipo_amostra = models.CharField(
+        max_length=2,
+        choices=TIPO_AMOSTRA_CHOICES,
+        verbose_name="Tipo de Amostra",
+        default='FL'
+    )
+    
+    peso_amostra = models.DecimalField(
+        max_digits=6,
+        decimal_places=3,
+        verbose_name="Peso da Amostra (g)",
+        help_text="Entre 2,000 g e 2,500 g"
+    )
+    
+    peso_tara = models.DecimalField(
+        max_digits=6,
+        decimal_places=3,
+        verbose_name="Peso da Tara (g)",
+        help_text="Peso do recipiente vazio (antes da extração)"
+    )
+    
+    peso_liquido = models.DecimalField(
+        max_digits=6,
+        decimal_places=3,
+        verbose_name="Peso Líquido (g)",
+        help_text="Peso do recipiente com óleo extraído (após extração)"
+    )
+
+    teor_oleo = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        verbose_name="Teor de Óleo (%)",
+        blank=True,
+        null=True,
+        help_text="Calculado automaticamente: (Peso_liquido - Peso_tara) / Peso_amostra * 100"
+    )
+
+    observacoes = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Observações",
+        help_text="Observações adicionais sobre a análise"
+    )
+
+    def clean(self):
+        """
+        Validação dos valores antes de salvar.
+        """
+        if self.peso_amostra and not (2.000 <= float(self.peso_amostra) <= 2.500):
+            raise ValidationError({'peso_amostra': 'O peso da amostra deve estar entre 2,000 g e 2,500 g.'})
+        
+        if self.peso_liquido and self.peso_tara and self.peso_liquido < self.peso_tara:
+            raise ValidationError({'peso_liquido': 'O peso líquido (tara + óleo) deve ser maior que o peso da tara vazia.'})
+        
+        if self.peso_tara and self.peso_tara <= 0:
+            raise ValidationError({'peso_tara': 'O peso da tara deve ser maior que zero.'})
+
+    def save(self, *args, **kwargs):
+        """
+        Calcula automaticamente o teor de óleo (%).
+        Fórmula: Teor = (peso_liquido - peso_tara) / peso_amostra * 100
+        """
+        if (self.peso_tara is not None and 
+            self.peso_liquido is not None and 
+            self.peso_amostra is not None and 
+            self.peso_amostra != 0):
+            
+            self.teor_oleo = round(
+                ((self.peso_liquido - self.peso_tara) / self.peso_amostra) * Decimal('100'),
+                2
+            )
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Análise de Teor de Óleo - {self.get_tipo_amostra_display()} - {self.data}"
+    
+    class Meta:
+        verbose_name = "Análise de Teor de Óleo"
+        verbose_name_plural = "Análises de Teor de Óleo"
+        ordering = ['-data', '-horario']
+
+class AnaliseFibra(BaseModel):
+    """
+    Modelo para armazenar análises de fibra na soja.
+    """
+    TIPO_AMOSTRA_CHOICES = [
+        ('FL', 'Farelo'),
+        ('SI', 'Soja Industrializada'),
+        ('FP', 'Fábrica Parada'),
+        ('SA', 'Sem Amostra'),
+    ]
+    
+    data = models.DateField(
+        verbose_name="Data da Análise", 
+        default=timezone.localdate,
+        validators=[validate_not_future_date]
+    )
+    horario = models.TimeField(
+        verbose_name="Horário da Análise",
+        default=timezone.localtime().time()
+    )
+    tipo_amostra = models.CharField(
+        max_length=2,
+        choices=TIPO_AMOSTRA_CHOICES,
+        verbose_name="Tipo de Amostra",
+        default='FL'
+    )
+    peso_amostra = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        verbose_name="Peso da Amostra (g)",
+        validators=[MinValueValidator(0.0001)]
+    )
+    peso_tara = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        verbose_name="Peso da Tara (g)",
+        validators=[MinValueValidator(0.0001)]
+    )
+    peso_fibra = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        verbose_name="Peso da Fibra (g)",
+        validators=[MinValueValidator(0.0001)]
+    )
+    peso_branco = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        verbose_name="Peso do Branco (g)",
+        validators=[MinValueValidator(0.0001)]
+    )
+    resultado = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Teor de Fibra (%)"
+    )
+    
+    def save(self, *args, **kwargs):
+        """Calcular resultado automaticamente"""
+        if self.peso_amostra and self.peso_tara and self.peso_fibra and self.peso_branco:
+            # Fórmula: (peso_tara - peso_fibra - peso_branco) / peso_amostra * 100
+            self.resultado = ((self.peso_tara - self.peso_fibra - self.peso_branco) / self.peso_amostra) * 100
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Análise de Fibra - {self.get_tipo_amostra_display()} - {self.data}"
+    
+    class Meta:
+        verbose_name = "Análise de Fibra"
+        verbose_name_plural = "Análises de Fibra"
+        ordering = ['-data', '-horario']
+
+
+class AnaliseFosforo(BaseModel):
+    """
+    Modelo para armazenar análises de fósforo na soja.
+    Fórmula: Fósforo (ppm) = (Aa × Cp × V × 1000 × 1000) / (P × VAl × Ap)
+    O usuário insere apenas a absorbância da amostra, os outros valores são padrões.
+    """
+    TIPO_AMOSTRA_CHOICES = [
+        ('FL', 'Farelo'),
+        ('SI', 'Soja Industrializada'),
+        ('FP', 'Fábrica Parada'),
+        ('SA', 'Sem Amostra'),
+    ]
+    
+    data = models.DateField(
+        verbose_name="Data da Análise", 
+        default=timezone.localdate,
+        validators=[validate_not_future_date]
+    )
+    horario = models.TimeField(
+        verbose_name="Horário da Análise",
+        default=timezone.localtime().time()
+    )
+    tipo_amostra = models.CharField(
+        max_length=2,
+        choices=TIPO_AMOSTRA_CHOICES,
+        verbose_name="Tipo de Amostra",
+        default='FL'
+    )
+    
+    # Campo principal que o usuário preenche
+    absorbancia_amostra = models.DecimalField(
+        max_digits=8,
+        decimal_places=6,
+        verbose_name="Absorbância da Amostra",
+        validators=[MinValueValidator(0.000001)],
+        help_text="Digite apenas o valor da absorbância lida no equipamento"
+    )
+    
+    # Campos com valores padrão que podem ser ajustados se necessário
+    peso_amostra = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        verbose_name="Peso da Amostra (g)",
+        default=Decimal('1.0000'),
+        validators=[MinValueValidator(0.0001)],
+        help_text="Peso da amostra em gramas (padrão: 1.0000g)"
+    )
+    concentracao_padrao = models.DecimalField(
+        max_digits=8,
+        decimal_places=4,
+        verbose_name="Concentração Padrão (mg/L)",
+        default=Decimal('10.0000'),
+        validators=[MinValueValidator(0.0001)],
+        help_text="Concentração do padrão em mg/L (padrão: 10.0000)"
+    )
+    volume_solucao = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        verbose_name="Volume da Solução (mL)",
+        default=Decimal('100.00'),
+        validators=[MinValueValidator(0.01)],
+        help_text="Volume da solução em mL (padrão: 100.00)"
+    )
+    volume_aliquota = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        verbose_name="Volume da Alíquota (mL)",
+        default=Decimal('10.00'),
+        validators=[MinValueValidator(0.01)],
+        help_text="Volume da alíquota em mL (padrão: 10.00)"
+    )
+    absorbancia_padrao = models.DecimalField(
+        max_digits=8,
+        decimal_places=6,
+        verbose_name="Absorbância do Padrão",
+        default=Decimal('0.250000'),
+        validators=[MinValueValidator(0.000001)],
+        help_text="Absorbância do padrão (padrão: 0.250000)"
+    )
+    
+    # Resultado calculado automaticamente
+    resultado = models.DecimalField(
+        max_digits=10,
+        decimal_places=3,
+        blank=True,
+        null=True,
+        verbose_name="Fósforo (ppm)",
+        help_text="Resultado calculado automaticamente usando a fórmula: (Aa × Cp × V × 1000 × 1000) / (P × VAl × Ap)"
+    )
+    
+    # Campo para controlar as casas decimais do resultado
+    casas_decimais = models.IntegerField(
+        default=0,
+        verbose_name="Casas Decimais",
+        validators=[MinValueValidator(0), MaxValueValidator(6)],
+        help_text="Número de casas decimais para exibir o resultado (0-6). 0 = número inteiro"
+    )
+    
+    def save(self, *args, **kwargs):
+        """
+        Calcular resultado automaticamente usando a fórmula corrigida:
+        Fósforo (ppm) = ((Aa/Ap) × Cp × (V/VAl)) / P
+        """
+        if self.absorbancia_amostra:
+            try:
+                # Converter todos os valores para Decimal para precisão
+                aa = Decimal(str(self.absorbancia_amostra))
+                cp = Decimal(str(self.concentracao_padrao))
+                v = Decimal(str(self.volume_solucao))
+                p = Decimal(str(self.peso_amostra))
+                val = Decimal(str(self.volume_aliquota))
+                ap = Decimal(str(self.absorbancia_padrao))
+                
+                # Fórmula corrigida: ((Aa/Ap) × Cp × (V/VAl)) / P
+                if ap != 0 and val != 0 and p != 0:
+                    concentracao_aliquota = (aa / ap) * cp  # mg/L na alíquota
+                    concentracao_original = concentracao_aliquota * (v / val)  # mg/L na solução original
+                    resultado_calculado = concentracao_original / p  # mg/g = ppm
+                    
+                    # Arredondar para 3 casas decimais para armazenamento
+                    self.resultado = resultado_calculado.quantize(Decimal('0.001'))
+                else:
+                    self.resultado = None
+                    
+            except (ValueError, TypeError, AttributeError, Exception) as e:
+                logger.error(f"Erro no cálculo de fósforo: {e}")
+                self.resultado = None
+                
+        super().save(*args, **kwargs)
+    
+    def get_resultado_formatado(self):
+        """Retorna o resultado formatado com as casas decimais configuradas"""
+        try:
+            if self.resultado is None:
+                return "0"
+            
+            # Garantir que temos um valor válido para casas_decimais
+            casas = 0
+            if hasattr(self, 'casas_decimais') and self.casas_decimais is not None:
+                casas = int(self.casas_decimais)
+            
+            # Converter para Decimal com proteção
+            if isinstance(self.resultado, Decimal):
+                valor = self.resultado
+            else:
+                valor = Decimal(str(self.resultado))
+            
+            # Formatar conforme as casas decimais
+            if casas == 0:
+                # Arredondar para inteiro
+                return str(int(valor.quantize(Decimal('1'))))
+            else:
+                # Formatar com casas decimais específicas
+                formato = '0.' + '0' * casas
+                return str(valor.quantize(Decimal(formato)))
+                
+        except Exception as e:
+            logger.error(f"Erro ao formatar resultado: {e}")
+            return "0"
+    
+    def __str__(self):
+        return f"Análise de Fósforo - {self.get_tipo_amostra_display()} - {self.data}"
+    
+    class Meta:
+        verbose_name = "Análise de Fósforo"
+        verbose_name_plural = "Análises de Fósforo"
         ordering = ['-data', '-horario']

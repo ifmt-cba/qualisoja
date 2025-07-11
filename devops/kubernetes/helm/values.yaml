@@ -1,0 +1,124 @@
+# Default values for qualisoja.
+replicaCount: 3
+
+image:
+  repository: qualisoja
+  tag: "production"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: qualisoja.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: qualisoja-tls
+      hosts:
+        - qualisoja.local
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Application specific configuration
+django:
+  debug: false
+  secretKey: "change-me-in-production"
+  allowedHosts: "qualisoja.local,localhost"
+  superuser:
+    username: "admin"
+    email: "admin@qualisoja.com"
+    password: "change-me-in-production"
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "qualisoja"
+    username: "qualisoja"
+    password: "qualisoja"
+    database: "qualisoja"
+  persistence:
+    enabled: true
+    size: 10Gi
+
+# Redis configuration  
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "qualisoja"
+  persistence:
+    enabled: false
+
+# Persistent volumes
+persistence:
+  media:
+    enabled: true
+    accessMode: ReadWriteMany
+    size: 5Gi
+    storageClass: ""
+
+# Health checks
+healthCheck:
+  path: /health/
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+# Monitoring
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-danger bg-opacity-10 border-danger border-opacity-25">
+        <h2 class="mb-0 text-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Confirmar Exclusão
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Tem certeza que deseja excluir esta análise de teor de óleo?
+        </div>
+        
+        <div class="card border-light mb-3">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Dados da Análise</h6>
+                <p class="card-text">
+                    <strong>Data:</strong> {{ object.data|date:"d/m/Y" }}<br>
+                    <strong>Horário:</strong> {{ object.horario|time:"H:i" }}<br>
+                    <strong>Tipo de Amostra:</strong> {{ object.get_tipo_amostra_display }}<br>
+                    <strong>Teor de Óleo:</strong> 
+                    {% if object.teor_oleo %}
+                        {{ object.teor_oleo }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <div class="alert alert-danger" role="alert">
+            <strong>Atenção:</strong> Esta ação não pode ser desfeita. Todos os dados desta análise serão perdidos permanentemente.
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash me-2"></i>Confirmar Exclusão
+                </button>
+                <a href="{% url 'analises:teor_oleo_detail' object.pk %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Cancelar
+                </a>
+                <a href="{% url 'analises:teor_oleo_list' %}" class="btn btn-outline-warning">
+                    <i class="bi bi-list me-2"></i>Voltar para Lista
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

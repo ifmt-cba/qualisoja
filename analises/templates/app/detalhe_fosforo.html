@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-info bg-opacity-10 border-info border-opacity-25">
+        <h2 class="mb-0 text-info">
+            <i class="bi bi-radioactive me-2"></i>
+            Detalhes da Análise de Fósforo
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Informações Básicas</h6>
+                        <p class="card-text">
+                            <strong>Data:</strong> {{ analise.data|date:"d/m/Y" }}<br>
+                            <strong>Horário:</strong> {{ analise.horario|time:"H:i" }}<br>
+                            <strong>Tipo de Amostra:</strong> {{ analise.get_tipo_amostra_display }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Medições Principais</h6>
+                        <p class="card-text">
+                            <strong>Absorbância da Amostra:</strong> {{ analise.absorbancia_amostra }}<br>
+                            <strong>Peso da Amostra:</strong> {{ analise.peso_amostra }} g<br>
+                            <strong>Casas Decimais:</strong> {{ analise.casas_decimais }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Parâmetros da Análise</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="card-text">
+                                    <strong>Concentração Padrão:</strong> {{ analise.concentracao_padrao }} mg/L<br>
+                                    <strong>Volume da Solução:</strong> {{ analise.volume_solucao }} mL<br>
+                                    <strong>Volume da Alíquota:</strong> {{ analise.volume_aliquota }} mL
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="card-text">
+                                    <strong>Absorbância do Padrão:</strong> {{ analise.absorbancia_padrao }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Resultado</h6>
+                        <h3 class="text-success">
+                            {% if analise.resultado %}
+                                {{ analise.get_resultado_formatado }} ppm
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </h3>
+                        <p class="text-muted">Fósforo</p>
+                        <small class="text-muted">
+                            Fórmula: ((Aa/Ap) × Cp × (V/VAl)) / P
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex gap-2 mt-4">
+            <a href="{% url 'analises:fosforo_update' analise.pk %}" class="btn btn-info">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            <a href="{% url 'analises:lista_fosforo' %}" class="btn btn-outline-info">
+                <i class="bi bi-arrow-left me-2"></i>Voltar para Lista
+            </a>
+            <a href="{% url 'analises:fosforo_delete' analise.pk %}" class="btn btn-outline-danger">
+                <i class="bi bi-trash me-2"></i>Excluir
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
