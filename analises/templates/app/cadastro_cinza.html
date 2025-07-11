@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-secondary bg-opacity-10 border-secondary border-opacity-25">
+        <h2 class="mb-0 text-secondary">
+            <i class="bi bi-fire me-2"></i>Nova Análise de Cinza
+        </h2>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="row g-3">
+                <!-- Primeira linha -->
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.data|add_class:"form-control" }}
+                        <label for="{{ form.data.id_for_label }}">{{ form.data.label }}</label>
+                        {% if form.data.errors %}
+                            <div class="invalid-feedback d-block">{{ form.data.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.horario|add_class:"form-control" }}
+                        <label for="{{ form.horario.id_for_label }}">{{ form.horario.label }}</label>
+                        {% if form.horario.errors %}
+                            <div class="invalid-feedback d-block">{{ form.horario.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Segunda linha -->
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.tipo_amostra|add_class:"form-select" }}
+                        <label for="{{ form.tipo_amostra.id_for_label }}">{{ form.tipo_amostra.label }}</label>
+                        {% if form.tipo_amostra.errors %}
+                            <div class="invalid-feedback d-block">{{ form.tipo_amostra.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.peso_amostra|add_class:"form-control" }}
+                        <label for="{{ form.peso_amostra.id_for_label }}">{{ form.peso_amostra.label }}</label>
+                        {% if form.peso_amostra.errors %}
+                            <div class="invalid-feedback d-block">{{ form.peso_amostra.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Terceira linha -->
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.peso_cadinho|add_class:"form-control" }}
+                        <label for="{{ form.peso_cadinho.id_for_label }}">{{ form.peso_cadinho.label }}</label>
+                        {% if form.peso_cadinho.errors %}
+                            <div class="invalid-feedback d-block">{{ form.peso_cadinho.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form.peso_cinza|add_class:"form-control" }}
+                        <label for="{{ form.peso_cinza.id_for_label }}">{{ form.peso_cinza.label }}</label>
+                        {% if form.peso_cinza.errors %}
+                            <div class="invalid-feedback d-block">{{ form.peso_cinza.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Observações -->
+                <div class="col-12">
+                    <div class="form-floating mb-3">
+                        {{ form.observacoes|add_class:"form-control" }}
+                        <label for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
+                        {% if form.observacoes.errors %}
+                            <div class="invalid-feedback d-block">{{ form.observacoes.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botões -->
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="bi bi-save me-2"></i>Salvar Análise
+                </button>
+                <a href="{% url 'analises:cinza_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Voltar para Lista
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Validação de formulário Bootstrap
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Auto-preencher horário atual
+document.addEventListener('DOMContentLoaded', function() {
+    const horarioField = document.querySelector('#{{ form.horario.id_for_label }}');
+    if (horarioField && !horarioField.value) {
+        const now = new Date();
+        const timeString = now.toTimeString().substr(0, 5);
+        horarioField.value = timeString;
+    }
+});
+</script>
+{% endblock %}

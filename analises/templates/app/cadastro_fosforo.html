@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Cadastro de Análise de Fósforo{% endblock %}
+
+{% block extra_css %}
+<style>
+    .formula-box {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .formula-text {
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    .campo-principal {
+        background-color: #e3f2fd !important;
+        border: 3px solid #1976d2 !important;
+        font-size: 1.2rem !important;
+        font-weight: 600 !important;
+    }
+    .campo-padrao {
+        background-color: #f8f9fa !important;
+        font-size: 0.9rem;
+    }
+    .resultado-display {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #1976d2;
+        text-align: center;
+        padding: 1.5rem;
+        background-color: #e8f5e8;
+        border-radius: 0.5rem;
+        border: 3px solid #28a745;
+        margin: 1rem 0;
+    }
+    .campo-destaque {
+        border-left: 4px solid #0d6efd;
+        background-color: #f8f9ff;
+        padding: 1rem;
+        border-radius: 0.375rem;
+    }
+    .valores-configuracao {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-flask me-2"></i>
+                        Análise de Fósforo - Digite apenas a Absorbância
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Instruções -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>Como funciona:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Digite apenas o valor da absorbância</strong> lido no equipamento</li>
+                            <li>Os demais valores são padrões pré-configurados</li>
+                            <li>O resultado em ppm será calculado automaticamente</li>
+                        </ul>
+                    </div>
+
+                    <!-- Fórmula de Cálculo -->
+                    <div class="formula-box">
+                        <h6><i class="fas fa-calculator me-2"></i>Fórmula de Cálculo:</h6>
+                        <div class="formula-text">
+                            Fósforo (ppm) = (Aa × 10.0 × 100.0 × 1000 × 1000) / (1.0 × 10.0 × 0.25)
+                        </div>
+                        <div class="mt-2 text-muted small">
+                            <strong>Simplificada:</strong> Fósforo (ppm) = Absorbância × 4.000.000
+                        </div>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Formulário -->
+                    <form method="post" id="formulario-fosforo">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Informações Gerais -->
+                            <div class="col-md-6">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Informações Gerais
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.data.id_for_label }}" class="form-label">
+                                        <i class="fas fa-calendar me-1"></i>{{ form.data.label }}
+                                    </label>
+                                    {{ form.data|add_class:"form-control" }}
+                                    {% if form.data.errors %}
+                                        <div class="text-danger mt-1">{{ form.data.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.horario.id_for_label }}" class="form-label">
+                                        <i class="fas fa-clock me-1"></i>{{ form.horario.label }}
+                                    </label>
+                                    {{ form.horario|add_class:"form-control" }}
+                                    {% if form.horario.errors %}
+                                        <div class="text-danger mt-1">{{ form.horario.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.tipo_amostra.id_for_label }}" class="form-label">
+                                        <i class="fas fa-tag me-1"></i>{{ form.tipo_amostra.label }}
+                                    </label>
+                                    {{ form.tipo_amostra|add_class:"form-select" }}
+                                    {% if form.tipo_amostra.errors %}
+                                        <div class="text-danger mt-1">{{ form.tipo_amostra.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Campo Principal: Absorbância -->
+                            <div class="col-md-6">
+                                <div class="campo-destaque">
+                                    <h6 class="text-success mb-3">
+                                        <i class="fas fa-eye me-2"></i>CAMPO PRINCIPAL
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.absorbancia_amostra.id_for_label }}" class="form-label fw-bold">
+                                            <i class="fas fa-eye me-1"></i>{{ form.absorbancia_amostra.label }}
+                                        </label>
+                                        {{ form.absorbancia_amostra }}
+                                        <div class="form-text">
+                                            {{ form.absorbancia_amostra.help_text }}
+                                            <div class="mt-2 p-2 bg-light border-start border-4 border-info">
+                                                <small>
+                                                    <strong>💡 Guia de valores:</strong><br>
+                                                    • <span class="text-success">ÓTIMO (&lt; 80 ppm):</span> Digite valores abaixo de 0.000020<br>
+                                                    • <span class="text-warning">BOM (80-180 ppm):</span> Digite valores entre 0.000020 e 0.000045<br>
+                                                    • <span class="text-danger">RUIM (&gt; 180 ppm):</span> Acima de 0.000045<br>
+                                                    <strong>Resultado será exibido como número inteiro (sem casas decimais)</strong>
+                                                </small>
+                                            </div>
+                                        </div>
+                                        {% if form.absorbancia_amostra.errors %}
+                                            <div class="text-danger mt-1">{{ form.absorbancia_amostra.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Campo de Casas Decimais -->
+                                    <div class="mb-3">
+                                        <label for="{{ form.casas_decimais.id_for_label }}" class="form-label">
+                                            <i class="fas fa-decimal me-1"></i>{{ form.casas_decimais.label }}
+                                        </label>
+                                        <div class="input-group">
+                                            {{ form.casas_decimais }}
+                                            <span class="input-group-text">casas</span>
+                                        </div>
+                                        <div class="form-text">
+                                            <small>Controla quantas casas decimais aparecerão no resultado (0 = número inteiro)</small>
+                                        </div>
+                                        {% if form.casas_decimais.errors %}
+                                            <div class="text-danger mt-1">{{ form.casas_decimais.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Resultado em Tempo Real -->
+                                    <div class="resultado-display" id="resultado-display">
+                                        <div class="small text-muted mb-1">Resultado:</div>
+                                        <div><span id="resultado-valor">0.00</span> ppm</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Valores Configuráveis -->
+                        <div class="valores-configuracao mt-4">
+                            <h6 class="mb-3">
+                                <i class="fas fa-cog me-2"></i>Parâmetros da Análise
+                                <small class="text-muted ms-2">(Você pode alterar estes valores conforme necessário)</small>
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.peso_amostra.id_for_label }}" class="form-label">
+                                        <i class="fas fa-weight me-1"></i>{{ form.peso_amostra.label }}
+                                    </label>
+                                    {{ form.peso_amostra }}
+                                    {% if form.peso_amostra.errors %}
+                                        <div class="text-danger mt-1">{{ form.peso_amostra.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.concentracao_padrao.id_for_label }}" class="form-label">
+                                        <i class="fas fa-flask me-1"></i>{{ form.concentracao_padrao.label }}
+                                    </label>
+                                    {{ form.concentracao_padrao }}
+                                    {% if form.concentracao_padrao.errors %}
+                                        <div class="text-danger mt-1">{{ form.concentracao_padrao.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.absorbancia_padrao.id_for_label }}" class="form-label">
+                                        <i class="fas fa-eye me-1"></i>{{ form.absorbancia_padrao.label }}
+                                    </label>
+                                    {{ form.absorbancia_padrao }}
+                                    {% if form.absorbancia_padrao.errors %}
+                                        <div class="text-danger mt-1">{{ form.absorbancia_padrao.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.volume_solucao.id_for_label }}" class="form-label">
+                                        <i class="fas fa-flask me-1"></i>{{ form.volume_solucao.label }}
+                                    </label>
+                                    {{ form.volume_solucao }}
+                                    {% if form.volume_solucao.errors %}
+                                        <div class="text-danger mt-1">{{ form.volume_solucao.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.volume_aliquota.id_for_label }}" class="form-label">
+                                        <i class="fas fa-vial me-1"></i>{{ form.volume_aliquota.label }}
+                                    </label>
+                                    {{ form.volume_aliquota }}
+                                    {% if form.volume_aliquota.errors %}
+                                        <div class="text-danger mt-1">{{ form.volume_aliquota.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <a href="{% url 'analises:lista_fosforo' %}" class="btn btn-secondary me-md-2">
+                                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                                    </a>
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-save me-2"></i>Salvar Análise
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const campoAbsorbancia = document.getElementById('id_absorbancia_amostra');
+    const campoCasasDecimais = document.getElementById('id_casas_decimais');
+    const resultadoDisplay = document.getElementById('resultado-valor');
+    
+    function calcularResultado() {
+        const aa = parseFloat(campoAbsorbancia.value) || 0;
+        const casasDecimais = parseInt(campoCasasDecimais.value) || 0;
+        
+        // Fórmula simplificada: (Aa × 10.0 × 100.0 × 1000 × 1000) / (1.0 × 10.0 × 0.25)
+        // = Aa × 4.000.000
+        const resultado = aa * 4000000;
+        
+        if (aa > 0) {
+            if (casasDecimais === 0) {
+                // Número inteiro
+                resultadoDisplay.textContent = Math.round(resultado).toLocaleString('pt-BR');
+            } else {
+                // Com casas decimais
+                resultadoDisplay.textContent = resultado.toLocaleString('pt-BR', {
+                    minimumFractionDigits: casasDecimais,
+                    maximumFractionDigits: casasDecimais
+                });
+            }
+            resultadoDisplay.parentElement.parentElement.style.backgroundColor = '#e8f5e8';
+            resultadoDisplay.parentElement.parentElement.style.borderColor = '#28a745';
+        } else {
+            resultadoDisplay.textContent = casasDecimais === 0 ? '0' : '0,' + '0'.repeat(casasDecimais);
+            resultadoDisplay.parentElement.parentElement.style.backgroundColor = '#f8f9fa';
+            resultadoDisplay.parentElement.parentElement.style.borderColor = '#dee2e6';
+        }
+    }
+    
+    // Calcular em tempo real
+    campoAbsorbancia.addEventListener('input', calcularResultado);
+    campoAbsorbancia.addEventListener('change', calcularResultado);
+    
+    // Atualizar resultado quando as casas decimais mudarem
+    campoCasasDecimais.addEventListener('input', calcularResultado);
+    campoCasasDecimais.addEventListener('change', calcularResultado);
+    
+    // Calcular resultado inicial
+    calcularResultado();
+    
+    // Focar no campo principal
+    campoAbsorbancia.focus();
+});
+</script>
+{% endblock %}

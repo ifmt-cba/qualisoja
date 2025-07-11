@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: qualisoja
+  labels:
+    name: qualisoja
+    app: qualisoja
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qualisoja-config
+  namespace: qualisoja
+data:
+  DEBUG: "false"
+  ALLOWED_HOSTS: "qualisoja.local,localhost"
+  DATABASE_ENGINE: "django.db.backends.postgresql"
+  DATABASE_NAME: "qualisoja"
+  DATABASE_USER: "qualisoja"
+  DATABASE_HOST: "postgres-service"
+  DATABASE_PORT: "5432"
+  REDIS_URL: "redis://redis-service:6379/0"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: qualisoja-secrets
+  namespace: qualisoja
+type: Opaque
+data:
+  # Base64 encoded values - change these in production!
+  SECRET_KEY: ZGphbmdvLWluc2VjdXJlLXNlY3JldC1rZXktZm9yLWRldi1vbmx5
+  DATABASE_PASSWORD: cXVhbGlzb2ph
+  REDIS_PASSWORD: cXVhbGlzb2ph
+  DJANGO_SUPERUSER_USERNAME: YWRtaW4=
+  DJANGO_SUPERUSER_EMAIL: YWRtaW5AcXVhbGlzb2phLmNvbQ==
+  DJANGO_SUPERUSER_PASSWORD: YWRtaW4xMjM=

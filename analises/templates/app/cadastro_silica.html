@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if object %}
+        Editar Análise de Sílica - QualiSoja
+    {% else %}
+        Nova Análise de Sílica - QualiSoja
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-layers me-2"></i>
+                        {% if object %}
+                            Editar Análise de Sílica
+                        {% else %}
+                            Nova Análise de Sílica
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.data.id_for_label }}" class="form-label">
+                                        <i class="bi bi-calendar3 me-1"></i>{{ form.data.label }}
+                                    </label>
+                                    {{ form.data }}
+                                    {% if form.data.errors %}
+                                        <div class="text-danger">{{ form.data.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.horario.id_for_label }}" class="form-label">
+                                        <i class="bi bi-clock me-1"></i>{{ form.horario.label }}
+                                    </label>
+                                    {{ form.horario }}
+                                    {% if form.horario.errors %}
+                                        <div class="text-danger">{{ form.horario.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.tipo_amostra.id_for_label }}" class="form-label">
+                                <i class="bi bi-collection me-1"></i>{{ form.tipo_amostra.label }}
+                            </label>
+                            {{ form.tipo_amostra }}
+                            {% if form.tipo_amostra.errors %}
+                                <div class="text-danger">{{ form.tipo_amostra.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.analise_cinza.id_for_label }}" class="form-label">
+                                <i class="bi bi-link-45deg me-1"></i>{{ form.analise_cinza.label }} *
+                            </label>
+                            {{ form.analise_cinza }}
+                            {% if form.analise_cinza.errors %}
+                                <div class="text-danger">{{ form.analise_cinza.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                {{ form.analise_cinza.help_text }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.resultado_silica.id_for_label }}" class="form-label">
+                                <i class="bi bi-percent me-1"></i>{{ form.resultado_silica.label }} *
+                            </label>
+                            {{ form.resultado_silica }}
+                            {% if form.resultado_silica.errors %}
+                                <div class="text-danger">{{ form.resultado_silica.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                {{ form.resultado_silica.help_text }}
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Resultado Final:</strong> Será calculado automaticamente como <strong>Resultado Cinza - Resultado Sílica</strong>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'analises:silica_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Voltar
+                            </a>
+                            <button type="submit" class="btn btn-secondary">
+                                <i class="bi bi-check-lg me-1"></i>
+                                {% if object %}Atualizar{% else %}Cadastrar{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

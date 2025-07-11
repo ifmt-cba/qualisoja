@@ -1,0 +1,90 @@
+body {
+  background-color: #e9fdf2; /* verde clarinho */
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+.form-container {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+  .form-container h1 {
+    margin-bottom: 0.5rem;
+  }
+  .form-container p {
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+  }
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: #0f766e;
+    outline: none;
+  }
+  .btn {
+    background-color: #0f766e;
+    color: white;
+    padding: 0.75rem;
+    width: 100%;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover {
+    background-color: #0e5e56;
+  }
+  .form-container img {
+    display: block;
+    margin: 0 auto 15px auto;
+    height: 40px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  button.btn {
+    background-color: #007b5f;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  button.btn:hover {
+    background-color: #065f46;
+  }
+  

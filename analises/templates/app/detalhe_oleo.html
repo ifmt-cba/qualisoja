@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-warning bg-opacity-10 border-warning border-opacity-25">
+        <h2 class="mb-0 text-warning">
+            <i class="bi bi-droplet-half me-2"></i>
+            Detalhes da Análise de Óleo Degomado
+        </h2>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Informações Básicas</h6>
+                        <p class="card-text">
+                            <strong>Data:</strong> {{ analise.data|date:"d/m/Y" }}<br>
+                            <strong>Horário:</strong> {{ analise.horario|time:"H:i" }}<br>
+                            <strong>Tipo de Amostra:</strong> {{ analise.get_tipo_amostra_display }}<br>
+                            <strong>Tipo de Análise:</strong> {{ analise.get_tipo_analise_display }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Medições</h6>
+                        <p class="card-text">
+                            <strong>Peso da Amostra:</strong> {{ analise.peso_amostra }} g<br>
+                            <strong>Tara:</strong> 
+                            {% if analise.tara %}
+                                {{ analise.tara }} g
+                            {% else %}
+                                N/A
+                            {% endif %}<br>
+                            <strong>Líquido:</strong> 
+                            {% if analise.liquido %}
+                                {{ analise.liquido }} g
+                            {% else %}
+                                N/A
+                            {% endif %}<br>
+                            <strong>Titulação:</strong> 
+                            {% if analise.titulacao %}
+                                {{ analise.titulacao }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Resultado</h6>
+                        <h3 class="text-info">
+                            {% if analise.resultado %}
+                                {{ analise.resultado }}%
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </h3>
+                        <p class="text-muted">{{ analise.get_tipo_analise_display }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Fator de Correção</h6>
+                        <h3 class="text-warning">
+                            {% if analise.fator_correcao %}
+                                {{ analise.fator_correcao }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </h3>
+                        <p class="text-muted">Fator</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 d-flex gap-2 justify-content-between">
+            <a href="{% url 'analises:oleo_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar à Lista
+            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'analises:oleo_update' analise.pk %}" class="btn btn-warning">
+                    <i class="bi bi-pencil me-2"></i>Editar
+                </a>
+                <a href="{% url 'analises:oleo_delete' analise.pk %}" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-2"></i>Excluir
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

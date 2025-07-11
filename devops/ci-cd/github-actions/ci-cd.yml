@@ -1,0 +1,175 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache dependências pip
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Instalar dependências
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install coverage pytest-django
+
+    - name: Executar testes
+      env:
+        SECRET_KEY: test-secret-key-for-ci
+        DEBUG: False
+        ALLOWED_HOSTS: localhost,127.0.0.1
+      run: |
+        python manage.py migrate
+        python manage.py collectstatic --noinput
+        coverage run --source='.' manage.py test
+        coverage xml
+
+    - name: Upload coverage para Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  security:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Instalar ferramentas de segurança
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+
+    - name: Verificar vulnerabilidades com Safety
+      run: |
+        pip install -r requirements.txt
+        safety check
+
+    - name: Análise de segurança com Bandit
+      run: |
+        bandit -r . -x tests/ -f json -o bandit-report.json || true
+        bandit -r . -x tests/
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.event_name == 'push'
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login no Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extrair metadados
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build e Push imagem Docker
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./devops/docker/development/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Deploy para Staging
+      run: |
+        echo "🚀 Deploying to staging environment"
+        # Aqui você adicionaria os comandos específicos para deploy
+        # Por exemplo: kubectl, docker-compose, ou outros scripts
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Deploy para Produção
+      run: |
+        echo "🚀 Deploying to production environment"
+        # Aqui você adicionaria os comandos específicos para deploy em produção
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [test, security, build]
+    if: always()
+
+    steps:
+    - name: Notificar sucesso
+      if: needs.test.result == 'success' && needs.security.result == 'success' && needs.build.result == 'success'
+      run: |
+        echo "✅ Pipeline executado com sucesso!"
+
+    - name: Notificar falha
+      if: needs.test.result == 'failure' || needs.security.result == 'failure' || needs.build.result == 'failure'
+      run: |
+        echo "❌ Pipeline falhou!"

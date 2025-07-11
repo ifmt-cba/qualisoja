@@ -8,9 +8,25 @@
   "author": "QualiSoja Team",
   "license": "MIT",
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@types/jest": "^30.0.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
-    "@testing-library/jest-dom": "^5.17.0",
-    "identity-obj-proxy": "^3.0.0"
-  }
+    "ts-jest": "^29.4.0"
+  },
+  "main": "jest.config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ifmt-cba/qualisoja.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/ifmt-cba/qualisoja/issues"
+  },
+  "homepage": "https://github.com/ifmt-cba/qualisoja#readme"
 }
