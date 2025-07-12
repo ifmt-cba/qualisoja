@@ -55,6 +55,15 @@ def loginViews(request):
 
         auth.login(request, user)
 
+        # Registro de atividade de login
+        try:
+            from logs.models import LogPersonalizado
+            grupos = ', '.join([g.name for g in user.groups.all()])
+            acao = f'Usuário {user.username} (Grupo(s): {grupos}) acessou o sistema.'
+            LogPersonalizado.objects.create(usuario=user, acao=acao)
+        except Exception as e:
+            print(f"Erro ao registrar log de login: {e}")
+
         if user.is_superuser:
             return redirect('/admin/')
 

@@ -38,6 +38,7 @@ class AnaliseUmidade(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -83,6 +84,7 @@ class AnaliseProteina(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -246,6 +248,7 @@ class AnaliseOleoDegomado(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     
     horario = models.TimeField(
         verbose_name="Horário da Análise",
@@ -300,6 +303,7 @@ class AnaliseUrase(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -364,6 +368,7 @@ class AnaliseCinza(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -433,6 +438,7 @@ class AnaliseTeorOleo(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -534,6 +540,7 @@ class AnaliseFibra(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -610,6 +617,7 @@ class AnaliseFosforo(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -777,6 +785,7 @@ class AnaliseSilica(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
