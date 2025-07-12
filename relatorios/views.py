@@ -17,6 +17,7 @@ from reportlab.lib import colors
 # Importar models e forms do app analises
 from analises.models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado
 from .forms import RelatorioFiltroForm
+from logs.utils import registrar_log
 
 
 class RelatorioGerarClassicoView(FormView):
@@ -111,23 +112,17 @@ class RelatorioGerarView(FormView):
             'fim': data_final.strftime('%Y-%m-%d'),
             'formato': formato_saida,
         }
-        
         if tipo_amostra_umidade:
             query_params['umidade_tipo'] = tipo_amostra_umidade
-        
         if tipo_amostra_proteina:
             query_params['proteina_tipo'] = tipo_amostra_proteina
         
         # Construir a URL com os parâmetros
         url = reverse('relatorios:visualizar')
         url = f"{url}?{urlencode(query_params)}"
-        
-        # Logs para depuração
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f"Redirecionando para URL: {url}")
-        
-        # Redirecionar para a visualização do relatório
+        # Log de exportação de relatório
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, f"Exportou relatório de {tipo_relatorio} ({formato_saida})")
         return redirect(url)
 
 
