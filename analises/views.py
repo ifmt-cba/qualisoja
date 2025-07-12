@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo, AnaliseSilica
 from .forms import AnaliseUmidadeForm, AnaliseProteinaForm, AnaliseOleoDegomadoForm, AnaliseUraseForm, AnaliseCinzaForm, AnaliseTeorOleoForm, AnaliseFibraForm, AnaliseFosforoForm, AnaliseSilicaForm
+from logs.utils import registrar_log
 
 
 class AnaliseHomeView(TemplateView):
@@ -11,6 +12,11 @@ class AnaliseHomeView(TemplateView):
     template_name = 'app/home_analises.html'
 
 class UmidadeCreateView(CreateView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Criou uma nova análise de Umidade", obj=self.object)
+        return response
     model = AnaliseUmidade
     form_class = AnaliseUmidadeForm
     template_name = 'app/cadastro_umidade.html'
@@ -22,6 +28,13 @@ class UmidadeUpdateView(UpdateView):
     template_name = 'app/cadastro_umidade.html'
     success_url = reverse_lazy('analises:umidade_list')
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Editou uma análise de Umidade", obj=self.object)
+        messages.success(self.request, 'Análise de umidade atualizada com sucesso!')
+        return response
+
 class UmidadeDetailView(DetailView):
     model = AnaliseUmidade
     template_name = 'app/detalhe_umidade.html'
@@ -32,7 +45,19 @@ class UmidadeDeleteView(DeleteView):
     template_name = 'app/confirmar_exclusao_umidade.html'
     success_url = reverse_lazy('analises:umidade_list')
 
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if request.user.is_authenticated:
+            registrar_log(request.user, "Excluiu uma análise de Umidade", obj=obj)
+        messages.success(request, 'Análise de umidade excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
+
 class ProteinaCreateView(CreateView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Criou uma nova análise de Proteína", obj=self.object)
+        return response
     model = AnaliseProteina
     form_class = AnaliseProteinaForm
     template_name = 'app/cadastro_proteina.html'
@@ -96,7 +121,10 @@ class OleoDegomadoCreateView(CreateView):
                 resultado = (titulacao * fator_correcao * Decimal('300.4') * Decimal('100')) / peso_amostra
 
         form.instance.resultado = resultado
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Criou uma nova análise de Óleo Degomado", obj=self.object)
+        return response
 
 
 class UmidadeListView(ListView):
@@ -114,8 +142,11 @@ class ProteinaUpdateView(UpdateView):
     success_url = reverse_lazy('analises:proteina_list')
     
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Editou uma análise de Proteína", obj=self.object)
         messages.success(self.request, 'Análise de proteína atualizada com sucesso!')
-        return super().form_valid(form)
+        return response
 
 class ProteinaDetailView(DetailView):
     model = AnaliseProteina
@@ -126,6 +157,13 @@ class ProteinaDeleteView(DeleteView):
     model = AnaliseProteina
     template_name = 'app/confirmar_exclusao_proteina.html'
     success_url = reverse_lazy('analises:proteina_list')
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if request.user.is_authenticated:
+            registrar_log(request.user, "Excluiu uma análise de Proteína", obj=obj)
+        messages.success(request, 'Análise de proteína excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
 
 class OleoDegomadoListView(ListView):
     model = AnaliseOleoDegomado
@@ -144,8 +182,11 @@ class UraseCreateView(CreateView):
         O cálculo é feito automaticamente no método save() do modelo,
         mas você pode adicionar validações extras aqui se necessário.
         """
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Criou uma nova análise de Urase", obj=self.object)
         messages.success(self.request, 'Análise de urase criada com sucesso!')
-        return super().form_valid(form)
+        return response
     
     def form_invalid(self, form):
         messages.error(self.request, 'Erro ao salvar a análise. Verifique os dados informados.')
@@ -180,13 +221,23 @@ class UraseUpdateView(UpdateView):
     success_url = reverse_lazy('analises:urase_list')
     
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Editou uma análise de Urase", obj=self.object)
         messages.success(self.request, 'Análise de urase atualizada com sucesso!')
-        return super().form_valid(form)
+        return response
 
 class UraseDeleteView(DeleteView):
     model = AnaliseUrase
     template_name = 'app/confirmar_exclusao_urase.html'
     success_url = reverse_lazy('analises:urase_list')
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if request.user.is_authenticated:
+            registrar_log(request.user, "Excluiu uma análise de Urase", obj=obj)
+        messages.success(request, 'Análise de urase excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
 
 # Importar as novas análises
 from .models import AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo
@@ -200,8 +251,11 @@ class CinzaCreateView(CreateView):
     success_url = reverse_lazy('analises:cinza_list')
     
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Criou uma nova análise de Cinza", obj=self.object)
         messages.success(self.request, 'Análise de cinza criada com sucesso!')
-        return super().form_valid(form)
+        return response
     
     def form_invalid(self, form):
         messages.error(self.request, 'Erro ao salvar a análise. Verifique os dados informados.')
@@ -224,15 +278,25 @@ class CinzaUpdateView(UpdateView):
     form_class = AnaliseCinzaForm
     template_name = 'app/cadastro_cinza.html'
     success_url = reverse_lazy('analises:cinza_list')
-    
+
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Editou uma análise de Cinza", obj=self.object)
         messages.success(self.request, 'Análise de cinza atualizada com sucesso!')
-        return super().form_valid(form)
+        return response
 
 class CinzaDeleteView(DeleteView):
     model = AnaliseCinza
     template_name = 'app/confirmar_exclusao_cinza.html'
     success_url = reverse_lazy('analises:cinza_list')
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if request.user.is_authenticated:
+            registrar_log(request.user, "Excluiu uma análise de Cinza", obj=obj)
+        messages.success(request, 'Análise de cinza excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
 
 # Views para Análise de Teor de Óleo
 class TeorOleoCreateView(CreateView):
@@ -242,8 +306,11 @@ class TeorOleoCreateView(CreateView):
     success_url = reverse_lazy('analises:teor_oleo_list')
     
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Criou uma nova análise de Teor de Óleo", obj=self.object)
         messages.success(self.request, 'Análise de teor de óleo criada com sucesso!')
-        return super().form_valid(form)
+        return response
     
     def form_invalid(self, form):
         messages.error(self.request, 'Erro ao salvar a análise. Verifique os dados informados.')
@@ -263,8 +330,11 @@ class TeorOleoUpdateView(UpdateView):
     success_url = reverse_lazy('analises:teor_oleo_list')
     
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Editou uma análise de Teor de Óleo", obj=self.object)
         messages.success(self.request, 'Análise de teor de óleo atualizada com sucesso!')
-        return super().form_valid(form)
+        return response
 
 class TeorOleoDetailView(DetailView):
     model = AnaliseTeorOleo
@@ -276,6 +346,13 @@ class TeorOleoDeleteView(DeleteView):
     template_name = 'app/confirmar_exclusao_teor_oleo.html'
     success_url = reverse_lazy('analises:teor_oleo_list')
 
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if request.user.is_authenticated:
+            registrar_log(request.user, "Excluiu uma análise de Teor de Óleo", obj=obj)
+        messages.success(request, 'Análise de teor de óleo excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
+
 # Views para Análise de Fibra
 class FibraCreateView(CreateView):
     model = AnaliseFibra
@@ -284,9 +361,10 @@ class FibraCreateView(CreateView):
     success_url = reverse_lazy('analises:fibra_list')
     
     def form_valid(self, form):
-        """Processar formulário válido"""
         try:
             response = super().form_valid(form)
+            if self.request.user.is_authenticated:
+                registrar_log(self.request.user, "Criou uma nova análise de Fibra", obj=self.object)
             messages.success(self.request, 'Análise de fibra salva com sucesso!')
             return response
         except Exception as e:
@@ -315,15 +393,25 @@ class FibraUpdateView(UpdateView):
     form_class = AnaliseFibraForm
     template_name = 'app/cadastro_fibra.html'
     success_url = reverse_lazy('analises:fibra_list')
-    
+
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Editou uma análise de Fibra", obj=self.object)
         messages.success(self.request, 'Análise de fibra atualizada com sucesso!')
-        return super().form_valid(form)
+        return response
 
 class FibraDeleteView(DeleteView):
     model = AnaliseFibra
     template_name = 'app/confirmar_exclusao_fibra.html'
     success_url = reverse_lazy('analises:fibra_list')
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if request.user.is_authenticated:
+            registrar_log(request.user, "Excluiu uma análise de Fibra", obj=obj)
+        messages.success(request, 'Análise de fibra excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
 
 # Views para Análise de Fósforo
 class FosforoCreateView(CreateView):
@@ -333,8 +421,11 @@ class FosforoCreateView(CreateView):
     success_url = reverse_lazy('analises:lista_fosforo')
     
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Criou uma nova análise de Fósforo", obj=self.object)
         messages.success(self.request, 'Análise de fósforo salva com sucesso!')
-        return super().form_valid(form)
+        return response
     
     def form_invalid(self, form):
         messages.error(self.request, 'Erro ao salvar análise. Verifique os dados informados.')
@@ -363,19 +454,36 @@ class FosforoUpdateView(UpdateView):
     success_url = reverse_lazy('analises:lista_fosforo')
     
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Editou uma análise de Fósforo", obj=self.object)
         messages.success(self.request, 'Análise de fósforo atualizada com sucesso!')
-        return super().form_valid(form)
+        return response
 
 class FosforoDeleteView(DeleteView):
     model = AnaliseFosforo
     template_name = 'app/confirmar_exclusao_fosforo.html'
     success_url = reverse_lazy('analises:lista_fosforo')
 
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if request.user.is_authenticated:
+            registrar_log(request.user, "Excluiu uma análise de Fósforo", obj=obj)
+        messages.success(request, 'Análise de fósforo excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
+
 class OleoDegomadoUpdateView(UpdateView):
     model = AnaliseOleoDegomado
     form_class = AnaliseOleoDegomadoForm
     template_name = 'app/cadastro_oleo.html'
     success_url = reverse_lazy('analises:oleo_list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Editou uma análise de Óleo Degomado", obj=self.object)
+        messages.success(self.request, 'Análise de óleo degomado atualizada com sucesso!')
+        return response
 
 class OleoDegomadoDetailView(DetailView):
     model = AnaliseOleoDegomado
@@ -387,6 +495,13 @@ class OleoDegomadoDeleteView(DeleteView):
     template_name = 'app/confirmar_exclusao_oleo.html'
     success_url = reverse_lazy('analises:oleo_list')
 
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if request.user.is_authenticated:
+            registrar_log(request.user, "Excluiu uma análise de Óleo Degomado", obj=obj)
+        messages.success(request, 'Análise de óleo degomado excluída com sucesso!')
+        return super().delete(request, *args, **kwargs)
+
 # Views para Análise de Sílica
 class SilicaCreateView(CreateView):
     model = AnaliseSilica
@@ -395,8 +510,11 @@ class SilicaCreateView(CreateView):
     success_url = reverse_lazy('analises:silica_list')
 
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Criou uma nova análise de Sílica", obj=self.object)
         messages.success(self.request, 'Análise de Sílica cadastrada com sucesso!')
-        return super().form_valid(form)
+        return response
 
 class SilicaListView(ListView):
     model = AnaliseSilica
@@ -412,8 +530,11 @@ class SilicaUpdateView(UpdateView):
     success_url = reverse_lazy('analises:silica_list')
 
     def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, "Editou uma análise de Sílica", obj=self.object)
         messages.success(self.request, 'Análise de Sílica atualizada com sucesso!')
-        return super().form_valid(form)
+        return response
 
 class SilicaDetailView(DetailView):
     model = AnaliseSilica
@@ -426,5 +547,8 @@ class SilicaDeleteView(DeleteView):
     success_url = reverse_lazy('analises:silica_list')
 
     def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if request.user.is_authenticated:
+            registrar_log(request.user, "Excluiu uma análise de Sílica", obj=obj)
         messages.success(request, 'Análise de Sílica excluída com sucesso!')
         return super().delete(request, *args, **kwargs)
