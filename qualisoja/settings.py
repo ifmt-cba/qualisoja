@@ -15,6 +15,13 @@ import os
 from django.core.management.utils import get_random_secret_key
 import sys
 
+# Carregar variáveis de ambiente
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,7 +36,22 @@ SECRET_KEY = os.environ.get('SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', ge
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+# Detectar se está rodando no Codespaces
+CODESPACES = os.environ.get('CODESPACES', 'false').lower() == 'true'
+CODESPACE_NAME = os.environ.get('CODESPACE_NAME', '')
+
+# Configurar hosts permitidos
+if CODESPACES:
+    ALLOWED_HOSTS = [
+        'localhost',
+        '127.0.0.1',
+        f'{CODESPACE_NAME}-8000.app.github.dev',
+        f'{CODESPACE_NAME}-8000.preview.app.github.dev',
+        '*.app.github.dev',
+        '*.preview.app.github.dev'
+    ]
+else:
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost,www.qualisoja.com.br,qualisoja.com.br').split(',')
 
 
 # Application definition
@@ -122,11 +144,21 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'templates/static'), os.path.join(BASE_DIR, 'relatorios/templates/static'),]
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'templates/static'), 
+    os.path.join(BASE_DIR, 'relatorios/templates/static'),
+]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# Configuração específica para Codespaces
+if CODESPACES:
+    # Garantir que os arquivos estáticos sejam servidos corretamente
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -180,13 +212,46 @@ LOGGING = {
 }
 
 # Configurações CSRF
-CSRF_COOKIE_SECURE = False  # True apenas em HTTPS
+CSRF_COOKIE_SECURE = not DEBUG and not CODESPACES  # False no Codespaces para desenvolvimento
 CSRF_COOKIE_HTTPONLY = False  # Para permitir acesso via JavaScript se necessário
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
+
+# Configurar origens confiáveis para CSRF
+if CODESPACES:
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        f'https://{CODESPACE_NAME}-8000.app.github.dev',
+        f'https://{CODESPACE_NAME}-8000.preview.app.github.dev',
+        'https://*.app.github.dev',
+        'https://*.preview.app.github.dev'
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8000', 
+        'http://127.0.0.1:8000',
+        'https://www.qualisoja.com.br',
+        'https://qualisoja.com.br'
+    ]
 
 # Configurações de Sessão
-SESSION_COOKIE_SECURE = False  # True apenas em HTTPS
+SESSION_COOKIE_SECURE = not DEBUG  # True em produção (HTTPS)
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_AGE = 3600  # 1 hora
+
+# Configurações de segurança para produção
+if not DEBUG:
+    # Forçar HTTPS
+    SECURE_HSTS_SECONDS = 31536000  # 1 ano
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Configurações SSL
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # Content Security Policy
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'

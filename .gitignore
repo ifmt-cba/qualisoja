@@ -57,6 +57,18 @@ coverage/
 
 # Qualisoja específico
 qualisoja.log
+.env
+.env.local
+.env.production
+
+# SSL Certificates
+*.crt
+*.key
+*.pem
+
+# Codespaces
+.devcontainer/.env
+.vscode/settings.json.backup
 
 # Backup files
 *_backup.*
