@@ -34,7 +34,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', get_random_secret_key()))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+# Forçar DEBUG=True para desenvolvimento local
+DEBUG = True  # os.environ.get('DEBUG', 'False').lower() == 'true'
 
 # Detectar se está rodando no Codespaces
 CODESPACES = os.environ.get('CODESPACES', 'false').lower() == 'true'
@@ -236,14 +237,14 @@ else:
     ]
 
 # Configurações de Sessão
-SESSION_COOKIE_SECURE = not DEBUG  # True em produção (HTTPS)
+SESSION_COOKIE_SECURE = not DEBUG and not CODESPACES  # False em desenvolvimento
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_AGE = 3600  # 1 hora
 
-# Configurações de segurança para produção
-if not DEBUG:
-    # Forçar HTTPS
+# Configurações de segurança APENAS para produção
+if not DEBUG and not CODESPACES:
+    # Forçar HTTPS apenas em produção
     SECURE_HSTS_SECONDS = 31536000  # 1 ano
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
@@ -256,3 +257,7 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
     X_FRAME_OPTIONS = 'DENY'
+else:
+    # Configurações para desenvolvimento
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0

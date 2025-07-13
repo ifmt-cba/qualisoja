@@ -165,3 +165,15 @@ def health_check(request):
 def teste_acesso(request):
     from django.shortcuts import render
     return render(request, 'teste_acesso.html')
+
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.conf import settings
+
+def test_connection(request):
+    """View simples para testar a conexão HTTP"""
+    return render(request, 'test_connection.html', {
+        'debug': settings.DEBUG,
+        'https_redirect': getattr(settings, 'SECURE_SSL_REDIRECT', False),
+        'codespaces': getattr(settings, 'CODESPACES', False),
+    })
