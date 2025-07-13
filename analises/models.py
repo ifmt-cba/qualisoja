@@ -38,6 +38,7 @@ class AnaliseUmidade(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -83,6 +84,7 @@ class AnaliseProteina(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -246,6 +248,7 @@ class AnaliseOleoDegomado(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     
     horario = models.TimeField(
         verbose_name="Horário da Análise",
@@ -266,11 +269,11 @@ class AnaliseOleoDegomado(BaseModel):
         default='UMI'  # Analise de Umidade como padrão
     )
 
-    tara = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Tara")
-    liquido = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Líquido")
-    peso_amostra = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="Peso da Amostra")
+    tara = models.DecimalField(max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Tara")
+    liquido = models.DecimalField(max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Líquido")
+    peso_amostra = models.DecimalField(max_digits=10, decimal_places=4, default=0.0, verbose_name="Peso da Amostra")
     resultado = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Resultado")
-    titulacao = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Titulação")
+    titulacao = models.DecimalField(max_digits=10, decimal_places=4, blank=True, null=True, verbose_name="Titulação")
     fator_correcao = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
@@ -300,6 +303,7 @@ class AnaliseUrase(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -364,6 +368,7 @@ class AnaliseCinza(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -433,6 +438,7 @@ class AnaliseTeorOleo(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -534,6 +540,7 @@ class AnaliseFibra(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -610,6 +617,7 @@ class AnaliseFosforo(BaseModel):
         default=timezone.localdate,
         validators=[validate_not_future_date]
     )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
     horario = models.TimeField(
         verbose_name="Horário da Análise",
         default=timezone.localtime().time()
@@ -758,4 +766,75 @@ class AnaliseFosforo(BaseModel):
     class Meta:
         verbose_name = "Análise de Fósforo"
         verbose_name_plural = "Análises de Fósforo"
+        ordering = ['-data', '-horario']
+
+class AnaliseSilica(BaseModel):
+    """
+    Modelo para armazenar análises de sílica na soja.
+    Fórmula: Resultado Final = Resultado Cinza - Resultado Sílica
+    """
+    TIPO_AMOSTRA_CHOICES = [
+        ('FL', 'Farelo'),
+        ('SI', 'Soja Industrializada'),
+        ('FP', 'Fábrica Parada'),
+        ('SA', 'Sem Amostra'),
+    ]
+    
+    data = models.DateField(
+        verbose_name="Data da Análise", 
+        default=timezone.localdate,
+        validators=[validate_not_future_date]
+    )
+    usuario = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Usuário Responsável")
+    horario = models.TimeField(
+        verbose_name="Horário da Análise",
+        default=timezone.localtime().time()
+    )
+    tipo_amostra = models.CharField(
+        max_length=2,
+        choices=TIPO_AMOSTRA_CHOICES,
+        verbose_name="Tipo de Amostra",
+        default='FL'
+    )
+    
+    # Campo para referenciar análise de cinza (obrigatório)
+    analise_cinza = models.ForeignKey(
+        'AnaliseCinza',
+        on_delete=models.CASCADE,
+        null=True,  # Temporário para migração
+        blank=True,  # Temporário para migração
+        verbose_name="Análise de Cinza",
+        help_text="Selecione a análise de cinza correspondente"
+    )
+    
+    # Resultado da sílica (inserido manualmente)
+    resultado_silica = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        verbose_name="Resultado Sílica (%)",
+        help_text="Digite o resultado da análise de sílica"
+    )
+    
+    # Resultado final calculado automaticamente
+    resultado_final = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Resultado Final (%)",
+        help_text="Resultado final: Cinza - Sílica (calculado automaticamente)"
+    )
+    
+    def save(self, *args, **kwargs):
+        """Calcular resultado final automaticamente: Cinza - Sílica"""
+        if self.analise_cinza and self.analise_cinza.resultado and self.resultado_silica:
+            self.resultado_final = self.analise_cinza.resultado - self.resultado_silica
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Análise de Sílica - {self.get_tipo_amostra_display()} - {self.data}"
+    
+    class Meta:
+        verbose_name = "Análise de Sílica"
+        verbose_name_plural = "Análises de Sílica"
         ordering = ['-data', '-horario']

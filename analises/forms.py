@@ -1,7 +1,9 @@
 import datetime
 from django import forms
-from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo
-from django.utils import timezone  # Use o timezone do Django, não o datetime padrão
+from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo, AnaliseSilica
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.utils.timezone import localdate
 
 class AnaliseUmidadeForm(forms.ModelForm):
     """
@@ -105,6 +107,17 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
             'data': forms.DateInput(attrs={'type': 'date'}),
             'horario': forms.TimeInput(attrs={'type': 'time'}),
         }
+    def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            today = localdate()  # Usa o fuso horário configurado no Django
+            self.fields['data'].widget.attrs['min'] = today.isoformat()
+
+    def clean_data(self):
+            data = self.cleaned_data.get('data')
+            hoje = timezone.localdate()  # Usa o fuso horário correto
+            if data and data < hoje:
+                raise ValidationError('A data não pode ser anterior à data atual.')
+            return data
 
     def clean(self):
         """Validação específica do formulário de óleo degomado"""
@@ -119,12 +132,12 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
         fator_correcao = cleaned_data.get('fator_correcao')
 
         if tipo_analise == "UMI":
-            if peso_amostra is not None and not (7 <= peso_amostra <= 7.5):
-                self.add_error('peso_amostra', 'Para análise de umidade, o peso da amostra deve estar entre 7 e 7,5.')
+            if peso_amostra is not None and not (5 <= peso_amostra <= 5.5):
+                self.add_error('peso_amostra', 'Para análise de umidade, o peso da amostra deve estar entre 5 e 5,5.')
             if liquido is not None and not (0 <= liquido <= 100):
                 self.add_error('liquido', 'Para análise de umidade, o valor do líquido deve estar entre 0 e 100.')
-            if titulacao is not None and not (0 <= titulacao <= 100):    
-                self.add_error('titulacao', 'Para análise de umidade, o valor da Titulação deve estar entre 0 e 100.')
+            # if titulacao is not None and not (0 <= titulacao <= 100):    
+            #     self.add_error('titulacao', 'Para análise de umidade, o valor da Titulação deve estar entre 0 e 100.')
         
         if tipo_analise == 'ACI':
             if peso_amostra is not None and not (7 <= peso_amostra <= 7.5):
@@ -440,4 +453,53 @@ class AnaliseFosforoForm(forms.ModelForm):
         if not absorbancia_amostra or absorbancia_amostra <= 0:
             self.add_error('absorbancia_amostra', 'A absorbância da amostra é obrigatória e deve ser maior que zero.')
         
+        return cleaned_data
+
+class AnaliseSilicaForm(forms.ModelForm):
+    """
+    Formulário para cadastro e edição de análises de sílica.
+    """
+    class Meta:
+        model = AnaliseSilica
+        fields = '__all__'
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+            'horario': forms.TimeInput(attrs={'type': 'time'}),
+            'resultado_silica': forms.NumberInput(attrs={
+                'step': '0.01',
+                'placeholder': 'Ex: 1.25',
+                'class': 'form-control'
+            }),
+            'analise_cinza': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Definir hora atual como padrão
+        if not self.instance.pk:
+            self.fields['horario'].initial = timezone.localtime().time()
+        
+        # Filtrar análises de cinza recentes para facilitar seleção
+        self.fields['analise_cinza'].queryset = AnaliseCinza.objects.filter(
+            data__gte=timezone.now().date() - datetime.timedelta(days=30)
+        ).order_by('-data', '-horario')
+        self.fields['analise_cinza'].empty_label = "Selecione uma análise de cinza"
+    
+    def clean(self):
+        """Validação específica do formulário de sílica"""
+        cleaned_data = super().clean()
+        
+        resultado_silica = cleaned_data.get('resultado_silica')
+        analise_cinza = cleaned_data.get('analise_cinza')
+        
+        # Validar se o resultado da sílica é positivo
+        if resultado_silica and resultado_silica <= 0:
+            self.add_error('resultado_silica', 'O resultado da sílica deve ser maior que zero.')
+        
+        # Validar se a análise de cinza foi selecionada
+        if not analise_cinza:
+            self.add_error('analise_cinza', 'Selecione uma análise de cinza.')
+            
         return cleaned_data
