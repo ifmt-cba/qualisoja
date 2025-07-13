@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'users',
     'relatorios',
     'widget_tweaks',
+    'logs'
 ]
 
 MIDDLEWARE = [
