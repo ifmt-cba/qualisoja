@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from decimal import Decimal
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView, DetailView, DeleteView
 from django.urls import reverse_lazy
@@ -6,11 +8,12 @@ from .models import AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, Analis
 from .forms import AnaliseUmidadeForm, AnaliseProteinaForm, AnaliseOleoDegomadoForm, AnaliseUraseForm, AnaliseCinzaForm, AnaliseTeorOleoForm, AnaliseFibraForm, AnaliseFosforoForm, AnaliseSilicaForm
 from logs.utils import registrar_log
 
-
+@method_decorator(login_required, name='dispatch')
 class AnaliseHomeView(TemplateView):
     """View para a página inicial do módulo de análises"""
     template_name = 'app/home_analises.html'
 
+@method_decorator(login_required, name='dispatch')
 class UmidadeCreateView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -22,6 +25,7 @@ class UmidadeCreateView(CreateView):
     template_name = 'app/cadastro_umidade.html'
     success_url = reverse_lazy('analises:umidade_list')
 
+@method_decorator(login_required, name='dispatch')
 class UmidadeUpdateView(UpdateView):
     model = AnaliseUmidade
     form_class = AnaliseUmidadeForm
@@ -35,11 +39,13 @@ class UmidadeUpdateView(UpdateView):
         messages.success(self.request, 'Análise de umidade atualizada com sucesso!')
         return response
 
+@method_decorator(login_required, name='dispatch')
 class UmidadeDetailView(DetailView):
     model = AnaliseUmidade
     template_name = 'app/detalhe_umidade.html'
     context_object_name = 'analise'
 
+@method_decorator(login_required, name='dispatch')
 class UmidadeDeleteView(DeleteView):
     model = AnaliseUmidade
     template_name = 'app/confirmar_exclusao_umidade.html'
@@ -52,6 +58,8 @@ class UmidadeDeleteView(DeleteView):
         messages.success(request, 'Análise de umidade excluída com sucesso!')
         return super().delete(request, *args, **kwargs)
 
+
+@method_decorator(login_required, name='dispatch')
 class ProteinaCreateView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -63,6 +71,8 @@ class ProteinaCreateView(CreateView):
     template_name = 'app/cadastro_proteina.html'
     success_url = reverse_lazy('analises:proteina_list')
 
+
+@method_decorator(login_required, name='dispatch')
 class OleoDegomadoCreateView(CreateView):
     model = AnaliseOleoDegomado
     form_class = AnaliseOleoDegomadoForm
@@ -127,14 +137,19 @@ class OleoDegomadoCreateView(CreateView):
         return response
 
 
+@method_decorator(login_required, name='dispatch')
 class UmidadeListView(ListView):
     model = AnaliseUmidade
     template_name = 'app/lista_umidade.html'
 
+
+@method_decorator(login_required, name='dispatch')
 class ProteinaListView(ListView):
     model = AnaliseProteina
     template_name = 'app/lista_proteina.html'
 
+
+@method_decorator(login_required, name='dispatch')
 class ProteinaUpdateView(UpdateView):
     model = AnaliseProteina
     form_class = AnaliseProteinaForm
@@ -148,11 +163,15 @@ class ProteinaUpdateView(UpdateView):
         messages.success(self.request, 'Análise de proteína atualizada com sucesso!')
         return response
 
+
+@method_decorator(login_required, name='dispatch')
 class ProteinaDetailView(DetailView):
     model = AnaliseProteina
     template_name = 'app/detalhe_proteina.html'
     context_object_name = 'analise'
 
+
+@method_decorator(login_required, name='dispatch')
 class ProteinaDeleteView(DeleteView):
     model = AnaliseProteina
     template_name = 'app/confirmar_exclusao_proteina.html'
@@ -165,12 +184,14 @@ class ProteinaDeleteView(DeleteView):
         messages.success(request, 'Análise de proteína excluída com sucesso!')
         return super().delete(request, *args, **kwargs)
 
+@method_decorator(login_required, name='dispatch')
 class OleoDegomadoListView(ListView):
     model = AnaliseOleoDegomado
     template_name = 'app/lista_oleo.html'
     
 # Adicione estas classes no seu views.py
 
+@method_decorator(login_required, name='dispatch')
 class UraseCreateView(CreateView):
     model = AnaliseUrase
     form_class = AnaliseUraseForm
@@ -192,6 +213,7 @@ class UraseCreateView(CreateView):
         messages.error(self.request, 'Erro ao salvar a análise. Verifique os dados informados.')
         return super().form_invalid(form)
 
+@method_decorator(login_required, name='dispatch')
 class UraseListView(ListView):
     model = AnaliseUrase
     template_name = 'app/lista_urase.html'
@@ -209,11 +231,13 @@ class UraseListView(ListView):
         """
         return AnaliseUrase.objects.all().order_by('-data', '-horario')
 
+@method_decorator(login_required, name='dispatch')
 class UraseDetailView(DetailView):
     model = AnaliseUrase
     template_name = 'app/detalhe_urase.html'
     context_object_name = 'analise'
 
+@method_decorator(login_required, name='dispatch')
 class UraseUpdateView(UpdateView):
     model = AnaliseUrase
     form_class = AnaliseUraseForm
@@ -227,6 +251,7 @@ class UraseUpdateView(UpdateView):
         messages.success(self.request, 'Análise de urase atualizada com sucesso!')
         return response
 
+@method_decorator(login_required, name='dispatch')
 class UraseDeleteView(DeleteView):
     model = AnaliseUrase
     template_name = 'app/confirmar_exclusao_urase.html'
@@ -244,6 +269,7 @@ from .models import AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo
 from .forms import AnaliseCinzaForm, AnaliseTeorOleoForm, AnaliseFibraForm, AnaliseFosforoForm
 
 # Views para Análise de Cinza
+@method_decorator(login_required, name='dispatch')
 class CinzaCreateView(CreateView):
     model = AnaliseCinza
     form_class = AnaliseCinzaForm
@@ -261,6 +287,7 @@ class CinzaCreateView(CreateView):
         messages.error(self.request, 'Erro ao salvar a análise. Verifique os dados informados.')
         return super().form_invalid(form)
 
+@method_decorator(login_required, name='dispatch')
 class CinzaListView(ListView):
     model = AnaliseCinza
     template_name = 'app/lista_cinza.html'
@@ -268,11 +295,13 @@ class CinzaListView(ListView):
     ordering = ['-data', '-horario']
     paginate_by = 10
 
+@method_decorator(login_required, name='dispatch')
 class CinzaDetailView(DetailView):
     model = AnaliseCinza
     template_name = 'app/detalhe_cinza.html'
     context_object_name = 'analise'
 
+@method_decorator(login_required, name='dispatch')
 class CinzaUpdateView(UpdateView):
     model = AnaliseCinza
     form_class = AnaliseCinzaForm
@@ -286,6 +315,7 @@ class CinzaUpdateView(UpdateView):
         messages.success(self.request, 'Análise de cinza atualizada com sucesso!')
         return response
 
+@method_decorator(login_required, name='dispatch')
 class CinzaDeleteView(DeleteView):
     model = AnaliseCinza
     template_name = 'app/confirmar_exclusao_cinza.html'
@@ -299,6 +329,7 @@ class CinzaDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
 # Views para Análise de Teor de Óleo
+@method_decorator(login_required, name='dispatch')
 class TeorOleoCreateView(CreateView):
     model = AnaliseTeorOleo
     form_class = AnaliseTeorOleoForm
@@ -316,6 +347,7 @@ class TeorOleoCreateView(CreateView):
         messages.error(self.request, 'Erro ao salvar a análise. Verifique os dados informados.')
         return super().form_invalid(form)
 
+@method_decorator(login_required, name='dispatch')
 class TeorOleoListView(ListView):
     model = AnaliseTeorOleo
     template_name = 'app/lista_teor_oleo.html'
@@ -323,6 +355,7 @@ class TeorOleoListView(ListView):
     ordering = ['-data', '-horario']
     paginate_by = 10
 
+@method_decorator(login_required, name='dispatch')
 class TeorOleoUpdateView(UpdateView):
     model = AnaliseTeorOleo
     form_class = AnaliseTeorOleoForm
@@ -336,11 +369,13 @@ class TeorOleoUpdateView(UpdateView):
         messages.success(self.request, 'Análise de teor de óleo atualizada com sucesso!')
         return response
 
+@method_decorator(login_required, name='dispatch')
 class TeorOleoDetailView(DetailView):
     model = AnaliseTeorOleo
     template_name = 'app/detalhe_teor_oleo.html'
     context_object_name = 'analise'
 
+@method_decorator(login_required, name='dispatch')
 class TeorOleoDeleteView(DeleteView):
     model = AnaliseTeorOleo
     template_name = 'app/confirmar_exclusao_teor_oleo.html'
@@ -354,6 +389,7 @@ class TeorOleoDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
 # Views para Análise de Fibra
+@method_decorator(login_required, name='dispatch')
 class FibraCreateView(CreateView):
     model = AnaliseFibra
     form_class = AnaliseFibraForm
@@ -376,6 +412,7 @@ class FibraCreateView(CreateView):
         messages.error(self.request, 'Erro no formulário. Verifique os dados e tente novamente.')
         return super().form_invalid(form)
 
+@method_decorator(login_required, name='dispatch')
 class FibraListView(ListView):
     model = AnaliseFibra
     template_name = 'app/lista_fibra.html'
@@ -383,11 +420,13 @@ class FibraListView(ListView):
     ordering = ['-data', '-horario']
     paginate_by = 10
 
+@method_decorator(login_required, name='dispatch')
 class FibraDetailView(DetailView):
     model = AnaliseFibra
     template_name = 'app/detalhe_fibra.html'
     context_object_name = 'analise'
 
+@method_decorator(login_required, name='dispatch')
 class FibraUpdateView(UpdateView):
     model = AnaliseFibra
     form_class = AnaliseFibraForm
@@ -401,6 +440,7 @@ class FibraUpdateView(UpdateView):
         messages.success(self.request, 'Análise de fibra atualizada com sucesso!')
         return response
 
+@method_decorator(login_required, name='dispatch')
 class FibraDeleteView(DeleteView):
     model = AnaliseFibra
     template_name = 'app/confirmar_exclusao_fibra.html'
@@ -414,6 +454,7 @@ class FibraDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
 # Views para Análise de Fósforo
+@method_decorator(login_required, name='dispatch')
 class FosforoCreateView(CreateView):
     model = AnaliseFosforo
     form_class = AnaliseFosforoForm
@@ -431,6 +472,7 @@ class FosforoCreateView(CreateView):
         messages.error(self.request, 'Erro ao salvar análise. Verifique os dados informados.')
         return super().form_invalid(form)
 
+@method_decorator(login_required, name='dispatch')
 class FosforoListView(ListView):
     model = AnaliseFosforo
     template_name = 'app/lista_fosforo.html'
@@ -442,11 +484,13 @@ class FosforoListView(ListView):
         """Retorna todos os registros de forma simples"""
         return AnaliseFosforo.objects.all().order_by('-id')
 
+@method_decorator(login_required, name='dispatch')
 class FosforoDetailView(DetailView):
     model = AnaliseFosforo
     template_name = 'app/detalhe_fosforo.html'
     context_object_name = 'analise'
 
+@method_decorator(login_required, name='dispatch')
 class FosforoUpdateView(UpdateView):
     model = AnaliseFosforo
     form_class = AnaliseFosforoForm
@@ -460,6 +504,7 @@ class FosforoUpdateView(UpdateView):
         messages.success(self.request, 'Análise de fósforo atualizada com sucesso!')
         return response
 
+@method_decorator(login_required, name='dispatch')
 class FosforoDeleteView(DeleteView):
     model = AnaliseFosforo
     template_name = 'app/confirmar_exclusao_fosforo.html'
@@ -472,6 +517,7 @@ class FosforoDeleteView(DeleteView):
         messages.success(request, 'Análise de fósforo excluída com sucesso!')
         return super().delete(request, *args, **kwargs)
 
+@method_decorator(login_required, name='dispatch')
 class OleoDegomadoUpdateView(UpdateView):
     model = AnaliseOleoDegomado
     form_class = AnaliseOleoDegomadoForm
@@ -485,11 +531,13 @@ class OleoDegomadoUpdateView(UpdateView):
         messages.success(self.request, 'Análise de óleo degomado atualizada com sucesso!')
         return response
 
+@method_decorator(login_required, name='dispatch')
 class OleoDegomadoDetailView(DetailView):
     model = AnaliseOleoDegomado
     template_name = 'app/detalhe_oleo.html'
     context_object_name = 'analise'
 
+@method_decorator(login_required, name='dispatch')
 class OleoDegomadoDeleteView(DeleteView):
     model = AnaliseOleoDegomado
     template_name = 'app/confirmar_exclusao_oleo.html'
@@ -503,6 +551,7 @@ class OleoDegomadoDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
 # Views para Análise de Sílica
+@method_decorator(login_required, name='dispatch')
 class SilicaCreateView(CreateView):
     model = AnaliseSilica
     form_class = AnaliseSilicaForm
@@ -516,6 +565,7 @@ class SilicaCreateView(CreateView):
         messages.success(self.request, 'Análise de Sílica cadastrada com sucesso!')
         return response
 
+@method_decorator(login_required, name='dispatch')
 class SilicaListView(ListView):
     model = AnaliseSilica
     template_name = 'app/lista_silica.html'
@@ -523,6 +573,7 @@ class SilicaListView(ListView):
     paginate_by = 10
     ordering = ['-data', '-horario']
 
+@method_decorator(login_required, name='dispatch')
 class SilicaUpdateView(UpdateView):
     model = AnaliseSilica
     form_class = AnaliseSilicaForm
@@ -536,11 +587,13 @@ class SilicaUpdateView(UpdateView):
         messages.success(self.request, 'Análise de Sílica atualizada com sucesso!')
         return response
 
+@method_decorator(login_required, name='dispatch')
 class SilicaDetailView(DetailView):
     model = AnaliseSilica
     template_name = 'app/detalhe_silica.html'
     context_object_name = 'analise'
 
+@method_decorator(login_required, name='dispatch')
 class SilicaDeleteView(DeleteView):
     model = AnaliseSilica
     template_name = 'app/confirmar_exclusao_silica.html'
