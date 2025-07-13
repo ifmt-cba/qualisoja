@@ -239,10 +239,6 @@ class UraseDeleteView(DeleteView):
         messages.success(request, 'Análise de urase excluída com sucesso!')
         return super().delete(request, *args, **kwargs)
 
-# Importar as novas análises
-from .models import AnaliseCinza, AnaliseTeorOleo, AnaliseFibra, AnaliseFosforo
-from .forms import AnaliseCinzaForm, AnaliseTeorOleoForm, AnaliseFibraForm, AnaliseFosforoForm
-
 # Views para Análise de Cinza
 class CinzaCreateView(CreateView):
     model = AnaliseCinza
