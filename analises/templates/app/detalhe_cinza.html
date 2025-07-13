@@ -22,7 +22,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-6">
                 <div class="card border-light">
                     <div class="card-body">
@@ -35,27 +35,28 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-12">
                 <div class="card border-success">
                     <div class="card-body text-center">
                         <h6 class="card-subtitle mb-2 text-muted">Resultado</h6>
                         <h3 class="text-success">
                             {% if analise.resultado %}
-                                {{ analise.resultado }}%
+                            {{ analise.resultado }}%
                             {% else %}
-                                N/A
+                            N/A
                             {% endif %}
                         </h3>
                         <p class="text-muted">Teor de Cinza</p>
                         <small class="text-muted">
-                            Fórmula: (({{ analise.peso_cinza }} - {{ analise.peso_cadinho }}) / {{ analise.peso_amostra }}) × 100
+                            Fórmula: (({{ analise.peso_cinza }} - {{ analise.peso_cadinho }}) / {{ analise.peso_amostra
+                            }}) × 100
                         </small>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="d-flex gap-2 mt-4">
             <a href="{% url 'analises:cinza_update' analise.pk %}" class="btn btn-secondary">
                 <i class="bi bi-pencil me-2"></i>Editar

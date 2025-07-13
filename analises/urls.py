@@ -40,49 +40,62 @@ urlpatterns = [
     path('fosforo/', FosforoListView.as_view(), name='lista_fosforo'),
     path('silica/nova/', SilicaCreateView.as_view(), name='silica_create'),
     path('silica/', SilicaListView.as_view(), name='silica_list'),
-    
+
     # URLs CRUD completo para Teor de Óleo
-    path('teor-oleo/<int:pk>/', TeorOleoDetailView.as_view(), name='teor_oleo_detail'),
-    path('teor-oleo/<int:pk>/editar/', TeorOleoUpdateView.as_view(), name='teor_oleo_update'),
-    path('teor-oleo/<int:pk>/excluir/', TeorOleoDeleteView.as_view(), name='teor_oleo_delete'),
-    
+    path('teor-oleo/<int:pk>/', TeorOleoDetailView.as_view(),
+         name='teor_oleo_detail'),
+    path('teor-oleo/<int:pk>/editar/',
+         TeorOleoUpdateView.as_view(), name='teor_oleo_update'),
+    path('teor-oleo/<int:pk>/excluir/',
+         TeorOleoDeleteView.as_view(), name='teor_oleo_delete'),
+
     # URLs CRUD completo para Umidade
     path('umidade/<int:pk>/', UmidadeDetailView.as_view(), name='umidade_detail'),
-    path('umidade/<int:pk>/editar/', UmidadeUpdateView.as_view(), name='umidade_update'),
-    path('umidade/<int:pk>/excluir/', UmidadeDeleteView.as_view(), name='umidade_delete'),
-    
+    path('umidade/<int:pk>/editar/',
+         UmidadeUpdateView.as_view(), name='umidade_update'),
+    path('umidade/<int:pk>/excluir/',
+         UmidadeDeleteView.as_view(), name='umidade_delete'),
+
     # URLs CRUD completo para Proteína
     path('proteina/<int:pk>/', ProteinaDetailView.as_view(), name='proteina_detail'),
-    path('proteina/<int:pk>/editar/', ProteinaUpdateView.as_view(), name='proteina_update'),
-    path('proteina/<int:pk>/excluir/', ProteinaDeleteView.as_view(), name='proteina_delete'),
-    
+    path('proteina/<int:pk>/editar/',
+         ProteinaUpdateView.as_view(), name='proteina_update'),
+    path('proteina/<int:pk>/excluir/',
+         ProteinaDeleteView.as_view(), name='proteina_delete'),
+
     # URLs CRUD completo para Urase
     path('urase/<int:pk>/', UraseDetailView.as_view(), name='urase_detail'),
     path('urase/<int:pk>/editar/', UraseUpdateView.as_view(), name='urase_update'),
     path('urase/<int:pk>/excluir/', UraseDeleteView.as_view(), name='urase_delete'),
-    
+
     # URLs CRUD completo para Cinza
     path('cinza/<int:pk>/', CinzaDetailView.as_view(), name='cinza_detail'),
     path('cinza/<int:pk>/editar/', CinzaUpdateView.as_view(), name='cinza_update'),
     path('cinza/<int:pk>/excluir/', CinzaDeleteView.as_view(), name='cinza_delete'),
-    
+
     # URLs CRUD completo para Fibra
     path('fibra/<int:pk>/', FibraDetailView.as_view(), name='fibra_detail'),
     path('fibra/<int:pk>/editar/', FibraUpdateView.as_view(), name='fibra_update'),
     path('fibra/<int:pk>/excluir/', FibraDeleteView.as_view(), name='fibra_delete'),
-    
+
     # URLs CRUD completo para Fósforo
     path('fosforo/<int:pk>/', FosforoDetailView.as_view(), name='fosforo_detail'),
-    path('fosforo/<int:pk>/editar/', FosforoUpdateView.as_view(), name='fosforo_update'),
-    path('fosforo/<int:pk>/excluir/', FosforoDeleteView.as_view(), name='fosforo_delete'),
-    
+    path('fosforo/<int:pk>/editar/',
+         FosforoUpdateView.as_view(), name='fosforo_update'),
+    path('fosforo/<int:pk>/excluir/',
+         FosforoDeleteView.as_view(), name='fosforo_delete'),
+
     # URLs CRUD completo para Óleo Degomado
     path('oleo/<int:pk>/', OleoDegomadoDetailView.as_view(), name='oleo_detail'),
-    path('oleo/<int:pk>/editar/', OleoDegomadoUpdateView.as_view(), name='oleo_update'),
-    path('oleo/<int:pk>/excluir/', OleoDegomadoDeleteView.as_view(), name='oleo_delete'),
-    
+    path('oleo/<int:pk>/editar/',
+         OleoDegomadoUpdateView.as_view(), name='oleo_update'),
+    path('oleo/<int:pk>/excluir/',
+         OleoDegomadoDeleteView.as_view(), name='oleo_delete'),
+
     # URLs CRUD completo para Silica
     path('silica/<int:pk>/', SilicaDetailView.as_view(), name='silica_detail'),
-    path('silica/<int:pk>/editar/', SilicaUpdateView.as_view(), name='silica_update'),
-    path('silica/<int:pk>/excluir/', SilicaDeleteView.as_view(), name='silica_delete'),
+    path('silica/<int:pk>/editar/',
+         SilicaUpdateView.as_view(), name='silica_update'),
+    path('silica/<int:pk>/excluir/',
+         SilicaDeleteView.as_view(), name='silica_delete'),
 ]

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {% if object %}
-        Editar Análise de Sílica - QualiSoja
-    {% else %}
-        Nova Análise de Sílica - QualiSoja
-    {% endif %}
+{% if object %}
+Editar Análise de Sílica - QualiSoja
+{% else %}
+Nova Análise de Sílica - QualiSoja
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -17,16 +17,16 @@
                     <h4 class="mb-0">
                         <i class="bi bi-layers me-2"></i>
                         {% if object %}
-                            Editar Análise de Sílica
+                        Editar Análise de Sílica
                         {% else %}
-                            Nova Análise de Sílica
+                        Nova Análise de Sílica
                         {% endif %}
                     </h4>
                 </div>
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -35,7 +35,7 @@
                                     </label>
                                     {{ form.data }}
                                     {% if form.data.errors %}
-                                        <div class="text-danger">{{ form.data.errors }}</div>
+                                    <div class="text-danger">{{ form.data.errors }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -46,7 +46,7 @@
                                     </label>
                                     {{ form.horario }}
                                     {% if form.horario.errors %}
-                                        <div class="text-danger">{{ form.horario.errors }}</div>
+                                    <div class="text-danger">{{ form.horario.errors }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -58,7 +58,7 @@
                             </label>
                             {{ form.tipo_amostra }}
                             {% if form.tipo_amostra.errors %}
-                                <div class="text-danger">{{ form.tipo_amostra.errors }}</div>
+                            <div class="text-danger">{{ form.tipo_amostra.errors }}</div>
                             {% endif %}
                         </div>
 
@@ -68,7 +68,7 @@
                             </label>
                             {{ form.analise_cinza }}
                             {% if form.analise_cinza.errors %}
-                                <div class="text-danger">{{ form.analise_cinza.errors }}</div>
+                            <div class="text-danger">{{ form.analise_cinza.errors }}</div>
                             {% endif %}
                             <div class="form-text">
                                 {{ form.analise_cinza.help_text }}
@@ -81,7 +81,7 @@
                             </label>
                             {{ form.resultado_silica }}
                             {% if form.resultado_silica.errors %}
-                                <div class="text-danger">{{ form.resultado_silica.errors }}</div>
+                            <div class="text-danger">{{ form.resultado_silica.errors }}</div>
                             {% endif %}
                             <div class="form-text">
                                 {{ form.resultado_silica.help_text }}
@@ -90,13 +90,14 @@
 
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle me-2"></i>
-                            <strong>Resultado Final:</strong> Será calculado automaticamente como <strong>Resultado Cinza - Resultado Sílica</strong>
+                            <strong>Resultado Final:</strong> Será calculado automaticamente como <strong>Resultado
+                                Cinza - Resultado Sílica</strong>
                         </div>
 
                         {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ form.non_field_errors }}
-                            </div>
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
                         {% endif %}
 
                         <div class="d-flex justify-content-between">

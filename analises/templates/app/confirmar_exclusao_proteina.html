@@ -13,7 +13,7 @@
             <h6 class="alert-heading">Atenção!</h6>
             Você está prestes a excluir permanentemente a seguinte análise:
         </div>
-        
+
         <div class="card border-light bg-light">
             <div class="card-body">
                 <div class="row">
@@ -24,29 +24,29 @@
                     </div>
                     <div class="col-md-6">
                         <p class="mb-2"><strong>Peso da Amostra:</strong> {{ object.peso_amostra }} g</p>
-                        <p class="mb-2"><strong>Resultado:</strong> 
+                        <p class="mb-2"><strong>Resultado:</strong>
                             {% if object.resultado %}
-                                {{ object.resultado }}%
+                            {{ object.resultado }}%
                             {% else %}
-                                N/A
+                            N/A
                             {% endif %}
                         </p>
-                        <p class="mb-2"><strong>Resultado Corrigido:</strong> 
+                        <p class="mb-2"><strong>Resultado Corrigido:</strong>
                             {% if object.resultado_corrigido %}
-                                {{ object.resultado_corrigido }}%
+                            {{ object.resultado_corrigido }}%
                             {% else %}
-                                N/A
+                            N/A
                             {% endif %}
                         </p>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="alert alert-danger border-0 mt-3" role="alert">
             <strong>Esta ação é irreversível!</strong> Todos os dados desta análise serão perdidos permanentemente.
         </div>
-        
+
         <form method="post" class="mt-4">
             {% csrf_token %}
             <div class="d-flex gap-2 justify-content-between">

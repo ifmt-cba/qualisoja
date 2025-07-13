@@ -19,7 +19,8 @@ urlpatterns = [
 # Importar e adicionar URLs opcionais de debug e CSRF
 try:
     from .debug_views import debug_dashboard_data
-    urlpatterns.append(path('debug/dashboard/', debug_dashboard_data, name='debug_dashboard'))
+    urlpatterns.append(
+        path('debug/dashboard/', debug_dashboard_data, name='debug_dashboard'))
 except ImportError:
     pass
 
@@ -31,5 +32,7 @@ except ImportError:
 
 # Servir arquivos estáticos em desenvolvimento
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

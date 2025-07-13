@@ -1,7 +1,6 @@
 {
   "name": "QualiSoja - Django Development",
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
@@ -9,7 +8,6 @@
       "version": "18"
     }
   },
-
   "customizations": {
     "vscode": {
       "extensions": [
@@ -38,19 +36,18 @@
       }
     }
   },
-
-  "forwardPorts": [8000, 3000],
+  "forwardPorts": [
+    8000,
+    3000
+  ],
   "portsAttributes": {
     "8000": {
       "label": "Django App",
       "onAutoForward": "notify"
     }
   },
-
   "postCreateCommand": "bash .devcontainer/setup.sh",
-  
   "remoteUser": "vscode",
-  
   "mounts": [
     "source=${localWorkspaceFolder}/.devcontainer/setup.sh,target=/tmp/setup.sh,type=bind"
   ]

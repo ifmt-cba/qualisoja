@@ -23,61 +23,61 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-6">
                 <div class="card border-light">
                     <div class="card-body">
                         <h6 class="card-subtitle mb-2 text-muted">Medições</h6>
                         <p class="card-text">
                             <strong>Peso da Amostra:</strong> {{ analise.peso_amostra }} g<br>
-                            <strong>Tara:</strong> 
+                            <strong>Tara:</strong>
                             {% if analise.tara %}
-                                {{ analise.tara }} g
+                            {{ analise.tara }} g
                             {% else %}
-                                N/A
+                            N/A
                             {% endif %}<br>
-                            <strong>Líquido:</strong> 
+                            <strong>Líquido:</strong>
                             {% if analise.liquido %}
-                                {{ analise.liquido }} g
+                            {{ analise.liquido }} g
                             {% else %}
-                                N/A
+                            N/A
                             {% endif %}<br>
-                            <strong>Titulação:</strong> 
+                            <strong>Titulação:</strong>
                             {% if analise.titulacao %}
-                                {{ analise.titulacao }}
+                            {{ analise.titulacao }}
                             {% else %}
-                                N/A
+                            N/A
                             {% endif %}
                         </p>
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-6">
                 <div class="card border-info">
                     <div class="card-body text-center">
                         <h6 class="card-subtitle mb-2 text-muted">Resultado</h6>
                         <h3 class="text-info">
                             {% if analise.resultado %}
-                                {{ analise.resultado }}%
+                            {{ analise.resultado }}%
                             {% else %}
-                                N/A
+                            N/A
                             {% endif %}
                         </h3>
                         <p class="text-muted">{{ analise.get_tipo_analise_display }}</p>
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-6">
                 <div class="card border-warning">
                     <div class="card-body text-center">
                         <h6 class="card-subtitle mb-2 text-muted">Fator de Correção</h6>
                         <h3 class="text-warning">
                             {% if analise.fator_correcao %}
-                                {{ analise.fator_correcao }}
+                            {{ analise.fator_correcao }}
                             {% else %}
-                                N/A
+                            N/A
                             {% endif %}
                         </h3>
                         <p class="text-muted">Fator</p>
@@ -85,7 +85,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="mt-4 d-flex gap-2 justify-content-between">
             <a href="{% url 'analises:oleo_list' %}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-2"></i>Voltar à Lista

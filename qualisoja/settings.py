@@ -31,7 +31,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Em produção, configure SECRET_KEY como variável de ambiente
-SECRET_KEY = os.environ.get('SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', get_random_secret_key()))
+SECRET_KEY = os.environ.get('SECRET_KEY', os.environ.get(
+    'DJANGO_SECRET_KEY', get_random_secret_key()))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Forçar DEBUG=True para desenvolvimento local
@@ -41,7 +42,7 @@ DEBUG = True  # os.environ.get('DEBUG', 'False').lower() == 'true'
 CODESPACES = os.environ.get('CODESPACES', 'false').lower() == 'true'
 CODESPACE_NAME = os.environ.get('CODESPACE_NAME', '')
 
-# Configurar hosts permitidos
+# Configurar hosts permitidos para desenvolvimento local
 if CODESPACES:
     ALLOWED_HOSTS = [
         'localhost',
@@ -52,7 +53,8 @@ if CODESPACES:
         '*.preview.app.github.dev'
     ]
 else:
-    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost,www.qualisoja.com.br,qualisoja.com.br').split(',')
+    # Configuração para desenvolvimento local apenas
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -148,7 +150,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'templates/static'), 
+    os.path.join(BASE_DIR, 'templates/static'),
     os.path.join(BASE_DIR, 'relatorios/templates/static'),
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -214,7 +216,8 @@ LOGGING = {
 }
 
 # Configurações CSRF
-CSRF_COOKIE_SECURE = not DEBUG and not CODESPACES  # False no Codespaces para desenvolvimento
+# False no Codespaces para desenvolvimento
+CSRF_COOKIE_SECURE = not DEBUG and not CODESPACES
 CSRF_COOKIE_HTTPONLY = False  # Para permitir acesso via JavaScript se necessário
 CSRF_COOKIE_SAMESITE = 'Lax'
 
@@ -229,11 +232,10 @@ if CODESPACES:
         'https://*.preview.app.github.dev'
     ]
 else:
+    # Configuração para desenvolvimento local apenas
     CSRF_TRUSTED_ORIGINS = [
-        'http://localhost:8000', 
-        'http://127.0.0.1:8000',
-        'https://www.qualisoja.com.br',
-        'https://qualisoja.com.br'
+        'http://localhost:8000',
+        'http://127.0.0.1:8000'
     ]
 
 # Configurações de Sessão
@@ -248,11 +250,11 @@ if not DEBUG and not CODESPACES:
     SECURE_HSTS_SECONDS = 31536000  # 1 ano
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    
+
     # Configurações SSL
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    
+
     # Content Security Policy
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
