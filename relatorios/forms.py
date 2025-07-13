@@ -9,6 +9,12 @@ class RelatorioFiltroForm(forms.Form):
         ('umidade', 'Relatório de Umidade'),
         ('proteina', 'Relatório de Proteína'),
         ('oleo_degomado', 'Análise do Óleo Degomado'),
+        ('urase', 'Análise de Urase'),
+        ('cinza', 'Análise de Cinza'),
+        ('teor_oleo', 'Análise de Teor de Óleo'),
+        ('fibra', 'Análise de Fibra'),
+        ('fosforo', 'Análise de Fósforo'),
+        ('silica', 'Análise de Sílica'),
         ('completo', 'Relatório Completo'),
     ]
     
@@ -59,6 +65,36 @@ class RelatorioFiltroForm(forms.Form):
     tipo_amostra_oleo_degomado = forms.CharField(
         required=False,
         label='Tipo de Amostra (Óleo Degomado)'
+    )
+    
+    tipo_amostra_urase = forms.CharField(
+        required=False,
+        label='Tipo de Amostra (Urase)'
+    )
+    
+    tipo_amostra_cinza = forms.CharField(
+        required=False,
+        label='Tipo de Amostra (Cinza)'
+    )
+    
+    tipo_amostra_teor_oleo = forms.CharField(
+        required=False,
+        label='Tipo de Amostra (Teor de Óleo)'
+    )
+    
+    tipo_amostra_fibra = forms.CharField(
+        required=False,
+        label='Tipo de Amostra (Fibra)'
+    )
+    
+    tipo_amostra_fosforo = forms.CharField(
+        required=False,
+        label='Tipo de Amostra (Fósforo)'
+    )
+    
+    tipo_amostra_silica = forms.CharField(
+        required=False,
+        label='Tipo de Amostra (Sílica)'
     )
     
     def clean(self):

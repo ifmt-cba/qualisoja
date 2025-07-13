@@ -5,7 +5,12 @@
 <div class="card shadow-sm border-0">
     <div class="card-header bg-success bg-opacity-10 border-success border-opacity-25">
         <h2 class="mb-0 text-success">
-            <i class="bi bi-flask-fill me-2"></i>Nova Análise de Umidade de Óleo Degomado
+            <i class="bi bi-flask-fill me-2"></i>
+            {% if object %}
+                Editar Análise de Óleo Degomado
+            {% else %}
+                Nova Análise de Óleo Degomado
+            {% endif %}
         </h2>
     </div>
     <div class="card-body">
@@ -76,7 +81,7 @@
                     <div class="form-floating mb-3">
                         {{ form.tara|add_class:"form-control" }}
                         <label for="{{ form.tara.id_for_label }}">{{ form.tara.label }}</label>
-                        {% if form.ml_gasto.errors %}
+                        {% if form.tara.errors %}
                             <div class="invalid-feedback d-block">{{ form.tara.errors }}</div>
                         {% endif %}
                     </div>

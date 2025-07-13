@@ -108,16 +108,18 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
             'horario': forms.TimeInput(attrs={'type': 'time'}),
         }
     def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            today = localdate()  # Usa o fuso horário configurado no Django
-            self.fields['data'].widget.attrs['min'] = today.isoformat()
+        super().__init__(*args, **kwargs)
+        # Não definir min para data - permitir datas anteriores
+        # today = localdate()
+        # self.fields['data'].widget.attrs['min'] = today.isoformat()
 
     def clean_data(self):
-            data = self.cleaned_data.get('data')
-            hoje = timezone.localdate()  # Usa o fuso horário correto
-            if data and data < hoje:
-                raise ValidationError('A data não pode ser anterior à data atual.')
-            return data
+        data = self.cleaned_data.get('data')
+        hoje = timezone.localdate()
+        # Permitir datas anteriores, apenas validar se não é muito no futuro
+        if data and data > hoje:
+            raise ValidationError('A data não pode ser no futuro.')
+        return data
 
     def clean(self):
         """Validação específica do formulário de óleo degomado"""

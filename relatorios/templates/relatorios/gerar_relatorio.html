@@ -742,6 +742,27 @@
         0%, 100% { opacity: 1; }
         50% { opacity: 0.7; }
     }
+
+    /* Custom Color Classes for Report Icons */
+    .text-purple {
+        color: #8b5cf6 !important;
+    }
+
+    .text-orange {
+        color: #f97316 !important;
+    }
+
+    .text-brown {
+        color: #92400e !important;
+    }
+
+    .text-cyan {
+        color: #06b6d4 !important;
+    }
+
+    .text-gray {
+        color: #6b7280 !important;
+    }
 </style>
 {% endblock %}
 
@@ -1247,7 +1268,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row mb-3">
                             <div class="col-md-3 d-flex">
                                 <div class="report-type-card flex-fill" data-type="umidade" tabindex="0">
                                     <div class="report-type-icon"><i class="fas fa-tint text-primary"></i></div>
@@ -1267,6 +1288,52 @@
                                     <div class="report-type-icon"><i class="fas fa-flask text-success"></i></div>
                                     <h6>Óleo Degomado</h6>
                                     <small class="text-muted">Análises do óleo degomado e derivados</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 d-flex">
+                                <div class="report-type-card flex-fill" data-type="urase" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-vial text-purple"></i></div>
+                                    <h6>Urase</h6>
+                                    <small class="text-muted">Análises de atividade de urase</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3 d-flex">
+                                <div class="report-type-card flex-fill" data-type="cinza" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-fire text-orange"></i></div>
+                                    <h6>Cinza</h6>
+                                    <small class="text-muted">Análises de teor de cinza</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 d-flex">
+                                <div class="report-type-card flex-fill" data-type="teor_oleo" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-oil-can text-dark"></i></div>
+                                    <h6>Teor de Óleo</h6>
+                                    <small class="text-muted">Análises de teor de óleo</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 d-flex">
+                                <div class="report-type-card flex-fill" data-type="fibra" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-wheat-awn text-brown"></i></div>
+                                    <h6>Fibra</h6>
+                                    <small class="text-muted">Análises de teor de fibra</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 d-flex">
+                                <div class="report-type-card flex-fill" data-type="fosforo" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-atom text-cyan"></i></div>
+                                    <h6>Fósforo</h6>
+                                    <small class="text-muted">Análises de teor de fósforo</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3 d-flex">
+                                <div class="report-type-card flex-fill" data-type="silica" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-gem text-gray"></i></div>
+                                    <h6>Sílica</h6>
+                                    <small class="text-muted">Análises de teor de sílica</small>
                                 </div>
                             </div>
                             <div class="col-md-3 d-flex">
@@ -1343,6 +1410,66 @@
                                     <option value="DG" {% if form.tipo_amostra_oleo_degomado.value == 'DG' %}selected{% endif %}>Óleo Degomado</option>
                                     <option value="RF" {% if form.tipo_amostra_oleo_degomado.value == 'RF' %}selected{% endif %}>Óleo Refinado</option>
                                     <option value="RS" {% if form.tipo_amostra_oleo_degomado.value == 'RS' %}selected{% endif %}>Resíduo</option>
+                                </select>
+                            </div>
+                            <div id="urase-filter-group" class="mt-3">
+                                <label for="id_tipo_amostra_urase" class="form-label">Filtro por Tipo (Urase)</label>
+                                <select name="tipo_amostra_urase" id="id_tipo_amostra_urase" class="form-select-modern">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="FL" {% if form.tipo_amostra_urase.value == 'FL' %}selected{% endif %}>Farelo</option>
+                                    <option value="SI" {% if form.tipo_amostra_urase.value == 'SI' %}selected{% endif %}>Soja Industrializada</option>
+                                    <option value="FP" {% if form.tipo_amostra_urase.value == 'FP' %}selected{% endif %}>Fábrica Parada</option>
+                                    <option value="SA" {% if form.tipo_amostra_urase.value == 'SA' %}selected{% endif %}>Sem Amostra</option>
+                                </select>
+                            </div>
+                            <div id="cinza-filter-group" class="mt-3">
+                                <label for="id_tipo_amostra_cinza" class="form-label">Filtro por Tipo (Cinza)</label>
+                                <select name="tipo_amostra_cinza" id="id_tipo_amostra_cinza" class="form-select-modern">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="FL" {% if form.tipo_amostra_cinza.value == 'FL' %}selected{% endif %}>Farelo</option>
+                                    <option value="SI" {% if form.tipo_amostra_cinza.value == 'SI' %}selected{% endif %}>Soja Industrializada</option>
+                                    <option value="FP" {% if form.tipo_amostra_cinza.value == 'FP' %}selected{% endif %}>Fábrica Parada</option>
+                                    <option value="SA" {% if form.tipo_amostra_cinza.value == 'SA' %}selected{% endif %}>Sem Amostra</option>
+                                </select>
+                            </div>
+                            <div id="teor-oleo-filter-group" class="mt-3">
+                                <label for="id_tipo_amostra_teor_oleo" class="form-label">Filtro por Tipo (Teor de Óleo)</label>
+                                <select name="tipo_amostra_teor_oleo" id="id_tipo_amostra_teor_oleo" class="form-select-modern">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="FL" {% if form.tipo_amostra_teor_oleo.value == 'FL' %}selected{% endif %}>Farelo</option>
+                                    <option value="SI" {% if form.tipo_amostra_teor_oleo.value == 'SI' %}selected{% endif %}>Soja Industrializada</option>
+                                    <option value="FP" {% if form.tipo_amostra_teor_oleo.value == 'FP' %}selected{% endif %}>Fábrica Parada</option>
+                                    <option value="SA" {% if form.tipo_amostra_teor_oleo.value == 'SA' %}selected{% endif %}>Sem Amostra</option>
+                                </select>
+                            </div>
+                            <div id="fibra-filter-group" class="mt-3">
+                                <label for="id_tipo_amostra_fibra" class="form-label">Filtro por Tipo (Fibra)</label>
+                                <select name="tipo_amostra_fibra" id="id_tipo_amostra_fibra" class="form-select-modern">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="FL" {% if form.tipo_amostra_fibra.value == 'FL' %}selected{% endif %}>Farelo</option>
+                                    <option value="SI" {% if form.tipo_amostra_fibra.value == 'SI' %}selected{% endif %}>Soja Industrializada</option>
+                                    <option value="FP" {% if form.tipo_amostra_fibra.value == 'FP' %}selected{% endif %}>Fábrica Parada</option>
+                                    <option value="SA" {% if form.tipo_amostra_fibra.value == 'SA' %}selected{% endif %}>Sem Amostra</option>
+                                </select>
+                            </div>
+                            <div id="fosforo-filter-group" class="mt-3">
+                                <label for="id_tipo_amostra_fosforo" class="form-label">Filtro por Tipo (Fósforo)</label>
+                                <select name="tipo_amostra_fosforo" id="id_tipo_amostra_fosforo" class="form-select-modern">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="FL" {% if form.tipo_amostra_fosforo.value == 'FL' %}selected{% endif %}>Farelo</option>
+                                    <option value="SI" {% if form.tipo_amostra_fosforo.value == 'SI' %}selected{% endif %}>Soja Industrializada</option>
+                                    <option value="FP" {% if form.tipo_amostra_fosforo.value == 'FP' %}selected{% endif %}>Fábrica Parada</option>
+                                    <option value="SA" {% if form.tipo_amostra_fosforo.value == 'SA' %}selected{% endif %}>Sem Amostra</option>
+                                </select>
+                            </div>
+                            <div id="silica-filter-group" class="mt-3">
+                                <label for="id_tipo_amostra_silica" class="form-label">Filtro por Tipo (Sílica)</label>
+                                <select name="tipo_amostra_silica" id="id_tipo_amostra_silica" class="form-select-modern">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="FL" {% if form.tipo_amostra_silica.value == 'FL' %}selected{% endif %}>Farelo</option>
+                                    <option value="SI" {% if form.tipo_amostra_silica.value == 'SI' %}selected{% endif %}>Soja Industrializada</option>
+                                    <option value="FP" {% if form.tipo_amostra_silica.value == 'FP' %}selected{% endif %}>Fábrica Parada</option>
+                                    <option value="SA" {% if form.tipo_amostra_silica.value == 'SA' %}selected{% endif %}>Sem Amostra</option>
                                 </select>
                             </div>
                         </div>
@@ -1752,9 +1879,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const umidadeFilterGroup = document.getElementById('umidade-filter-group');
     const proteinaFilterGroup = document.getElementById('proteina-filter-group');
     const oleoFilterGroup = document.getElementById('oleo-degomado-filter-group');
+    const uraseFilterGroup = document.getElementById('urase-filter-group');
+    const cinzaFilterGroup = document.getElementById('cinza-filter-group');
+    const teorOleoFilterGroup = document.getElementById('teor-oleo-filter-group');
+    const fibraFilterGroup = document.getElementById('fibra-filter-group');
+    const fosforoFilterGroup = document.getElementById('fosforo-filter-group');
+    const silicaFilterGroup = document.getElementById('silica-filter-group');
     const tipoAmostraUmidadeSelect = document.getElementById('id_tipo_amostra_umidade');
     const tipoAmostraProteinaSelect = document.getElementById('id_tipo_amostra_proteina');
     const tipoAmostraOleoSelect = document.getElementById('id_tipo_amostra_oleo_degomado');
+    const tipoAmostraUraseSelect = document.getElementById('id_tipo_amostra_urase');
+    const tipoAmostraCinzaSelect = document.getElementById('id_tipo_amostra_cinza');
+    const tipoAmostraTeorOleoSelect = document.getElementById('id_tipo_amostra_teor_oleo');
+    const tipoAmostraFibraSelect = document.getElementById('id_tipo_amostra_fibra');
+    const tipoAmostraFosforoSelect = document.getElementById('id_tipo_amostra_fosforo');
+    const tipoAmostraSilicaSelect = document.getElementById('id_tipo_amostra_silica');
 
     let currentStep = 1;
 
@@ -1819,7 +1958,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        [dataInicialInput, dataFinalInput, tipoAmostraUmidadeSelect, tipoAmostraProteinaSelect, tipoAmostraOleoSelect].forEach(el => {
+        [dataInicialInput, dataFinalInput, tipoAmostraUmidadeSelect, tipoAmostraProteinaSelect, tipoAmostraOleoSelect, tipoAmostraUraseSelect, tipoAmostraCinzaSelect, tipoAmostraTeorOleoSelect, tipoAmostraFibraSelect, tipoAmostraFosforoSelect, tipoAmostraSilicaSelect].forEach(el => {
             if(el) el.addEventListener('change', updateSummary);
         });
         
@@ -1984,9 +2123,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         tipoRelatorioInput.value = type;
         
+        // Controlar a exibição dos filtros baseado no tipo de relatório selecionado
         umidadeFilterGroup.style.display = (type === 'umidade' || type === 'completo') ? 'block' : 'none';
         proteinaFilterGroup.style.display = (type === 'proteina' || type === 'completo') ? 'block' : 'none';
         oleoFilterGroup.style.display = (type === 'oleo_degomado' || type === 'completo') ? 'block' : 'none';
+        uraseFilterGroup.style.display = (type === 'urase' || type === 'completo') ? 'block' : 'none';
+        cinzaFilterGroup.style.display = (type === 'cinza' || type === 'completo') ? 'block' : 'none';
+        teorOleoFilterGroup.style.display = (type === 'teor_oleo' || type === 'completo') ? 'block' : 'none';
+        fibraFilterGroup.style.display = (type === 'fibra' || type === 'completo') ? 'block' : 'none';
+        fosforoFilterGroup.style.display = (type === 'fosforo' || type === 'completo') ? 'block' : 'none';
+        silicaFilterGroup.style.display = (type === 'silica' || type === 'completo') ? 'block' : 'none';
         
         updateSummary();
     }
@@ -2084,6 +2230,42 @@ document.addEventListener('DOMContentLoaded', function() {
             sampleFiltersHtml += `<span class="filter-badge bg-secondary">Óleo: ${selectedText}</span>`;
         } else if (oleoFilterGroup.style.display !== 'none') {
             sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Óleo: Todos</span>`;
+        }
+        if (uraseFilterGroup.style.display !== 'none' && tipoAmostraUraseSelect.value) {
+            const selectedText = tipoAmostraUraseSelect.options[tipoAmostraUraseSelect.selectedIndex].text;
+            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Urase: ${selectedText}</span> `;
+        } else if (uraseFilterGroup.style.display !== 'none') {
+            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Urase: Todos</span> `;
+        }
+        if (cinzaFilterGroup.style.display !== 'none' && tipoAmostraCinzaSelect.value) {
+            const selectedText = tipoAmostraCinzaSelect.options[tipoAmostraCinzaSelect.selectedIndex].text;
+            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Cinza: ${selectedText}</span> `;
+        } else if (cinzaFilterGroup.style.display !== 'none') {
+            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Cinza: Todos</span> `;
+        }
+        if (teorOleoFilterGroup.style.display !== 'none' && tipoAmostraTeorOleoSelect.value) {
+            const selectedText = tipoAmostraTeorOleoSelect.options[tipoAmostraTeorOleoSelect.selectedIndex].text;
+            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Teor de Óleo: ${selectedText}</span> `;
+        } else if (teorOleoFilterGroup.style.display !== 'none') {
+            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Teor de Óleo: Todos</span> `;
+        }
+        if (fibraFilterGroup.style.display !== 'none' && tipoAmostraFibraSelect.value) {
+            const selectedText = tipoAmostraFibraSelect.options[tipoAmostraFibraSelect.selectedIndex].text;
+            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Fibra: ${selectedText}</span> `;
+        } else if (fibraFilterGroup.style.display !== 'none') {
+            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Fibra: Todos</span> `;
+        }
+        if (fosforoFilterGroup.style.display !== 'none' && tipoAmostraFosforoSelect.value) {
+            const selectedText = tipoAmostraFosforoSelect.options[tipoAmostraFosforoSelect.selectedIndex].text;
+            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Fósforo: ${selectedText}</span> `;
+        } else if (fosforoFilterGroup.style.display !== 'none') {
+            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Fósforo: Todos</span> `;
+        }
+        if (silicaFilterGroup.style.display !== 'none' && tipoAmostraSilicaSelect.value) {
+            const selectedText = tipoAmostraSilicaSelect.options[tipoAmostraSilicaSelect.selectedIndex].text;
+            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Sílica: ${selectedText}</span> `;
+        } else if (silicaFilterGroup.style.display !== 'none') {
+            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Sílica: Todos</span> `;
         }
         document.getElementById('active-sample-filters').innerHTML = sampleFiltersHtml;
 

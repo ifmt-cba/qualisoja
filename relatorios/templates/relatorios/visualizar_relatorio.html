@@ -8,6 +8,20 @@
                     Relatório de Análises de Umidade
                 {% elif tipo_relatorio == 'proteina' %}
                     Relatório de Análises de Proteína
+                {% elif tipo_relatorio == 'oleo_degomado' %}
+                    Relatório de Análises de Óleo Degomado
+                {% elif tipo_relatorio == 'urase' %}
+                    Relatório de Análises de Urase
+                {% elif tipo_relatorio == 'cinza' %}
+                    Relatório de Análises de Cinza
+                {% elif tipo_relatorio == 'teor_oleo' %}
+                    Relatório de Análises de Teor de Óleo
+                {% elif tipo_relatorio == 'fibra' %}
+                    Relatório de Análises de Fibra
+                {% elif tipo_relatorio == 'fosforo' %}
+                    Relatório de Análises de Fósforo
+                {% elif tipo_relatorio == 'silica' %}
+                    Relatório de Análises de Sílica
                 {% else %}
                     Relatório Completo de Análises
                 {% endif %}
@@ -57,6 +71,42 @@
         <strong>Erro ao processar dados de óleo degomado:</strong> {{ erro_oleo_degomado }}
     </div>
     {% endif %}
+    
+    {% if erro_urase %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de urase:</strong> {{ erro_urase }}
+    </div>
+    {% endif %}
+    
+    {% if erro_cinza %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de cinza:</strong> {{ erro_cinza }}
+    </div>
+    {% endif %}
+    
+    {% if erro_teor_oleo %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de teor de óleo:</strong> {{ erro_teor_oleo }}
+    </div>
+    {% endif %}
+    
+    {% if erro_fibra %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de fibra:</strong> {{ erro_fibra }}
+    </div>
+    {% endif %}
+    
+    {% if erro_fosforo %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de fósforo:</strong> {{ erro_fosforo }}
+    </div>
+    {% endif %}
+    
+    {% if erro_silica %}
+    <div class="alert alert-warning">
+        <strong>Erro ao processar dados de sílica:</strong> {{ erro_silica }}
+    </div>
+    {% endif %}
 
     {% if tipo_relatorio == 'proteina' or tipo_relatorio == 'completo' %}
     {% if analises_proteina %}
@@ -70,13 +120,13 @@
             <div class="alert alert-info mb-3">
                 <div class="row">
                     <div class="col-md-3">
-                        <strong>Média:</strong> {{ estatisticas_proteina.media|floatformat:2 }}%
+                        <strong>Média:</strong> {{ estatisticas_proteina.media|floatformat:2|default:"-" }}%
                     </div>
                     <div class="col-md-3">
-                        <strong>Mínimo:</strong> {{ estatisticas_proteina.minimo|floatformat:2 }}%
+                        <strong>Mínimo:</strong> {{ estatisticas_proteina.minimo|floatformat:2|default:"-" }}%
                     </div>
                     <div class="col-md-3">
-                        <strong>Máximo:</strong> {{ estatisticas_proteina.maximo|floatformat:2 }}%
+                        <strong>Máximo:</strong> {{ estatisticas_proteina.maximo|floatformat:2|default:"-" }}%
                     </div>
                     <div class="col-md-3">
                         <strong>Total:</strong> {{ estatisticas_proteina.total }} análises
@@ -167,13 +217,13 @@
             <div class="alert alert-info mb-3">
                 <div class="row">
                     <div class="col-md-3">
-                        <strong>Média:</strong> {{ estatisticas_umidade.media|floatformat:2 }}%
+                        <strong>Média:</strong> {{ estatisticas_umidade.media|floatformat:2|default:"-" }}%
                     </div>
                     <div class="col-md-3">
-                        <strong>Mínimo:</strong> {{ estatisticas_umidade.minimo|floatformat:2 }}%
+                        <strong>Mínimo:</strong> {{ estatisticas_umidade.minimo|floatformat:2|default:"-" }}%
                     </div>
                     <div class="col-md-3">
-                        <strong>Máximo:</strong> {{ estatisticas_umidade.maximo|floatformat:2 }}%
+                        <strong>Máximo:</strong> {{ estatisticas_umidade.maximo|floatformat:2|default:"-" }}%
                     </div>
                     <div class="col-md-3">
                         <strong>Total:</strong> {{ estatisticas_umidade.total }} análises
@@ -278,13 +328,13 @@
             <div class="alert alert-info mb-3">
                 <div class="row">
                     <div class="col-md-3">
-                        <strong>Acidez Média:</strong> {{ estatisticas_oleo_degomado.acidez_media|floatformat:2 }}%
+                        <strong>Titulação Média:</strong> {{ estatisticas_oleo_degomado.titulacao_media|floatformat:2 }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Umidade Média:</strong> {{ estatisticas_oleo_degomado.umidade_media|floatformat:2 }}%
+                        <strong>Peso Amostra Médio:</strong> {{ estatisticas_oleo_degomado.peso_amostra_media|floatformat:2 }}g
                     </div>
                     <div class="col-md-3">
-                        <strong>Impurezas Médias:</strong> {{ estatisticas_oleo_degomado.impurezas_media|floatformat:2 }}%
+                        <strong>Fator Correção Médio:</strong> {{ estatisticas_oleo_degomado.fator_correcao_media|floatformat:2 }}
                     </div>
                     <div class="col-md-3">
                         <strong>Total:</strong> {{ estatisticas_oleo_degomado.total }} análises
@@ -301,11 +351,11 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header bg-light">
-                            <h6 class="mb-0">Evolução da Acidez ao Longo do Tempo</h6>
+                            <h6 class="mb-0">Evolução dos Resultados ao Longo do Tempo</h6>
                         </div>
                         <div class="card-body chart-container">
                             <div style="height: 300px;">
-                                <canvas id="oleoAcidezTimeChart"></canvas>
+                                <canvas id="oleoResultadoTimeChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -331,11 +381,11 @@
                             <th>Data</th>
                             <th>Horário</th>
                             <th>Tipo de Amostra</th>
-                            <th>Acidez (%)</th>
-                            <th>Umidade (%)</th>
-                            <th>Impurezas (%)</th>
-                            <th>Índice Iodo</th>
-                            <th>Cor</th>
+                            <th>Tara (g)</th>
+                            <th>Líquido (g)</th>
+                            <th>Peso Amostra (g)</th>
+                            <th>Titulação</th>
+                            <th>Fator Correção</th>
                             <th>Resultado</th>
                         </tr>
                     </thead>
@@ -345,12 +395,12 @@
                             <td>{{ analise.data|date:"d/m/Y" }}</td>
                             <td>{{ analise.horario|time:"H:i" }}</td>
                             <td>{{ analise.get_tipo_amostra_display }}</td>
-                            <td>{{ analise.acidez|floatformat:2 }}</td>
-                            <td>{{ analise.umidade_oleo|floatformat:2 }}</td>
-                            <td>{{ analise.impurezas|floatformat:2 }}</td>
-                            <td>{{ analise.indice_iodo|floatformat:2 }}</td>
-                            <td>{{ analise.cor }}</td>
-                            <td>{{ analise.resultado }}</td>
+                            <td>{{ analise.tara|floatformat:2|default:"-" }}</td>
+                            <td>{{ analise.liquido|floatformat:2|default:"-" }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2|default:"-" }}</td>
+                            <td>{{ analise.titulacao|floatformat:2|default:"-" }}</td>
+                            <td>{{ analise.fator_correcao|floatformat:2|default:"-" }}</td>
+                            <td>{{ analise.resultado|floatformat:2|default:"-" }}</td>
                         </tr>
                     {% empty %}
                         <tr><td colspan="9" class="text-center">Nenhuma análise encontrada.</td></tr>
@@ -367,7 +417,565 @@
     {% endif %}
     {% endif %}
 
-    {% if not analises_proteina and not analises_umidade and not analises_oleo_degomado %}
+    {% if tipo_relatorio == 'urase' or tipo_relatorio == 'completo' %}
+    {% if analises_urase %}
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Análises de Urase</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_urase.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_urase %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_urase.media|floatformat:2|default:"-" }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_urase.minimo|floatformat:2|default:"-" }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_urase.maximo|floatformat:2|default:"-" }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_urase.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Seção de estatísticas para urase -->
+            <div id="urase-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para urase -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Urase ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="uraseTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="uraseTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>Resultado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_urase %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de urase para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if tipo_relatorio == 'cinza' or tipo_relatorio == 'completo' %}
+    {% if analises_cinza %}
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Análises de Cinza</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_cinza.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_cinza %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_cinza.media|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_cinza.minimo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_cinza.maximo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_cinza.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Seção de estatísticas para cinza -->
+            <div id="cinza-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para cinza -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Cinza ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="cinzaTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="cinzaTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>Resultado (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_cinza %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de cinza para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if tipo_relatorio == 'teor_oleo' or tipo_relatorio == 'completo' %}
+    {% if analises_teor_oleo %}
+    <div class="card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #8b5cf6;">
+            <h5 class="mb-0">Análises de Teor de Óleo</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_teor_oleo.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_teor_oleo %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_teor_oleo.media|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_teor_oleo.minimo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_teor_oleo.maximo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_teor_oleo.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Seção de estatísticas para teor de óleo -->
+            <div id="teor-oleo-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para teor de óleo -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Teor de Óleo ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="teorOleoTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="teorOleoTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>Resultado (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_teor_oleo %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de teor de óleo para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if tipo_relatorio == 'fibra' or tipo_relatorio == 'completo' %}
+    {% if analises_fibra %}
+    <div class="card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #f97316;">
+            <h5 class="mb-0">Análises de Fibra</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_fibra.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_fibra %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_fibra.media|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_fibra.minimo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_fibra.maximo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_fibra.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Seção de estatísticas para fibra -->
+            <div id="fibra-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para fibra -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Fibra ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="fibraTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="fibraTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>Resultado (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_fibra %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de fibra para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if tipo_relatorio == 'fosforo' or tipo_relatorio == 'completo' %}
+    {% if analises_fosforo %}
+    <div class="card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #92400e;">
+            <h5 class="mb-0">Análises de Fósforo</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_fosforo.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_fosforo %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_fosforo.media|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_fosforo.minimo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_fosforo.maximo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_fosforo.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Seção de estatísticas para fósforo -->
+            <div id="fosforo-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para fósforo -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Fósforo ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="fosforoTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="fosforoTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>Resultado (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_fosforo %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de fósforo para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if tipo_relatorio == 'silica' or tipo_relatorio == 'completo' %}
+    {% if analises_silica %}
+    <div class="card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #06b6d4;">
+            <h5 class="mb-0">Análises de Sílica</h5>
+            <span class="badge bg-light text-dark">Total: {{ analises_silica.count }}</span>
+        </div>
+        <div class="card-body">
+            {% if estatisticas_silica %}
+            <div class="alert alert-info mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Média:</strong> {{ estatisticas_silica.media|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Mínimo:</strong> {{ estatisticas_silica.minimo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Máximo:</strong> {{ estatisticas_silica.maximo|floatformat:2|default:"-" }}%
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total:</strong> {{ estatisticas_silica.total }} análises
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Seção de estatísticas para sílica -->
+            <div id="silica-stats" class="mb-4"></div>
+            
+            <!-- Seção de gráficos para sílica -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Evolução de Sílica ao Longo do Tempo</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="silicaTimeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Média por Tipo de Amostra</h6>
+                        </div>
+                        <div class="card-body chart-container">
+                            <div style="height: 300px;">
+                                <canvas id="silicaTipoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Tipo de Amostra</th>
+                            <th>Peso da Amostra (g)</th>
+                            <th>Resultado (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for analise in analises_silica %}
+                        <tr>
+                            <td>{{ analise.data|date:"d/m/Y" }}</td>
+                            <td>{{ analise.horario|time:"H:i" }}</td>
+                            <td>{{ analise.get_tipo_amostra_display }}</td>
+                            <td>{{ analise.peso_amostra|floatformat:2 }}</td>
+                            <td>{{ analise.resultado|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="text-center">Nenhuma análise encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p class="mb-0">Não foram encontradas análises de sílica para o período selecionado.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if not analises_proteina and not analises_umidade and not analises_oleo_degomado and not analises_urase and not analises_cinza and not analises_teor_oleo and not analises_fibra and not analises_fosforo and not analises_silica %}
     <div class="alert alert-warning text-center py-4">
         <h4>Nenhum dado encontrado</h4>
         <p class="mb-0">Não foram encontradas análises para o período e filtros selecionados.</p>
@@ -395,7 +1003,12 @@
         margin-bottom: 20px;
         break-inside: avoid;
     }
-    .card-header.bg-primary, .card-header.bg-success {
+    .card-header.bg-primary, .card-header.bg-success, .card-header.bg-warning {
+        color: #000 !important;
+        background-color: #eee !important;
+        font-weight: bold;
+    }
+    .card-header[style*="background-color"] {
         color: #000 !important;
         background-color: #eee !important;
         font-weight: bold;
@@ -456,6 +1069,30 @@
 
 <script type="application/json" id="oleo-degomado-data">
 {% if analises_oleo_degomado_json %}{{ analises_oleo_degomado_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<script type="application/json" id="urase-data">
+{% if analises_urase_json %}{{ analises_urase_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<script type="application/json" id="cinza-data">
+{% if analises_cinza_json %}{{ analises_cinza_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<script type="application/json" id="teor-oleo-data">
+{% if analises_teor_oleo_json %}{{ analises_teor_oleo_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<script type="application/json" id="fibra-data">
+{% if analises_fibra_json %}{{ analises_fibra_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<script type="application/json" id="fosforo-data">
+{% if analises_fosforo_json %}{{ analises_fosforo_json|safe }}{% else %}[]{% endif %}
+</script>
+
+<script type="application/json" id="silica-data">
+{% if analises_silica_json %}{{ analises_silica_json|safe }}{% else %}[]{% endif %}
 </script>
 
 <!-- Script para renderizar os gráficos -->
