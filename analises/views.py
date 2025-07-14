@@ -41,6 +41,106 @@ class AnaliseHomeView(TemplateView):
     """View para a página inicial do módulo de análises"""
 
     template_name = "app/home_analises.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        from datetime import date
+        from django.db.models import Count
+        
+        try:
+            # Contar total de análises por tipo
+            context['total_umidade'] = AnaliseUmidade.objects.count()
+            context['total_proteina'] = AnaliseProteina.objects.count()
+            context['total_oleo'] = AnaliseOleoDegomado.objects.count()
+            context['total_urase'] = AnaliseUrase.objects.count()
+            context['total_cinza'] = AnaliseCinza.objects.count()
+            context['total_fibra'] = AnaliseFibra.objects.count()
+            context['total_fosforo'] = AnaliseFosforo.objects.count()
+            context['total_teor_oleo'] = AnaliseTeorOleo.objects.count()
+            
+            # Total geral de análises
+            context['total_analises'] = (
+                context['total_umidade'] + context['total_proteina'] + 
+                context['total_oleo'] + context['total_urase'] + 
+                context['total_cinza'] + context['total_fibra'] + 
+                context['total_fosforo'] + context['total_teor_oleo']
+            )
+            
+            # Análises de hoje
+            hoje = date.today()
+            analises_hoje = 0
+            try:
+                analises_hoje += AnaliseUmidade.objects.filter(data=hoje).count()
+                analises_hoje += AnaliseProteina.objects.filter(data=hoje).count()
+                analises_hoje += AnaliseOleoDegomado.objects.filter(data=hoje).count()
+                analises_hoje += AnaliseUrase.objects.filter(data=hoje).count()
+                analises_hoje += AnaliseCinza.objects.filter(data=hoje).count()
+                analises_hoje += AnaliseFibra.objects.filter(data=hoje).count()
+                analises_hoje += AnaliseFosforo.objects.filter(data=hoje).count()
+                analises_hoje += AnaliseTeorOleo.objects.filter(data=hoje).count()
+            except Exception as e:
+                print(f"Erro ao contar análises de hoje: {e}")
+                analises_hoje = 0
+            
+            context['analises_hoje'] = analises_hoje
+            
+            # Última análise
+            context['ultima_analise'] = None
+            try:
+                # Buscar a análise mais recente de todos os tipos
+                from datetime import datetime
+                ultima_data = None
+                ultima_analise = None
+                
+                modelos = [
+                    (AnaliseUmidade, 'Umidade'),
+                    (AnaliseProteina, 'Proteína'),
+                    (AnaliseOleoDegomado, 'Óleo Degomado'),
+                    (AnaliseUrase, 'Urase'),
+                    (AnaliseCinza, 'Cinza'),
+                    (AnaliseFibra, 'Fibra'),
+                    (AnaliseFosforo, 'Fósforo'),
+                    (AnaliseTeorOleo, 'Teor de Óleo'),
+                ]
+                
+                for modelo, nome in modelos:
+                    try:
+                        analise_recente = modelo.objects.order_by('-data', '-criado_em').first()
+                        if analise_recente and (not ultima_data or analise_recente.data > ultima_data):
+                            ultima_data = analise_recente.data
+                            ultima_analise = {
+                                'tipo': nome,
+                                'data': analise_recente.data,
+                                'horario': getattr(analise_recente, 'horario', None)
+                            }
+                    except Exception as e:
+                        print(f"Erro ao buscar última análise de {nome}: {e}")
+                        continue
+                
+                context['ultima_analise'] = ultima_analise
+                
+            except Exception as e:
+                print(f"Erro ao buscar última análise: {e}")
+            
+        except Exception as e:
+            print(f"Erro ao preparar contexto do dashboard: {e}")
+            # Valores padrão em caso de erro
+            context.update({
+                'total_umidade': 0,
+                'total_proteina': 0,
+                'total_oleo': 0,
+                'total_urase': 0,
+                'total_cinza': 0,
+                'total_fibra': 0,
+                'total_fosforo': 0,
+                'total_teor_oleo': 0,
+                'total_analises': 0,
+                'analises_hoje': 0,
+                'ultima_analise': None
+            })
+        
+        return context
 
 
 @method_decorator(login_required, name="dispatch")

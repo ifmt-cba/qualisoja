@@ -671,19 +671,33 @@ function gerarGraficos() {
 }
 
 function processarDadosAnalises(dados) {
+    console.log('=== INÍCIO processarDadosAnalises ===');
+    console.log('Dados brutos recebidos:', dados);
+    
     const evolucao = [];
     const distribuicao = {};
     
     // Verificar se dados existe e não está vazio
     if (!dados || typeof dados !== 'object') {
+        console.log('Dados inválidos ou vazios');
         return { evolucao, distribuicao };
     }
     
+    const chavesDados = Object.keys(dados);
+    console.log(`Número de chaves nos dados: ${chavesDados.length}`);
+    console.log('Chaves encontradas:', chavesDados);
+    
     for (const [chave, analise] of Object.entries(dados)) {
-        if (!analise) continue;
+        console.log(`Processando chave: ${chave}`, analise);
+        
+        if (!analise) {
+            console.log(`Análise ${chave} é nula, pulando`);
+            continue;
+        }
         
         // Processar análises individuais
         if (analise.resultado && analise.data && analise.parametro) {
+            console.log(`Análise individual encontrada: ${analise.parametro}`);
             const resultado = parseFloat(analise.resultado);
             if (!isNaN(resultado)) {
                 evolucao.push({
@@ -699,12 +713,17 @@ function processarDadosAnalises(dados) {
                     distribuicao[param] = [];
                 }
                 distribuicao[param].push(resultado);
+                console.log(`Adicionado à distribuição ${param}: ${resultado}`);
+            } else {
+                console.log(`Resultado inválido para ${analise.parametro}: ${analise.resultado}`);
             }
         }
         
         // Processar grupos de análises
         if (analise.tipo === 'grupo' && analise.analises) {
+            console.log('Grupo de análises encontrado:', Object.keys(analise.analises));
             for (const [paramNome, dadosParam] of Object.entries(analise.analises)) {
+                console.log(`Processando parâmetro do grupo: ${paramNome}`, dadosParam);
                 if (dadosParam && dadosParam.resultado) {
                     const resultado = parseFloat(dadosParam.resultado);
                     if (!isNaN(resultado)) {
@@ -719,11 +738,51 @@ function processarDadosAnalises(dados) {
                             distribuicao[paramNome] = [];
                         }
                         distribuicao[paramNome].push(resultado);
+                        console.log(`Adicionado à distribuição ${paramNome}: ${resultado}`);
+                    } else {
+                        console.log(`Resultado inválido para ${paramNome}: ${dadosParam.resultado}`);
+                    }
+                } else {
+                    console.log(`Dados de parâmetro ${paramNome} inválidos:`, dadosParam);
+                }
+            }
+        }
+        
+        // Processar análises que podem ter estrutura diferente
+        if (!analise.tipo && !analise.parametro && typeof analise === 'object') {
+            console.log('Tentando processar estrutura alternativa:', analise);
+            
+            // Verificar se tem campos de resultado direto
+            for (const [campo, valor] of Object.entries(analise)) {
+                if (campo.includes('resultado') || campo.includes('valor')) {
+                    const resultado = parseFloat(valor);
+                    if (!isNaN(resultado)) {
+                        const parametro = campo.replace('resultado_', '').replace('valor_', '');
+                        
+                        if (!distribuicao[parametro]) {
+                            distribuicao[parametro] = [];
+                        }
+                        distribuicao[parametro].push(resultado);
+                        console.log(`Adicionado à distribuição (estrutura alt) ${parametro}: ${resultado}`);
+                        
+                        if (analise.data) {
+                            evolucao.push({
+                                data: analise.data,
+                                parametro: parametro,
+                                resultado: resultado,
+                                unidade: analise.unidade || ''
+                            });
+                        }
                     }
                 }
             }
         }
     }
+    
+    console.log('=== RESULTADO processarDadosAnalises ===');
+    console.log(`Evolução: ${evolucao.length} pontos`);
+    console.log('Distribuição:', distribuicao);
+    console.log('Parâmetros na distribuição:', Object.keys(distribuicao));
     
     return { evolucao, distribuicao };
 }
@@ -798,17 +857,94 @@ function gerarGraficoEvolucao(dados) {
 }
 
 function gerarGraficoDistribuicao(dados) {
+    console.log('=== INÍCIO gerarGraficoDistribuicao ===');
+    console.log('Dados recebidos:', dados);
+    console.log('Dados de distribuição:', dados.distribuicao);
+    
     const ctx = document.getElementById('graficoDistribuicao').getContext('2d');
+    
+    // Verificar se há dados de distribuição
+    if (!dados.distribuicao || Object.keys(dados.distribuicao).length === 0) {
+        console.log('Nenhum dado de distribuição encontrado');
+        // Mostrar gráfico vazio com mensagem
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Sem dados'],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ['#e5e7eb'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Distribuição por Parâmetro - Sem dados disponíveis'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        return;
+    }
     
     // Calcular médias por parâmetro
     const medias = {};
     for (const [param, valores] of Object.entries(dados.distribuicao)) {
-        const soma = valores.reduce((a, b) => a + b, 0);
-        medias[param] = (soma / valores.length).toFixed(2);
+        console.log(`Processando parâmetro ${param}:`, valores);
+        if (valores && valores.length > 0) {
+            const valoresNumericos = valores.filter(v => !isNaN(parseFloat(v))).map(v => parseFloat(v));
+            if (valoresNumericos.length > 0) {
+                const soma = valoresNumericos.reduce((a, b) => a + b, 0);
+                medias[param] = (soma / valoresNumericos.length).toFixed(2);
+                console.log(`Média de ${param}: ${medias[param]}`);
+            }
+        }
+    }
+    
+    console.log('Médias calculadas:', medias);
+    
+    if (Object.keys(medias).length === 0) {
+        console.log('Nenhuma média válida calculada');
+        // Mostrar gráfico vazio com mensagem
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Sem dados válidos'],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ['#e5e7eb'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Distribuição por Parâmetro - Dados inválidos'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        return;
     }
     
     const labels = Object.keys(medias);
-    const values = Object.values(medias);
+    const values = Object.values(medias).map(v => parseFloat(v));
+    
+    console.log('Labels finais:', labels);
+    console.log('Valores finais:', values);
     
     // Cores para o gráfico de pizza
     const backgroundColors = [
