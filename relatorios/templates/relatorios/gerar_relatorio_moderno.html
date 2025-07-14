@@ -259,6 +259,56 @@
         outline-offset: 3px;
     }
 
+    .btn-expedicao {
+        background: linear-gradient(135deg, var(--accent-green) 0%, var(--primary-green) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-expedicao::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-expedicao:hover::before {
+        left: 100%;
+    }
+
+    .btn-expedicao:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.35);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-expedicao:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-expedicao:focus-visible {
+        outline: 3px solid rgba(5, 150, 105, 0.25);
+        outline-offset: 3px;
+    }
+
     .report-type-card, 
     .format-option {
         border: 2px solid var(--border-color);
@@ -388,6 +438,121 @@
         font-size: 1.1rem;
         margin-bottom: 0.5rem;
         letter-spacing: -0.025em;
+    }
+
+    /* Progress Steps - Ultra Minimal Timeline Design */
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 0;
+        background: transparent;
+        position: relative;
+    }
+
+    .progress-steps::after {
+        content: '';
+        position: absolute;
+        top: 1.25rem;
+        left: 10%;
+        right: 10%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, #e5e7eb 10%, #e5e7eb 90%, transparent 100%);
+        z-index: 1;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0;
+        flex: 1;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: transparent;
+        border: none;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        color: #d1d5db;
+        background: white;
+        border: 3px solid #f3f4f6;
+        border-radius: 50%;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .step.active .step-icon {
+        color: white;
+        background: var(--primary-green);
+        border-color: var(--primary-green);
+        transform: scale(1.15);
+        box-shadow: 0 4px 16px rgba(6, 95, 70, 0.3);
+    }
+
+    .step:hover:not(.active) .step-icon {
+        color: var(--accent-green);
+        border-color: var(--accent-green);
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+    }
+
+    .step-title {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        font-weight: 600;
+        line-height: 1.2;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        max-width: 80px;
+    }
+
+    .step.active .step-title {
+        color: var(--primary-green);
+        transform: translateY(-2px);
+    }
+
+    .step:hover:not(.active) .step-title {
+        color: var(--accent-green);
+        transform: translateY(-1px);
+    }
+
+    /* Progress indicator */
+    .progress-steps::before {
+        content: '';
+        position: absolute;
+        top: 1.25rem;
+        left: 10%;
+        height: 1px;
+        background: var(--primary-green);
+        z-index: 1;
+        transition: width 0.6s ease;
+        width: var(--progress-width, 30%); /* Dynamic width controlled by JavaScript */
+    }
+
+    /* Additional step states */
+    .step.completed .step-icon {
+        color: white;
+        background: var(--accent-green);
+        border-color: var(--accent-green);
+        transform: scale(1.1);
+    }
+
+    .step.completed .step-title {
+        color: var(--accent-green);
     }
 
     .quick-date-buttons {
@@ -583,6 +748,22 @@
         .form-section {
             padding: 1.5rem;
         }
+        
+        .progress-steps {
+            max-width: 500px;
+            margin: 2.5rem auto;
+        }
+        
+        .step-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .step-title {
+            font-size: 0.7rem;
+            max-width: 70px;
+        }
     }
 
     @media (max-width: 768px) {
@@ -604,8 +785,47 @@
         }
         
         .progress-steps {
-            padding: 0;
-            margin-bottom: 2rem;
+            max-width: 400px;
+            margin: 2rem auto;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .progress-steps::after,
+        .progress-steps::before {
+            display: none;
+        }
+        
+        .step {
+            flex-direction: row;
+            text-align: left;
+            gap: 1rem;
+            width: 100%;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f3f4f6;
+        }
+
+        .step.active {
+            background: rgba(6, 95, 70, 0.05);
+            border-color: var(--primary-green);
+        }
+        
+        .step-icon {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        
+        .step-title {
+            font-size: 0.75rem;
+            max-width: none;
+            text-transform: none;
+            letter-spacing: normal;
         }
         
         .quick-date-buttons {
@@ -645,14 +865,62 @@
             max-width: none;
         }
         
+        .progress-steps {
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+        }
+        
+        .progress-steps {
+            max-width: 350px;
+            margin: 1.5rem auto;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .progress-steps::after,
+        .progress-steps::before {
+            display: none;
+        }
+        
+        .step {
+            flex-direction: row;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f3f4f6;
+        }
+        
+        .step-icon {
+            width: 1.75rem;
+            height: 1.75rem;
+            font-size: 0.75rem;
+        }
+        
+        .step-title {
+            font-size: 0.7rem;
+            max-width: none;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        
         .d-flex.gap-2 {
             flex-direction: column;
             width: 100%;
         }
         
-        .d-flex.gap-2 .btn {
+        .d-flex.gap-2 .btn,
+        .d-flex.gap-2 .btn-expedicao {
             width: 100%;
             margin-bottom: 0.5rem;
+            justify-content: center;
+        }
+        
+        .btn-expedicao {
+            font-size: 0.9rem;
+            padding: 0.875rem 1.25rem;
+            box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.25);
         }
     }
 
@@ -673,6 +941,33 @@
 
     .shortcuts-list::-webkit-scrollbar-thumb:hover {
         background: var(--primary-green);
+    }
+
+    /* Loading spinner styles */
+    .loading-spinner {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Custom color classes */
+    .text-purple {
+        color: #7c3aed !important;
+    }
+
+    /* Layout para 5 colunas */
+    @media (min-width: 992px) {
+        .col-lg-2-4 {
+            flex: 0 0 20%;
+            max-width: 20%;
+        }
     }
 
     /* Enhanced Focus States */
@@ -765,15 +1060,21 @@
 <div class="container">
     <div class="progress-steps">
         <div class="step active" id="step-1" data-step-number="1" tabindex="0" role="button" aria-label="Ir para Tipo de Relatório">
-            <div class="step-number">1</div>
+            <div class="step-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
             <div class="step-title">Tipo de Relatório</div>
         </div>
         <div class="step" id="step-2" data-step-number="2" tabindex="0" role="button" aria-label="Ir para Período e Filtros" aria-disabled="true">
-            <div class="step-number">2</div>
+            <div class="step-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
             <div class="step-title">Período e Filtros</div>
         </div>
         <div class="step" id="step-3" data-step-number="3" tabindex="0" role="button" aria-label="Ir para Formato e Geração" aria-disabled="true">
-            <div class="step-number">3</div>
+            <div class="step-icon">
+                <i class="fas fa-download"></i>
+            </div>
             <div class="step-title">Formato e Geração</div>
         </div>
     </div>
@@ -808,25 +1109,39 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
                                 <div class="report-type-card" data-type="umidade" tabindex="0">
                                     <div class="report-type-icon"><i class="fas fa-tint text-primary"></i></div>
                                     <h6>Umidade</h6>
                                     <small class="text-muted">Análises de teor de umidade dos grãos</small>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
                                 <div class="report-type-card" data-type="proteina" tabindex="0">
                                     <div class="report-type-icon"><i class="fas fa-seedling text-warning"></i></div>
                                     <h6>Proteína</h6>
                                     <small class="text-muted">Análises de teor proteico dos grãos</small>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
+                                <div class="report-type-card" data-type="oleo" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-flask text-success"></i></div>
+                                    <h6>Óleo Degomado</h6>
+                                    <small class="text-muted">Análises de teor de óleo degomado e derivados</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
                                 <div class="report-type-card active" data-type="completo" tabindex="0">
                                     <div class="report-type-icon"><i class="fas fa-chart-bar text-info"></i></div>
                                     <h6>Completo</h6>
                                     <small class="text-muted">Análise comparativa completa e detalhada</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
+                                <div class="report-type-card" data-type="expedicao" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-shipping-fast text-success"></i></div>
+                                    <h6>Expedição</h6>
+                                    <small class="text-muted">Relatórios de expedição para vendas</small>
                                 </div>
                             </div>
                         </div>
@@ -934,9 +1249,14 @@
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mt-4 pt-3">
-                    <a href="{% url 'analises:home' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-home me-2"></i>Voltar à Página Inicial
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'analises:home' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Voltar à Página Inicial
+                        </a>
+                        <a href="{% url 'relatorios:expedicao_lista' %}" class="btn-expedicao">
+                            <i class="fas fa-shipping-fast me-2"></i>Relatórios de Expedição
+                        </a>
+                    </div>
                     <div class="d-flex gap-2">
                         <button type="button" id="preview-btn-main" class="btn btn-outline-primary" onclick="previewData()">
                             <i class="fas fa-eye me-2"></i>Pré-visualizar
@@ -1020,6 +1340,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize DOM elements with error checking
     const reportForm = document.getElementById('report-form');
     const tipoRelatorioInput = document.getElementById('id_tipo_relatorio');
     const formatoSaidaInput = document.getElementById('id_formato_saida');
@@ -1032,34 +1353,79 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentStep = 1;
 
-    function initializePage() {
-        document.getElementById('current-date').textContent = 
-            new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        
-        flatpickr(dataInicialInput, { 
-            locale: "pt", 
-            dateFormat: "Y-m-d", 
-            altInput: true, 
-            altFormat: "d/m/Y", 
-            theme: "material_green" 
-        });
-        flatpickr(dataFinalInput, { 
-            locale: "pt", 
-            dateFormat: "Y-m-d", 
-            altInput: true, 
-            altFormat: "d/m/Y", 
-            theme: "material_green" 
-        });
+    // Check if critical elements exist
+    const criticalElements = {
+        'report-form': reportForm,
+        'tipo_relatorio': tipoRelatorioInput,
+        'formato_saida': formatoSaidaInput,
+        'data_inicial': dataInicialInput,
+        'data_final': dataFinalInput
+    };
 
-        setDefaultDates();
-        selectReportType('completo');
-        updateStep(1, true);
-        updateSummary();
+    const missingElements = [];
+    for (const [name, element] of Object.entries(criticalElements)) {
+        if (!element) {
+            missingElements.push(name);
+        }
+    }
+
+    if (missingElements.length > 0) {
+        console.warn('Missing critical elements:', missingElements);
+    }
+
+    function initializePage() {
+        try {
+            // Update current date
+            const currentDateEl = document.getElementById('current-date');
+            if (currentDateEl) {
+                currentDateEl.textContent = 
+                    new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+            
+            // Initialize flatpickr
+            if (dataInicialInput && typeof flatpickr !== 'undefined') {
+                flatpickr(dataInicialInput, { 
+                    locale: "pt", 
+                    dateFormat: "Y-m-d", 
+                    altInput: true, 
+                    altFormat: "d/m/Y", 
+                    theme: "material_green" 
+                });
+            }
+            
+            if (dataFinalInput && typeof flatpickr !== 'undefined') {
+                flatpickr(dataFinalInput, { 
+                    locale: "pt", 
+                    dateFormat: "Y-m-d", 
+                    altInput: true, 
+                    altFormat: "d/m/Y", 
+                    theme: "material_green" 
+                });
+            }
+
+            setDefaultDates();
+            selectReportType('completo');
+            updateStep(1, true);
+            updateSummary();
+            
+            // Initialize progress bar
+            document.documentElement.style.setProperty('--progress-width', '0%');
+            
+            console.log('Page initialized successfully');
+        } catch (error) {
+            console.error('Error initializing page:', error);
+        }
     }
     
     function setupEventListeners() {
         document.querySelectorAll('.report-type-card').forEach(card => {
             card.addEventListener('click', function() {
+                // Se for o card de expedição, redireciona para a página de criação de expedição
+                if (this.dataset.type === 'expedicao') {
+                    window.location.href = "{% url 'relatorios:expedicao_criar' %}";
+                    return;
+                }
+                
                 selectReportType(this.dataset.type);
                 updateStep(2);
                 document.getElementById('section-2').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1097,26 +1463,33 @@ document.addEventListener('DOMContentLoaded', function() {
             if(el) el.addEventListener('change', updateSummary);
         });
         
-        document.getElementById('save-config-btn').addEventListener('click', saveConfiguration);
+        const saveConfigBtn = document.getElementById('save-config-btn');
+        if (saveConfigBtn) {
+            saveConfigBtn.addEventListener('click', saveConfiguration);
+        }
         
-        reportForm.addEventListener('submit', function(e) {
-            if (!validateForm()) {
-                e.preventDefault();
-                return;
-            }
-            
-            showLoading(true);
-            showToast('Gerando relatório...', 'info');
-        });
+        if (reportForm) {
+            reportForm.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                showLoading(true);
+                showToast('Gerando relatório...', 'info');
+            });
+        }
 
         document.querySelectorAll('.step').forEach(stepEl => {
-            stepEl.addEventListener('click', handleStepNavigation);
-            stepEl.addEventListener('keypress', (e) => { 
-                if(e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleStepNavigation.call(stepEl, e); 
-                }
-            });
+            if (stepEl) {
+                stepEl.addEventListener('click', handleStepNavigation);
+                stepEl.addEventListener('keypress', (e) => { 
+                    if(e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleStepNavigation.call(stepEl, e); 
+                    }
+                });
+            }
         });
 
         document.addEventListener('keydown', function(e) {
@@ -1237,61 +1610,106 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleStepNavigation(event) {
-        const stepNumber = parseInt(this.dataset.stepNumber);
-        const targetSection = document.getElementById(`section-${stepNumber}`);
-        
-        if (targetSection) {
-            updateStep(stepNumber);
-            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        try {
+            const stepNumber = parseInt(this.dataset.stepNumber);
+            if (isNaN(stepNumber) || stepNumber < 1 || stepNumber > 3) {
+                console.warn('Invalid step number:', stepNumber);
+                return;
+            }
+
+            const targetSection = document.getElementById(`section-${stepNumber}`);
+            
+            if (targetSection) {
+                updateStep(stepNumber);
+                
+                // Smooth scroll to section
+                setTimeout(() => {
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                console.warn('Target section not found:', `section-${stepNumber}`);
+            }
+        } catch (error) {
+            console.error('Error in step navigation:', error);
         }
     }
     
     function selectReportType(type) {
-        document.querySelectorAll('.report-type-card').forEach(card => card.classList.remove('active'));
-        const selectedCard = document.querySelector(`.report-type-card[data-type="${type}"]`);
-        if (selectedCard) selectedCard.classList.add('active');
-        
-        tipoRelatorioInput.value = type;
-        
-        umidadeFilterGroup.style.display = (type === 'umidade' || type === 'completo') ? 'block' : 'none';
-        proteinaFilterGroup.style.display = (type === 'proteina' || type === 'completo') ? 'block' : 'none';
-        
-        updateSummary();
+        try {
+            document.querySelectorAll('.report-type-card').forEach(card => card.classList.remove('active'));
+            const selectedCard = document.querySelector(`.report-type-card[data-type="${type}"]`);
+            if (selectedCard) selectedCard.classList.add('active');
+            
+            if (tipoRelatorioInput) {
+                tipoRelatorioInput.value = type;
+            }
+            
+            if (umidadeFilterGroup) {
+                umidadeFilterGroup.style.display = (type === 'umidade' || type === 'completo') ? 'block' : 'none';
+            }
+            if (proteinaFilterGroup) {
+                proteinaFilterGroup.style.display = (type === 'proteina' || type === 'completo') ? 'block' : 'none';
+            }
+            
+            updateSummary();
+        } catch (error) {
+            console.error('Error selecting report type:', error);
+        }
     }
     
     function selectFormat(format) {
-        document.querySelectorAll('.format-option').forEach(option => option.classList.remove('active'));
-        const selectedOption = document.querySelector(`.format-option[data-format="${format}"]`);
-        if (selectedOption) selectedOption.classList.add('active');
-        
-        formatoSaidaInput.value = format;
-        updateSummary();
+        try {
+            document.querySelectorAll('.format-option').forEach(option => option.classList.remove('active'));
+            const selectedOption = document.querySelector(`.format-option[data-format="${format}"]`);
+            if (selectedOption) selectedOption.classList.add('active');
+            
+            if (formatoSaidaInput) {
+                formatoSaidaInput.value = format;
+            }
+            updateSummary();
+        } catch (error) {
+            console.error('Error selecting format:', error);
+        }
     }
     
     function setDefaultDates() {
-        const hoje = new Date();
-        const semanaPassada = new Date();
-        semanaPassada.setDate(hoje.getDate() - 7);
-        
-        if (!dataInicialInput.value) {
-            dataInicialInput.value = semanaPassada.toISOString().split('T')[0];
-        }
-        if (!dataFinalInput.value) {
-            dataFinalInput.value = hoje.toISOString().split('T')[0];
+        try {
+            const hoje = new Date();
+            const semanaPassada = new Date();
+            semanaPassada.setDate(hoje.getDate() - 7);
+            
+            if (dataInicialInput && !dataInicialInput.value) {
+                dataInicialInput.value = semanaPassada.toISOString().split('T')[0];
+            }
+            if (dataFinalInput && !dataFinalInput.value) {
+                dataFinalInput.value = hoje.toISOString().split('T')[0];
+            }
+        } catch (error) {
+            console.error('Error setting default dates:', error);
         }
     }
     
     function setQuickDates(days) {
-        const hoje = new Date();
-        const dataInicial = new Date();
-        dataInicial.setDate(hoje.getDate() - days);
-        
-        dataInicialInput.value = dataInicial.toISOString().split('T')[0];
-        dataFinalInput.value = hoje.toISOString().split('T')[0];
+        try {
+            const hoje = new Date();
+            const dataInicial = new Date();
+            dataInicial.setDate(hoje.getDate() - days);
+            
+            if (dataInicialInput) {
+                dataInicialInput.value = dataInicial.toISOString().split('T')[0];
+            }
+            if (dataFinalInput) {
+                dataFinalInput.value = hoje.toISOString().split('T')[0];
+            }
+        } catch (error) {
+            console.error('Error setting quick dates:', error);
+        }
     }
         
     function updateStep(targetStepNumber, isInitial = false) {
         currentStep = targetStepNumber;
+        
+        // Update all steps
         document.querySelectorAll('.step').forEach((stepEl, index) => {
             const stepNum = parseInt(stepEl.dataset.stepNumber);
             stepEl.classList.remove('active', 'completed', 'clickable');
@@ -1308,67 +1726,94 @@ document.addEventListener('DOMContentLoaded', function() {
                 stepEl.setAttribute('aria-disabled', 'false');
             }
         });
+
+        // Update progress bar width safely
+        try {
+            const progressWidth = ((targetStepNumber - 1) / 2) * 80; // 80% max width between steps
+            const finalWidth = Math.min(Math.max(progressWidth, 0), 80);
+            document.documentElement.style.setProperty('--progress-width', `${finalWidth}%`);
+        } catch (error) {
+            console.warn('Could not update progress width:', error);
+        }
     }
     
     function updateSummary() {
-        const tipoRelatorio = tipoRelatorioInput.value;
-        const formatoSaida = formatoSaidaInput.value;
-        
-        const tipoNames = {
-            'umidade': 'Relatório de Umidade', 
-            'proteina': 'Relatório de Proteína', 
-            'completo': 'Relatório Completo'
-        };
-        const formatNames = {
-            'HTML': 'Visualização Online', 
-            'PDF': 'Documento PDF', 
-            'EXCEL': 'Planilha Excel'
-        };
-        const formatIcons = {
-            'HTML': 'fas fa-globe text-info', 
-            'PDF': 'fas fa-file-pdf text-danger', 
-            'EXCEL': 'fas fa-file-excel text-success'
-        };
-        
-        document.getElementById('active-filters').innerHTML = 
-            `<span class="filter-badge">${tipoNames[tipoRelatorio] || 'N/A'}</span>`;
-        
-        let sampleFiltersHtml = '';
-        if (umidadeFilterGroup.style.display !== 'none' && tipoAmostraUmidadeSelect.value) {
-            const selectedText = tipoAmostraUmidadeSelect.options[tipoAmostraUmidadeSelect.selectedIndex].text;
-            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Umidade: ${selectedText}</span> `;
-        } else if (umidadeFilterGroup.style.display !== 'none') {
-             sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Umidade: Todos</span> `;
-        }
-        if (proteinaFilterGroup.style.display !== 'none' && tipoAmostraProteinaSelect.value) {
-            const selectedText = tipoAmostraProteinaSelect.options[tipoAmostraProteinaSelect.selectedIndex].text;
-            sampleFiltersHtml += `<span class="filter-badge bg-secondary">Proteína: ${selectedText}</span>`;
-        } else if (proteinaFilterGroup.style.display !== 'none') {
-            sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Proteína: Todos</span>`;
-        }
-        document.getElementById('active-sample-filters').innerHTML = sampleFiltersHtml;
+        try {
+            const tipoRelatorio = tipoRelatorioInput?.value || '';
+            const formatoSaida = formatoSaidaInput?.value || '';
+            
+            const tipoNames = {
+                'umidade': 'Relatório de Umidade', 
+                'proteina': 'Relatório de Proteína', 
+                'completo': 'Relatório Completo',
+                'expedicao': 'Relatório de Expedição'
+            };
+            const formatNames = {
+                'HTML': 'Visualização Online', 
+                'PDF': 'Documento PDF', 
+                'EXCEL': 'Planilha Excel'
+            };
+            const formatIcons = {
+                'HTML': 'fas fa-globe text-info', 
+                'PDF': 'fas fa-file-pdf text-danger', 
+                'EXCEL': 'fas fa-file-excel text-success'
+            };
+            
+            const activeFiltersEl = document.getElementById('active-filters');
+            if (activeFiltersEl) {
+                activeFiltersEl.innerHTML = 
+                    `<span class="filter-badge">${tipoNames[tipoRelatorio] || 'N/A'}</span>`;
+            }
+            
+            let sampleFiltersHtml = '';
+            if (umidadeFilterGroup && umidadeFilterGroup.style.display !== 'none' && tipoAmostraUmidadeSelect?.value) {
+                const selectedText = tipoAmostraUmidadeSelect.options[tipoAmostraUmidadeSelect.selectedIndex].text;
+                sampleFiltersHtml += `<span class="filter-badge bg-secondary">Umidade: ${selectedText}</span> `;
+            } else if (umidadeFilterGroup && umidadeFilterGroup.style.display !== 'none') {
+                 sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Umidade: Todos</span> `;
+            }
+            if (proteinaFilterGroup && proteinaFilterGroup.style.display !== 'none' && tipoAmostraProteinaSelect?.value) {
+                const selectedText = tipoAmostraProteinaSelect.options[tipoAmostraProteinaSelect.selectedIndex].text;
+                sampleFiltersHtml += `<span class="filter-badge bg-secondary">Proteína: ${selectedText}</span>`;
+            } else if (proteinaFilterGroup && proteinaFilterGroup.style.display !== 'none') {
+                sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Proteína: Todos</span>`;
+            }
+            
+            const activeSampleFiltersEl = document.getElementById('active-sample-filters');
+            if (activeSampleFiltersEl) {
+                activeSampleFiltersEl.innerHTML = sampleFiltersHtml;
+            }
 
-        const di = dataInicialInput.value;
-        const df = dataFinalInput.value;
-        if (di && df) {
-            const inicio = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR', {
-                day:'2-digit', 
-                month:'2-digit', 
-                year:'numeric'
-            });
-            const fim = new Date(df + 'T00:00:00').toLocaleDateString('pt-BR', {
-                day:'2-digit', 
-                month:'2-digit', 
-                year:'numeric'
-            });
-            document.getElementById('period-text').textContent = `${inicio} até ${fim}`;
-        } else {
-            document.getElementById('period-text').textContent = "Selecione um período";
+            const di = dataInicialInput?.value;
+            const df = dataFinalInput?.value;
+            const periodTextEl = document.getElementById('period-text');
+            
+            if (periodTextEl) {
+                if (di && df) {
+                    const inicio = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR', {
+                        day:'2-digit', 
+                        month:'2-digit', 
+                        year:'numeric'
+                    });
+                    const fim = new Date(df + 'T00:00:00').toLocaleDateString('pt-BR', {
+                        day:'2-digit', 
+                        month:'2-digit', 
+                        year:'numeric'
+                    });
+                    periodTextEl.textContent = `${inicio} até ${fim}`;
+                } else {
+                    periodTextEl.textContent = "Selecione um período";
+                }
+            }
+            
+            const formatSummaryEl = document.getElementById('format-summary');
+            if (formatSummaryEl) {
+                formatSummaryEl.innerHTML = 
+                    `<i class="${formatIcons[formatoSaida] || 'fas fa-file'} me-2"></i>${formatNames[formatoSaida] || 'N/A'}`;
+            }
+        } catch (error) {
+            console.error('Error updating summary:', error);
         }
-        
-        const formatSummaryEl = document.getElementById('format-summary');
-        formatSummaryEl.innerHTML = 
-            `<i class="${formatIcons[formatoSaida] || 'fas fa-file'} me-2"></i>${formatNames[formatoSaida] || 'N/A'}`;
     }
     
     function previewData() {
