@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from urllib.parse import urlencode
 from django.views.generic import TemplateView, View, FormView
 from django.http import HttpResponse, JsonResponse
@@ -1725,7 +1726,7 @@ class RelatorioGerarModernoView(FormView):
         return redirect(url)
 
 
-class RelatorioExpedicaoListView(TemplateView):
+class RelatorioExpedicaoListView(LoginRequiredMixin, TemplateView):
     """View para listar relatórios de expedição."""
     template_name = 'relatorios/expedicao/lista.html'
     
@@ -1783,10 +1784,17 @@ class TesteFormView(TemplateView):
         return HttpResponseRedirect(reverse('relatorios:expedicao_lista'))
 
 
-class RelatorioExpedicaoCreateView(FormView):
+class RelatorioExpedicaoCreateView(LoginRequiredMixin, FormView):
     """View para criar novos relatórios de expedição."""
     template_name = 'relatorios/expedicao/criar.html'
     form_class = RelatorioExpedicaoForm
+    login_url = '/usuarios/login/'
+    
+    def dispatch(self, request, *args, **kwargs):
+        """Verifica autenticação antes de processar qualquer request."""
+        if not request.user.is_authenticated:
+            return redirect(self.login_url)
+        return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1932,6 +1940,12 @@ class RelatorioExpedicaoCreateView(FormView):
         logger.info(f"Dados do formulário: {form.cleaned_data}")
         print(f"Dados do formulário: {form.cleaned_data}")
         
+        # Verificar se o usuário está autenticado
+        if not self.request.user.is_authenticated:
+            logger.error("Usuário não autenticado tentando criar relatório")
+            messages.error(self.request, "Você precisa estar logado para criar relatórios.")
+            return redirect('users:login')
+        
         try:
             # Gerar código único para o relatório
             import uuid
@@ -1975,6 +1989,8 @@ class RelatorioExpedicaoCreateView(FormView):
                 analises_selecionadas=analises_selecionadas,
                 usuario_responsavel=self.request.user,
                 observacoes_manuais=form.cleaned_data.get('observacoes_manuais', ''),
+                incluir_graficos=form.cleaned_data.get('incluir_graficos', False),
+                certificacao_conformidade=form.cleaned_data.get('incluir_certificacao', False),
                 formato='PDF',  # Sempre PDF
                 status='GERADO'  # Marcar como gerado e pronto para uso
             )
@@ -2217,7 +2233,7 @@ class RelatorioExpedicaoCreateView(FormView):
         
         return {'conforme': True, 'observacao': 'Conforme especificação'}
 
-class RelatorioExpedicaoDetailView(TemplateView):
+class RelatorioExpedicaoDetailView(LoginRequiredMixin, TemplateView):
     """View para visualizar relatório de expedição."""
     template_name = 'relatorios/expedicao/detalhe.html'
     
@@ -2231,6 +2247,7 @@ class RelatorioExpedicaoDetailView(TemplateView):
         context.update({
             'relatorio': relatorio,
             'dados_analises': dados_analises,
+            'incluir_graficos': relatorio.incluir_graficos,
             'historico_envios': HistoricoEnvioRelatorio.objects.filter(relatorio=relatorio).order_by('-data_envio'),
         })
         
@@ -2501,7 +2518,7 @@ class RelatorioExpedicaoDetailView(TemplateView):
         }
         return unidades.get(modelo, '')
 
-class RelatorioExpedicaoEnviarView(FormView):
+class RelatorioExpedicaoEnviarView(LoginRequiredMixin, FormView):
     """View para enviar relatório por e-mail."""
     template_name = 'relatorios/expedicao/enviar.html'
     form_class = EnvioRelatorioForm
@@ -2516,12 +2533,19 @@ class RelatorioExpedicaoEnviarView(FormView):
             'id': relatorio.id,
             'codigo': relatorio.codigo,
             'cliente': {
-                'nome': relatorio.get_cliente_nome()
+                'nome': relatorio.get_cliente_nome(),
+                'email': relatorio.cliente.email if relatorio.cliente else ''
             },
             'contrato': relatorio.get_contrato_info(),
             'data_inicial': relatorio.data_inicial.strftime('%d/%m/%Y'),
             'data_final': relatorio.data_final.strftime('%d/%m/%Y'),
-            'status': relatorio.status
+            'status': relatorio.status,
+            'certificacao_conformidade': relatorio.certificacao_conformidade,
+            'usuario_responsavel': {
+                'username': relatorio.usuario_responsavel.username if relatorio.usuario_responsavel else '',
+                'first_name': relatorio.usuario_responsavel.first_name if relatorio.usuario_responsavel else '',
+                'last_name': relatorio.usuario_responsavel.last_name if relatorio.usuario_responsavel else ''
+            }
         }
         
         return context

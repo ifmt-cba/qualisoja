@@ -406,6 +406,37 @@
     </div>
     {% endif %}
 
+    <!-- Gráficos Comparativos -->
+    {% if incluir_graficos and dados_analises %}
+    <div class="card">
+        <h3 class="section-title">
+            <i class="fas fa-chart-line"></i>
+            Gráficos Comparativos
+        </h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+            <!-- Gráfico de Evolução Temporal -->
+            <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem;">
+                <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dark);">📈 Evolução dos Resultados</h4>
+                <canvas id="graficoEvolucao" width="400" height="250"></canvas>
+            </div>
+            
+            <!-- Gráfico de Distribuição por Tipo -->
+            <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem;">
+                <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dark);">🥧 Distribuição por Parâmetro</h4>
+                <canvas id="graficoDistribuicao" width="400" height="250"></canvas>
+            </div>
+        </div>
+        
+        <div style="margin-top: 1rem; padding: 0.75rem; background: #f0f9ff; border-radius: 0.5rem; font-size: 0.875rem;">
+            <p style="margin: 0; color: var(--text-muted);">
+                <i class="fas fa-chart-bar" style="color: var(--accent-green); margin-right: 0.5rem;"></i>
+                Gráficos gerados automaticamente baseados nos dados das análises do período selecionado
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Resultados das Análises -->
     <div class="card">
         <h3 class="section-title">
@@ -568,10 +599,256 @@
 
 {% block extra_js %}
 <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+{{ dados_analises|json_script:"dados-analises" }}
+{{ incluir_graficos|json_script:"incluir-graficos" }}
 <script>
-// Filtros de template personalizados para acessar dicionários
+// Dados das análises para os gráficos
+const dadosAnalises = JSON.parse(document.getElementById('dados-analises').textContent);
+const incluirGraficos = JSON.parse(document.getElementById('incluir-graficos').textContent);
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Implementar lógica adicional se necessário
+    console.log('Incluir gráficos:', incluirGraficos);
+    console.log('Dados das análises:', dadosAnalises);
+    
+    if (incluirGraficos && dadosAnalises && typeof dadosAnalises === 'object') {
+        const numAnalises = Object.keys(dadosAnalises).length;
+        console.log('Número de análises:', numAnalises);
+        
+        if (numAnalises > 0) {
+            try {
+                gerarGraficos();
+            } catch (error) {
+                console.error('Erro ao gerar gráficos:', error);
+            }
+        } else {
+            console.log('Nenhuma análise encontrada para gerar gráficos');
+        }
+    } else {
+        console.log('Gráficos não serão gerados:', {
+            incluirGraficos,
+            temDados: !!dadosAnalises,
+            tipoDados: typeof dadosAnalises
+        });
+    }
 });
+
+function gerarGraficos() {
+    try {
+        // Processar dados para os gráficos
+        const dadosProcessados = processarDadosAnalises(dadosAnalises);
+        console.log('Dados processados:', dadosProcessados);
+        
+        // Verificar se há dados para os gráficos
+        if (dadosProcessados.evolucao.length === 0) {
+            console.log('Nenhum dado de evolução encontrado');
+            return;
+        }
+        
+        // Gráfico de Evolução Temporal
+        if (document.getElementById('graficoEvolucao')) {
+            try {
+                gerarGraficoEvolucao(dadosProcessados);
+                console.log('Gráfico de evolução gerado com sucesso');
+            } catch (error) {
+                console.error('Erro ao gerar gráfico de evolução:', error);
+            }
+        }
+        
+        // Gráfico de Distribuição
+        if (document.getElementById('graficoDistribuicao')) {
+            try {
+                gerarGraficoDistribuicao(dadosProcessados);
+                console.log('Gráfico de distribuição gerado com sucesso');
+            } catch (error) {
+                console.error('Erro ao gerar gráfico de distribuição:', error);
+            }
+        }
+    } catch (error) {
+        console.error('Erro geral ao gerar gráficos:', error);
+    }
+}
+
+function processarDadosAnalises(dados) {
+    const evolucao = [];
+    const distribuicao = {};
+    
+    // Verificar se dados existe e não está vazio
+    if (!dados || typeof dados !== 'object') {
+        return { evolucao, distribuicao };
+    }
+    
+    for (const [chave, analise] of Object.entries(dados)) {
+        if (!analise) continue;
+        
+        // Processar análises individuais
+        if (analise.resultado && analise.data && analise.parametro) {
+            const resultado = parseFloat(analise.resultado);
+            if (!isNaN(resultado)) {
+                evolucao.push({
+                    data: analise.data,
+                    parametro: analise.parametro,
+                    resultado: resultado,
+                    unidade: analise.unidade || ''
+                });
+                
+                // Para distribuição
+                const param = analise.parametro;
+                if (!distribuicao[param]) {
+                    distribuicao[param] = [];
+                }
+                distribuicao[param].push(resultado);
+            }
+        }
+        
+        // Processar grupos de análises
+        if (analise.tipo === 'grupo' && analise.analises) {
+            for (const [paramNome, dadosParam] of Object.entries(analise.analises)) {
+                if (dadosParam && dadosParam.resultado) {
+                    const resultado = parseFloat(dadosParam.resultado);
+                    if (!isNaN(resultado)) {
+                        evolucao.push({
+                            data: analise.data,
+                            parametro: paramNome,
+                            resultado: resultado,
+                            unidade: dadosParam.unidade || ''
+                        });
+                        
+                        if (!distribuicao[paramNome]) {
+                            distribuicao[paramNome] = [];
+                        }
+                        distribuicao[paramNome].push(resultado);
+                    }
+                }
+            }
+        }
+    }
+    
+    return { evolucao, distribuicao };
+}
+
+function gerarGraficoEvolucao(dados) {
+    const ctx = document.getElementById('graficoEvolucao').getContext('2d');
+    
+    // Agrupar por parâmetro e ordenar por data
+    const parametros = {};
+    dados.evolucao.forEach(item => {
+        if (!parametros[item.parametro]) {
+            parametros[item.parametro] = [];
+        }
+        parametros[item.parametro].push({
+            x: item.data,
+            y: item.resultado
+        });
+    });
+    
+    // Ordenar dados por data para cada parâmetro
+    Object.keys(parametros).forEach(param => {
+        parametros[param].sort((a, b) => new Date(a.x) - new Date(b.x));
+    });
+    
+    // Cores para diferentes parâmetros
+    const cores = [
+        '#065f46', '#059669', '#10b981', '#34d399', '#6ee7b7',
+        '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16'
+    ];
+    
+    const datasets = Object.keys(parametros).map((param, index) => ({
+        label: param,
+        data: parametros[param],
+        borderColor: cores[index % cores.length],
+        backgroundColor: cores[index % cores.length] + '20',
+        borderWidth: 2,
+        fill: false,
+        tension: 0.1
+    }));
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Evolução dos Resultados ao Longo do Tempo'
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Data'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Resultado'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function gerarGraficoDistribuicao(dados) {
+    const ctx = document.getElementById('graficoDistribuicao').getContext('2d');
+    
+    // Calcular médias por parâmetro
+    const medias = {};
+    for (const [param, valores] of Object.entries(dados.distribuicao)) {
+        const soma = valores.reduce((a, b) => a + b, 0);
+        medias[param] = (soma / valores.length).toFixed(2);
+    }
+    
+    const labels = Object.keys(medias);
+    const values = Object.values(medias);
+    
+    // Cores para o gráfico de pizza
+    const backgroundColors = [
+        '#065f46', '#059669', '#10b981', '#34d399', '#6ee7b7',
+        '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16'
+    ];
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: backgroundColors.slice(0, labels.length),
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Média dos Resultados por Parâmetro'
+                },
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            return `${label}: ${value}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
 </script>
 {% endblock %}

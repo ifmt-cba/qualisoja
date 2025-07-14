@@ -227,6 +227,7 @@ class RelatorioExpedicao(BaseModel):
     formato = models.CharField(max_length=10, choices=FORMATO_CHOICES, default='PDF', verbose_name="Formato")
     
     certificacao_conformidade = models.BooleanField(default=False, verbose_name="Certificação de Conformidade")
+    incluir_graficos = models.BooleanField(default=False, verbose_name="Incluir Gráficos Comparativos")
     arquivo_gerado = models.FileField(upload_to='relatorios/expedicao/', blank=True, null=True, verbose_name="Arquivo Gerado")
     
     def __str__(self):

@@ -217,7 +217,7 @@
             </div>
             <div class="preview-item">
                 <span class="preview-label">Cliente:</span>
-                <span class="preview-value">{{ relatorio.cliente.nome }}</span>
+                <span class="preview-value">{{ relatorio.get_cliente_nome }}</span>
             </div>
             <div class="preview-item">
                 <span class="preview-label">Período:</span>
@@ -226,26 +226,32 @@
             <div class="preview-item">
                 <span class="preview-label">Lotes:</span>
                 <span class="preview-value">
-                    {% for lote in relatorio.lotes.all %}
-                        {{ lote.codigo }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
+                    {% if relatorio.analises_selecionadas %}
+                        Análises Selecionadas
+                    {% else %}
+                        Período: {{ relatorio.data_inicial|date:"d/m/Y" }} - {{ relatorio.data_final|date:"d/m/Y" }}
+                    {% endif %}
                 </span>
             </div>
             <div class="preview-item">
                 <span class="preview-label">Parâmetros:</span>
                 <span class="preview-value">
-                    {% for parametro in relatorio.parametros_incluidos %}
-                        {{ parametro|title }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
+                    {% if relatorio.parametros_incluidos %}
+                        {% for parametro in relatorio.parametros_incluidos %}
+                            {{ parametro|title }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        Análises do período selecionado
+                    {% endif %}
                 </span>
             </div>
             <div class="preview-item">
                 <span class="preview-label">Conformidade:</span>
                 <span class="preview-value">
                     {% if relatorio.certificacao_conformidade %}
-                        <span style="color: var(--success-green);">✅ Conforme</span>
+                        <span style="color: var(--accent-green);">✅ Conforme</span>
                     {% else %}
-                        <span style="color: var(--error-red);">⚠️ Requer Atenção</span>
+                        <span style="color: #f59e0b;">⚠️ Requer Atenção</span>
                     {% endif %}
                 </span>
             </div>

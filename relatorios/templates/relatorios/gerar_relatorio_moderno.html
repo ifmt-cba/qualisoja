@@ -1,0 +1,2004 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Gerador de Relatórios - QualiSoja{% endblock %}
+
+{% block extra_css %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_green.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-green: #065f46;
+        --light-green: #d1fae5;
+        --accent-green: #059669;
+        --text-dark: #111827;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --focus-ring-color: rgba(5, 150, 105, 0.25);
+        --gradient-primary: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
+        --gradient-light: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        --border-radius-sm: 0.375rem;
+        --border-radius-md: 0.5rem;
+        --border-radius-lg: 0.75rem;
+        --border-radius-xl: 1rem;
+        --border-radius-2xl: 1.5rem;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+        line-height: 1.6;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    .page-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 3.5rem 0;
+        margin-bottom: 3rem;
+        border-radius: 0 0 var(--border-radius-2xl) var(--border-radius-2xl);
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.03)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.03)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.03)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.6;
+    }
+
+    .page-header .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h1 {
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        letter-spacing: -0.025em;
+    }
+
+    .page-header p {
+        font-size: 1.125rem;
+        font-weight: 400;
+        opacity: 0.95;
+    }
+
+    .card-modern {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        background: white;
+        backdrop-filter: blur(10px);
+        position: relative;
+    }
+
+    .card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .card-modern:hover::before {
+        opacity: 1;
+    }
+
+    .card-modern:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+        border-color: rgba(5, 150, 105, 0.2);
+    }
+    
+    .card-modern .card-header {
+        background: var(--gradient-light);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem 2rem 1.25rem;
+        position: relative;
+    }
+
+    .card-modern .card-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 2rem;
+        right: 2rem;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, var(--accent-green) 50%, transparent 100%);
+        opacity: 0.3;
+    }
+
+    .card-modern .card-header h5, 
+    .card-modern .card-header h6 {
+        margin-bottom: 0;
+        color: var(--primary-green);
+        font-weight: 700;
+        font-size: 1.125rem;
+        letter-spacing: -0.025em;
+        display: flex;
+        align-items: center;
+    }
+
+    .card-modern .card-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        background: var(--gradient-light);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--accent-green);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(5, 150, 105, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(50%, -50%);
+    }
+
+    .form-section h6 {
+        color: var(--primary-green);
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control-modern, 
+    .form-select-modern {
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        padding: 0.875rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        box-shadow: var(--shadow-xs);
+    }
+
+    .form-control-modern:focus, 
+    .form-select-modern:focus {
+        border-color: var(--accent-green);
+        box-shadow: 0 0 0 0.25rem var(--focus-ring-color), var(--shadow-sm);
+        outline: none;
+        transform: translateY(-1px);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        letter-spacing: -0.025em;
+    }
+
+    .btn-primary-custom {
+        background: var(--gradient-primary);
+        border: none;
+        border-radius: var(--border-radius-md);
+        padding: 1rem 2.5rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.075em;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary-custom::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-primary-custom:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-xl);
+        background: linear-gradient(135deg, var(--accent-green) 0%, var(--primary-green) 100%);
+    }
+
+    .btn-primary-custom:active {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-primary-custom:focus-visible {
+        outline: 3px solid var(--accent-green);
+        outline-offset: 3px;
+    }
+
+    .btn-expedicao {
+        background: linear-gradient(135deg, var(--accent-green) 0%, var(--primary-green) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-expedicao::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-expedicao:hover::before {
+        left: 100%;
+    }
+
+    .btn-expedicao:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.35);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-expedicao:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-expedicao:focus-visible {
+        outline: 3px solid rgba(5, 150, 105, 0.25);
+        outline-offset: 3px;
+    }
+
+    .report-type-card, 
+    .format-option {
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
+        padding: 1.75rem 1.5rem;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        margin-bottom: 1.5rem;
+        background: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .report-type-card::before,
+    .format-option::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at center, rgba(5, 150, 105, 0.02) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .report-type-card:hover::before,
+    .format-option:hover::before {
+        opacity: 1;
+    }
+
+    .report-type-card:focus, 
+    .format-option:focus {
+        border-color: var(--accent-green);
+        box-shadow: 0 0 0 0.25rem var(--focus-ring-color), var(--shadow-md);
+        outline: none;
+    }
+
+    .report-type-card:hover, 
+    .format-option:hover {
+        border-color: var(--accent-green);
+        background: linear-gradient(135deg, white 0%, var(--light-green) 100%);
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .report-type-card.active, 
+    .format-option.active {
+        border-color: var(--accent-green);
+        background: linear-gradient(135deg, var(--light-green) 0%, rgba(209, 250, 229, 0.7) 100%);
+        box-shadow: 0 0 0 3px var(--focus-ring-color), var(--shadow-lg);
+        transform: scale(1.02);
+    }
+
+    .report-type-card.active::after, 
+    .format-option.active::after {
+        content: '✓';
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: 50%;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-weight: 700;
+        box-shadow: var(--shadow-md);
+        animation: checkmark-appear 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes checkmark-appear {
+        0% {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+    }
+
+    .report-type-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--accent-green);
+        transition: transform 0.3s ease;
+    }
+
+    .report-type-card:hover .report-type-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    .format-option {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        padding: 1.5rem;
+        gap: 1.25rem;
+    }
+    
+    .format-option .format-icon {
+        width: 4rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+
+    .format-option:hover .format-icon {
+        transform: scale(1.15);
+    }
+    
+    .format-option .format-content {
+        flex: 1;
+    }
+
+    .report-type-card h6, 
+    .format-option h6 {
+        font-weight: 700;
+        color: var(--text-dark);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.025em;
+    }
+
+    /* Progress Steps - Ultra Minimal Timeline Design */
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 0;
+        background: transparent;
+        position: relative;
+    }
+
+    .progress-steps::after {
+        content: '';
+        position: absolute;
+        top: 1.25rem;
+        left: 10%;
+        right: 10%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, #e5e7eb 10%, #e5e7eb 90%, transparent 100%);
+        z-index: 1;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0;
+        flex: 1;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: transparent;
+        border: none;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        color: #d1d5db;
+        background: white;
+        border: 3px solid #f3f4f6;
+        border-radius: 50%;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .step.active .step-icon {
+        color: white;
+        background: var(--primary-green);
+        border-color: var(--primary-green);
+        transform: scale(1.15);
+        box-shadow: 0 4px 16px rgba(6, 95, 70, 0.3);
+    }
+
+    .step:hover:not(.active) .step-icon {
+        color: var(--accent-green);
+        border-color: var(--accent-green);
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+    }
+
+    .step-title {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        font-weight: 600;
+        line-height: 1.2;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        max-width: 80px;
+    }
+
+    .step.active .step-title {
+        color: var(--primary-green);
+        transform: translateY(-2px);
+    }
+
+    .step:hover:not(.active) .step-title {
+        color: var(--accent-green);
+        transform: translateY(-1px);
+    }
+
+    /* Progress indicator */
+    .progress-steps::before {
+        content: '';
+        position: absolute;
+        top: 1.25rem;
+        left: 10%;
+        height: 1px;
+        background: var(--primary-green);
+        z-index: 1;
+        transition: width 0.6s ease;
+        width: var(--progress-width, 30%); /* Dynamic width controlled by JavaScript */
+    }
+
+    /* Additional step states */
+    .step.completed .step-icon {
+        color: white;
+        background: var(--accent-green);
+        border-color: var(--accent-green);
+        transform: scale(1.1);
+    }
+
+    .step.completed .step-title {
+        color: var(--accent-green);
+    }
+
+    .quick-date-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .quick-date-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--border-color);
+        background: white;
+        border-radius: var(--border-radius-md);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        box-shadow: var(--shadow-xs);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quick-date-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(5, 150, 105, 0.1), transparent);
+        transition: left 0.4s ease;
+    }
+
+    .quick-date-btn:hover::before {
+        left: 100%;
+    }
+
+    .quick-date-btn:hover {
+        border-color: var(--accent-green);
+        background: linear-gradient(135deg, white 0%, #eefbf3 100%);
+        color: var(--primary-green);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .quick-date-btn.active {
+        background: var(--gradient-primary);
+        color: white;
+        border-color: var(--accent-green);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .preview-section {
+        background: var(--gradient-light);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        margin-top: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .preview-section h6 {
+        color: var(--primary-green);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .preview-stats {
+        margin-top: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--gradient-light);
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-item .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-green);
+        display: block;
+    }
+
+    .stat-item .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        margin-top: 0.5rem;
+    }
+
+    /* Form Section Improvements */
+    .form-section {
+        position: relative;
+    }
+
+    .form-section .section-icon {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        font-size: 2rem;
+        color: rgba(5, 150, 105, 0.1);
+        z-index: 1;
+    }
+
+    /* Quick Date Button Improvements */
+    .quick-date-btn {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quick-date-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(5, 150, 105, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .quick-date-btn:hover::before {
+        left: 100%;
+    }
+
+    /* Enhanced Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+        .keyboard-shortcuts-panel,
+        .btn-save-config,
+        .loading-spinner,
+        .toast-notification {
+            display: none !important;
+        }
+        
+        .card-modern {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+        
+        .page-header {
+            background: white !important;
+            color: black !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+
+    @media (max-width: 991px) {
+        .sticky-sidebar {
+            position: static;
+            margin-top: 2rem;
+        }
+        
+        .card-modern .card-body {
+            padding: 1.5rem;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+        
+        .progress-steps {
+            max-width: 500px;
+            margin: 2.5rem auto;
+        }
+        
+        .step-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .step-title {
+            font-size: 0.7rem;
+            max-width: 70px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .keyboard-shortcuts-panel {
+            position: relative;
+            width: 100%;
+            margin: 1rem 0;
+            right: auto;
+            top: auto;
+            transform: none;
+        }
+        
+        .page-header {
+            padding: 2.5rem 0;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .progress-steps {
+            max-width: 400px;
+            margin: 2rem auto;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .progress-steps::after,
+        .progress-steps::before {
+            display: none;
+        }
+        
+        .step {
+            flex-direction: row;
+            text-align: left;
+            gap: 1rem;
+            width: 100%;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f3f4f6;
+        }
+
+        .step.active {
+            background: rgba(6, 95, 70, 0.05);
+            border-color: var(--primary-green);
+        }
+        
+        .step-icon {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        
+        .step-title {
+            font-size: 0.75rem;
+            max-width: none;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        
+        .quick-date-buttons {
+            gap: 0.5rem;
+        }
+        
+        .quick-date-btn {
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .card-modern .card-header,
+        .card-modern .card-body {
+            padding: 1.25rem;
+        }
+        
+        .btn-primary-custom {
+            padding: 0.875rem 2rem;
+            font-size: 0.9rem;
+        }
+        
+        .report-type-card,
+        .format-option {
+            padding: 1.25rem;
+        }
+        
+        .report-type-icon {
+            font-size: 2.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .toast-notification {
+            left: 1rem;
+            right: 1rem;
+            min-width: auto;
+            max-width: none;
+        }
+        
+        .progress-steps {
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+        }
+        
+        .progress-steps {
+            max-width: 350px;
+            margin: 1.5rem auto;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .progress-steps::after,
+        .progress-steps::before {
+            display: none;
+        }
+        
+        .step {
+            flex-direction: row;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f3f4f6;
+        }
+        
+        .step-icon {
+            width: 1.75rem;
+            height: 1.75rem;
+            font-size: 0.75rem;
+        }
+        
+        .step-title {
+            font-size: 0.7rem;
+            max-width: none;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        
+        .d-flex.gap-2 {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .d-flex.gap-2 .btn,
+        .d-flex.gap-2 .btn-expedicao {
+            width: 100%;
+            margin-bottom: 0.5rem;
+            justify-content: center;
+        }
+        
+        .btn-expedicao {
+            font-size: 0.9rem;
+            padding: 0.875rem 1.25rem;
+            box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.25);
+        }
+    }
+
+    /* Custom Scrollbar */
+    .shortcuts-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .shortcuts-list::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+    }
+
+    .shortcuts-list::-webkit-scrollbar-thumb {
+        background: var(--accent-green);
+        border-radius: 3px;
+    }
+
+    .shortcuts-list::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-green);
+    }
+
+    /* Loading spinner styles */
+    .loading-spinner {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Custom color classes */
+    .text-purple {
+        color: #7c3aed !important;
+    }
+
+    /* Layout para 5 colunas */
+    @media (min-width: 992px) {
+        .col-lg-2-4 {
+            flex: 0 0 20%;
+            max-width: 20%;
+        }
+    }
+
+    /* Enhanced Focus States */
+    *:focus-visible {
+        outline: 2px solid var(--accent-green);
+        outline-offset: 2px;
+        border-radius: var(--border-radius-sm);
+    }
+
+    /* Loading Animation Enhancement */
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .fa-spin {
+        animation: spin 1s linear infinite;
+    }
+
+    /* Micro-interactions */
+    .report-type-card,
+    .format-option,
+    .quick-date-btn,
+    .btn {
+        transform-origin: center;
+    }
+
+    /* System Status Enhancement */
+    #system-status-text {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="keyboard-shortcuts-info" class="keyboard-shortcuts-panel" style="display: none;">
+    <div class="shortcuts-header">
+        <h6><i class="fas fa-keyboard"></i>Atalhos Disponíveis</h6>
+        <button type="button" class="btn-close-shortcuts" onclick="toggleShortcutsPanel(false)" aria-label="Fechar atalhos">×</button>
+    </div>
+    <div class="shortcuts-list">
+        <div class="shortcut-item">
+            <span>Gerar Relatório</span>
+            <span><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
+        </div>
+        <div class="shortcut-item">
+            <span>Pré-visualizar</span>
+            <span><kbd>Ctrl</kbd> + <kbd>P</kbd></span>
+        </div>
+        <div class="shortcut-item">
+            <span>Salvar Config.</span>
+            <span><kbd>Ctrl</kbd> + <kbd>S</kbd></span>
+        </div>
+        <div class="shortcut-item">
+            <span>Navegar Opções</span>
+            <span><kbd>↑</kbd> <kbd>↓</kbd></span>
+        </div>
+        <div class="shortcut-item">
+            <span>Ver/Ocultar Atalhos</span>
+            <span><kbd>Ctrl</kbd> + <kbd>/</kbd></span>
+        </div>
+    </div>
+</div>
+
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-3">
+                    <i class="fas fa-chart-line me-3"></i>
+                    Gerador de Relatórios QualiSoja
+                </h1>
+                <p class="mb-0">Configure e personalize seus relatórios de análise de qualidade com precisão e eficiência</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="d-flex align-items-center justify-content-end text-white">
+                    <i class="fas fa-calendar-alt me-2"></i> 
+                    <span id="current-date" class="fw-semibold"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="progress-steps">
+        <div class="step active" id="step-1" data-step-number="1" tabindex="0" role="button" aria-label="Ir para Tipo de Relatório">
+            <div class="step-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="step-title">Tipo de Relatório</div>
+        </div>
+        <div class="step" id="step-2" data-step-number="2" tabindex="0" role="button" aria-label="Ir para Período e Filtros" aria-disabled="true">
+            <div class="step-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="step-title">Período e Filtros</div>
+        </div>
+        <div class="step" id="step-3" data-step-number="3" tabindex="0" role="button" aria-label="Ir para Formato e Geração" aria-disabled="true">
+            <div class="step-icon">
+                <i class="fas fa-download"></i>
+            </div>
+            <div class="step-title">Formato e Geração</div>
+        </div>
+    </div>
+
+    {% if form.errors %}
+    <div class="error-message animate-fade-in">
+        <h5><i class="fas fa-exclamation-triangle"></i>Corrija os seguintes erros:</h5>
+        <ul class="mb-0 ps-3">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" id="report-form" novalidate>
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card-modern animate-fade-in mb-4" id="section-1">
+                    <div class="card-header">
+                        <h5>
+                            <i class="fas fa-file-alt text-success"></i>
+                            Selecione o Tipo de Relatório
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
+                                <div class="report-type-card" data-type="umidade" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-tint text-primary"></i></div>
+                                    <h6>Umidade</h6>
+                                    <small class="text-muted">Análises de teor de umidade dos grãos</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
+                                <div class="report-type-card" data-type="proteina" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-seedling text-warning"></i></div>
+                                    <h6>Proteína</h6>
+                                    <small class="text-muted">Análises de teor proteico dos grãos</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
+                                <div class="report-type-card" data-type="oleo" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-flask text-success"></i></div>
+                                    <h6>Óleo Degomado</h6>
+                                    <small class="text-muted">Análises de teor de óleo degomado e derivados</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
+                                <div class="report-type-card active" data-type="completo" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-chart-bar text-info"></i></div>
+                                    <h6>Completo</h6>
+                                    <small class="text-muted">Análise comparativa completa e detalhada</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-2-4 col-md-4 col-6 mb-3">
+                                <div class="report-type-card" data-type="expedicao" tabindex="0">
+                                    <div class="report-type-icon"><i class="fas fa-shipping-fast text-success"></i></div>
+                                    <h6>Expedição</h6>
+                                    <small class="text-muted">Relatórios de expedição para vendas</small>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="tipo_relatorio" id="id_tipo_relatorio" value="completo">
+                    </div>
+                </div>
+
+                <div class="card-modern animate-fade-in mb-4" id="section-2">
+                    <div class="card-header">
+                        <h5>
+                            <i class="fas fa-filter text-info"></i>
+                            Período e Filtros Avançados
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-section">
+                            <h6><i class="fas fa-calendar-alt"></i>Período de Análise</h6>
+                            <div class="quick-date-buttons">
+                                <button type="button" class="quick-date-btn active" data-days="7">Últimos 7 dias</button>
+                                <button type="button" class="quick-date-btn" data-days="15">Últimos 15 dias</button>
+                                <button type="button" class="quick-date-btn" data-days="30">Último mês</button>
+                                <button type="button" class="quick-date-btn" data-days="90">Últimos 3 meses</button>
+                                <button type="button" class="quick-date-btn" data-custom="true">Personalizado</button>
+                            </div>
+                            
+                            <div class="row" id="custom-date-range">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label for="id_data_inicial" class="form-label"><i class="fas fa-calendar-plus me-2"></i>Data Inicial</label>
+                                    <input type="date" name="data_inicial" id="id_data_inicial" class="form-control-modern" 
+                                        value="{{ form.data_inicial.value|date:'Y-m-d'|default:'' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_data_final" class="form-label"><i class="fas fa-calendar-check me-2"></i>Data Final</label>
+                                    <input type="date" name="data_final" id="id_data_final" class="form-control-modern"
+                                        value="{{ form.data_final.value|date:'Y-m-d'|default:'' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section" id="sample-filters">
+                            <h6><i class="fas fa-vial"></i>Tipos de Amostra</h6>
+                            <div id="umidade-filter-group">
+                                <label for="id_tipo_amostra_umidade" class="form-label">Filtro por Tipo (Umidade)</label>
+                                <select name="tipo_amostra_umidade" id="id_tipo_amostra_umidade" class="form-select-modern">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="INTEGRAL" {% if form.tipo_amostra_umidade.value == 'INTEGRAL' %}selected{% endif %}>Integral</option>
+                                    <option value="LAMINADA" {% if form.tipo_amostra_umidade.value == 'LAMINADA' %}selected{% endif %}>Laminada</option>
+                                    <option value="FARELO" {% if form.tipo_amostra_umidade.value == 'FARELO' %}selected{% endif %}>Farelo</option>
+                                    <option value="CASCA" {% if form.tipo_amostra_umidade.value == 'CASCA' %}selected{% endif %}>Casca</option>
+                                </select>
+                            </div>
+                            <div id="proteina-filter-group" class="mt-3">
+                                <label for="id_tipo_amostra_proteina" class="form-label">Filtro por Tipo (Proteína)</label>
+                                <select name="tipo_amostra_proteina" id="id_tipo_amostra_proteina" class="form-select-modern">
+                                    <option value="">Todos os tipos</option>
+                                    <option value="INTEGRAL" {% if form.tipo_amostra_proteina.value == 'INTEGRAL' %}selected{% endif %}>Integral</option>
+                                    <option value="LAMINADA" {% if form.tipo_amostra_proteina.value == 'LAMINADA' %}selected{% endif %}>Laminada</option>
+                                    <option value="FARELO" {% if form.tipo_amostra_proteina.value == 'FARELO' %}selected{% endif %}>Farelo</option>
+                                    <option value="CASCA" {% if form.tipo_amostra_proteina.value == 'CASCA' %}selected{% endif %}>Casca</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-modern animate-fade-in mb-4" id="section-3">
+                    <div class="card-header">
+                        <h5>
+                            <i class="fas fa-download text-warning"></i>
+                            Formato de Saída
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="format-option active" data-format="HTML" tabindex="0" role="button" aria-label="Selecionar formato HTML">
+                                    <div class="format-icon"><i class="fas fa-globe fa-2x text-info"></i></div>
+                                    <div class="format-content">
+                                        <h6>Visualizar Online</h6>
+                                        <small class="text-muted">Interativo no navegador</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="format-option" data-format="PDF" tabindex="0" role="button" aria-label="Selecionar formato PDF">
+                                    <div class="format-icon"><i class="fas fa-file-pdf fa-2x text-danger"></i></div>
+                                    <div class="format-content">
+                                        <h6>Exportar PDF</h6>
+                                        <small class="text-muted">Documento para impressão</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="format-option" data-format="EXCEL" tabindex="0" role="button" aria-label="Selecionar formato Excel">
+                                    <div class="format-icon"><i class="fas fa-file-excel fa-2x text-success"></i></div>
+                                    <div class="format-content">
+                                        <h6>Exportar Excel</h6>
+                                        <small class="text-muted">Planilha para análise</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="formato_saida" id="id_formato_saida" value="HTML">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'analises:home' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Voltar à Página Inicial
+                        </a>
+                        <a href="{% url 'relatorios:expedicao_lista' %}" class="btn-expedicao">
+                            <i class="fas fa-shipping-fast me-2"></i>Relatórios de Expedição
+                        </a>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" id="preview-btn-main" class="btn btn-outline-primary" onclick="previewData()">
+                            <i class="fas fa-eye me-2"></i>Pré-visualizar
+                        </button>
+                        <button type="button" id="show-shortcuts-btn-main" class="btn btn-outline-info" onclick="toggleShortcutsPanel()">
+                            <i class="fas fa-keyboard me-2"></i>Atalhos
+                        </button>
+                        <button type="submit" id="generate-btn" class="btn-primary-custom btn">
+                            <i class="fas fa-magic me-2"></i>
+                            <span class="btn-text">Gerar Relatório</span>
+                            <span class="btn-loading" style="display: none;">
+                                <i class="fas fa-spinner fa-spin me-2"></i>Gerando...
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card-modern sticky-sidebar">
+                    <div class="card-header">
+                        <h6><i class="fas fa-clipboard-check me-2"></i>Resumo da Configuração</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="system-status" class="mb-4 small">
+                             <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted fw-semibold">Status:</span>
+                                <span id="system-status-text" class="badge bg-success">Sistema Ativo</span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2 small text-uppercase fw-bold">Filtros Ativos:</h6>
+                            <div id="active-filters" class="mb-3">
+                                <span class="filter-badge">Relatório Completo</span>
+                            </div>
+                             <div id="active-sample-filters"></div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2 small text-uppercase fw-bold">Período:</h6>
+                            <div id="date-summary" class="fw-bold text-dark">
+                                <i class="fas fa-calendar-alt me-2 text-success"></i> 
+                                <span id="period-text">Últimos 7 dias</span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2 small text-uppercase fw-bold">Formato:</h6>
+                            <div id="format-summary" class="fw-bold text-dark">
+                                <i class="fas fa-globe me-2 text-info"></i> Visualização Online
+                            </div>
+                        </div>
+                        <div class="preview-section" id="data-preview">
+                            <h6><i class="fas fa-chart-area me-2"></i>Pré-visualização</h6>
+                            <div class="text-center text-muted p-4">
+                                <i class="fas fa-search-plus fa-3x mb-3 opacity-50"></i>
+                                <p class="small mb-0 fw-medium">Clique em "Pré-visualizar" para ver os dados disponíveis</p>
+                            </div>
+                        </div>
+                        <button type="button" id="save-config-btn" class="btn btn-save-config">
+                            <i class="fas fa-save"></i>Salvar Configuração
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="d-flex flex-column align-items-center text-center">
+            <div class="spinner-border text-success mb-3" style="width: 4rem; height: 4rem;" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <h5 class="text-white mb-2">Preparando seu relatório...</h5>
+            <small class="text-white-50">Isso pode levar alguns instantes. Por favor, aguarde.</small>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize DOM elements with error checking
+    const reportForm = document.getElementById('report-form');
+    const tipoRelatorioInput = document.getElementById('id_tipo_relatorio');
+    const formatoSaidaInput = document.getElementById('id_formato_saida');
+    const dataInicialInput = document.getElementById('id_data_inicial');
+    const dataFinalInput = document.getElementById('id_data_final');
+    const umidadeFilterGroup = document.getElementById('umidade-filter-group');
+    const proteinaFilterGroup = document.getElementById('proteina-filter-group');
+    const tipoAmostraUmidadeSelect = document.getElementById('id_tipo_amostra_umidade');
+    const tipoAmostraProteinaSelect = document.getElementById('id_tipo_amostra_proteina');
+
+    let currentStep = 1;
+
+    // Check if critical elements exist
+    const criticalElements = {
+        'report-form': reportForm,
+        'tipo_relatorio': tipoRelatorioInput,
+        'formato_saida': formatoSaidaInput,
+        'data_inicial': dataInicialInput,
+        'data_final': dataFinalInput
+    };
+
+    const missingElements = [];
+    for (const [name, element] of Object.entries(criticalElements)) {
+        if (!element) {
+            missingElements.push(name);
+        }
+    }
+
+    if (missingElements.length > 0) {
+        console.warn('Missing critical elements:', missingElements);
+    }
+
+    function initializePage() {
+        try {
+            // Update current date
+            const currentDateEl = document.getElementById('current-date');
+            if (currentDateEl) {
+                currentDateEl.textContent = 
+                    new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+            
+            // Initialize flatpickr
+            if (dataInicialInput && typeof flatpickr !== 'undefined') {
+                flatpickr(dataInicialInput, { 
+                    locale: "pt", 
+                    dateFormat: "Y-m-d", 
+                    altInput: true, 
+                    altFormat: "d/m/Y", 
+                    theme: "material_green" 
+                });
+            }
+            
+            if (dataFinalInput && typeof flatpickr !== 'undefined') {
+                flatpickr(dataFinalInput, { 
+                    locale: "pt", 
+                    dateFormat: "Y-m-d", 
+                    altInput: true, 
+                    altFormat: "d/m/Y", 
+                    theme: "material_green" 
+                });
+            }
+
+            setDefaultDates();
+            selectReportType('completo');
+            updateStep(1, true);
+            updateSummary();
+            
+            // Initialize progress bar
+            document.documentElement.style.setProperty('--progress-width', '0%');
+            
+            console.log('Page initialized successfully');
+        } catch (error) {
+            console.error('Error initializing page:', error);
+        }
+    }
+    
+    function setupEventListeners() {
+        document.querySelectorAll('.report-type-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Se for o card de expedição, redireciona para a página de listagem de expedição
+                if (this.dataset.type === 'expedicao') {
+                    window.location.href = "{% url 'relatorios:expedicao_lista' %}";
+                    return;
+                }
+                
+                selectReportType(this.dataset.type);
+                updateStep(2);
+                document.getElementById('section-2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+            card.addEventListener('keypress', function(e) { 
+                if(e.key === 'Enter' || e.key === ' ') this.click(); 
+            });
+        });
+        
+        document.querySelectorAll('.format-option').forEach(option => {
+            option.addEventListener('click', function() {
+                selectFormat(this.dataset.format);
+                updateStep(3);
+            });
+            option.addEventListener('keypress', function(e) { 
+                if(e.key === 'Enter' || e.key === ' ') this.click(); 
+            });
+        });
+        
+        document.querySelectorAll('.quick-date-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.quick-date-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                if (this.dataset.custom) {
+                    dataInicialInput.focus();
+                } else {
+                    const days = parseInt(this.dataset.days);
+                    setQuickDates(days);
+                }
+                updateSummary();
+            });
+        });
+
+        [dataInicialInput, dataFinalInput, tipoAmostraUmidadeSelect, tipoAmostraProteinaSelect].forEach(el => {
+            if(el) el.addEventListener('change', updateSummary);
+        });
+        
+        const saveConfigBtn = document.getElementById('save-config-btn');
+        if (saveConfigBtn) {
+            saveConfigBtn.addEventListener('click', saveConfiguration);
+        }
+        
+        if (reportForm) {
+            reportForm.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                showLoading(true);
+                showToast('Gerando relatório...', 'info');
+            });
+        }
+
+        document.querySelectorAll('.step').forEach(stepEl => {
+            if (stepEl) {
+                stepEl.addEventListener('click', handleStepNavigation);
+                stepEl.addEventListener('keypress', (e) => { 
+                    if(e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleStepNavigation.call(stepEl, e); 
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (validateForm()) {
+                        document.getElementById('generate-btn').click();
+                    }
+                } else if (e.key === 'p' || e.key === 'P') {
+                    e.preventDefault();
+                    previewData();
+                } else if (e.key === '/') {
+                     e.preventDefault();
+                    toggleShortcutsPanel();
+                } else if (e.key === 's' || e.key === 'S') {
+                    e.preventDefault();
+                    saveConfiguration();
+                }
+            }
+        });
+
+        [tipoRelatorioInput, dataInicialInput, dataFinalInput, formatoSaidaInput, tipoAmostraUmidadeSelect, tipoAmostraProteinaSelect].forEach(element => {
+            if (element) {
+                element.addEventListener('change', () => {
+                    setTimeout(saveConfiguration, 500);
+                });
+            }
+        });
+
+        loadSavedConfiguration();
+    }
+
+    function saveConfiguration() {
+        const config = {
+            tipo_relatorio: tipoRelatorioInput.value,
+            data_inicial: dataInicialInput.value,
+            data_final: dataFinalInput.value,
+            formato_saida: formatoSaidaInput.value,
+            tipo_amostra_umidade: tipoAmostraUmidadeSelect?.value || '',
+            tipo_amostra_proteina: tipoAmostraProteinaSelect?.value || '',
+            timestamp: new Date().toISOString()
+        };
+        
+        try {
+            sessionStorage.setItem('qualisoja_report_config', JSON.stringify(config));
+            showToast('Configuração salva!', 'success');
+        } catch (error) {
+            console.error('Erro ao salvar configuração:', error);
+            showToast('Erro ao salvar configuração', 'error');
+        }
+    }
+
+    function loadSavedConfiguration() {
+        try {
+            const saved = sessionStorage.getItem('qualisoja_report_config');
+            if (saved) {
+                const config = JSON.parse(saved);
+                
+                const savedDate = new Date(config.timestamp);
+                const now = new Date();
+                const daysDiff = (now - savedDate) / (1000 * 60 * 60 * 24);
+                
+                if (daysDiff <= 7) {
+                    if (config.tipo_relatorio) {
+                        selectReportType(config.tipo_relatorio);
+                    }
+                    if (config.formato_saida) {
+                        selectFormat(config.formato_saida);
+                    }
+                    if (config.tipo_amostra_umidade && tipoAmostraUmidadeSelect) {
+                        tipoAmostraUmidadeSelect.value = config.tipo_amostra_umidade;
+                    }
+                    if (config.tipo_amostra_proteina && tipoAmostraProteinaSelect) {
+                        tipoAmostraProteinaSelect.value = config.tipo_amostra_proteina;
+                    }
+                    
+                    updateSummary();
+                    showToast('Configuração restaurada', 'info');
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao carregar configuração:', error);
+        }
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                ${message}
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 400);
+        }, 3000);
+    }
+
+    function toggleShortcutsPanel(forceState) {
+        const panel = document.getElementById('keyboard-shortcuts-info');
+        if (typeof forceState === 'boolean') {
+            panel.style.display = forceState ? 'block' : 'none';
+        } else {
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    function handleStepNavigation(event) {
+        try {
+            const stepNumber = parseInt(this.dataset.stepNumber);
+            if (isNaN(stepNumber) || stepNumber < 1 || stepNumber > 3) {
+                console.warn('Invalid step number:', stepNumber);
+                return;
+            }
+
+            const targetSection = document.getElementById(`section-${stepNumber}`);
+            
+            if (targetSection) {
+                updateStep(stepNumber);
+                
+                // Smooth scroll to section
+                setTimeout(() => {
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                console.warn('Target section not found:', `section-${stepNumber}`);
+            }
+        } catch (error) {
+            console.error('Error in step navigation:', error);
+        }
+    }
+    
+    function selectReportType(type) {
+        try {
+            document.querySelectorAll('.report-type-card').forEach(card => card.classList.remove('active'));
+            const selectedCard = document.querySelector(`.report-type-card[data-type="${type}"]`);
+            if (selectedCard) selectedCard.classList.add('active');
+            
+            if (tipoRelatorioInput) {
+                tipoRelatorioInput.value = type;
+            }
+            
+            if (umidadeFilterGroup) {
+                umidadeFilterGroup.style.display = (type === 'umidade' || type === 'completo') ? 'block' : 'none';
+            }
+            if (proteinaFilterGroup) {
+                proteinaFilterGroup.style.display = (type === 'proteina' || type === 'completo') ? 'block' : 'none';
+            }
+            
+            updateSummary();
+        } catch (error) {
+            console.error('Error selecting report type:', error);
+        }
+    }
+    
+    function selectFormat(format) {
+        try {
+            document.querySelectorAll('.format-option').forEach(option => option.classList.remove('active'));
+            const selectedOption = document.querySelector(`.format-option[data-format="${format}"]`);
+            if (selectedOption) selectedOption.classList.add('active');
+            
+            if (formatoSaidaInput) {
+                formatoSaidaInput.value = format;
+            }
+            updateSummary();
+        } catch (error) {
+            console.error('Error selecting format:', error);
+        }
+    }
+    
+    function setDefaultDates() {
+        try {
+            const hoje = new Date();
+            const semanaPassada = new Date();
+            semanaPassada.setDate(hoje.getDate() - 7);
+            
+            if (dataInicialInput && !dataInicialInput.value) {
+                dataInicialInput.value = semanaPassada.toISOString().split('T')[0];
+            }
+            if (dataFinalInput && !dataFinalInput.value) {
+                dataFinalInput.value = hoje.toISOString().split('T')[0];
+            }
+        } catch (error) {
+            console.error('Error setting default dates:', error);
+        }
+    }
+    
+    function setQuickDates(days) {
+        try {
+            const hoje = new Date();
+            const dataInicial = new Date();
+            dataInicial.setDate(hoje.getDate() - days);
+            
+            if (dataInicialInput) {
+                dataInicialInput.value = dataInicial.toISOString().split('T')[0];
+            }
+            if (dataFinalInput) {
+                dataFinalInput.value = hoje.toISOString().split('T')[0];
+            }
+        } catch (error) {
+            console.error('Error setting quick dates:', error);
+        }
+    }
+        
+    function updateStep(targetStepNumber, isInitial = false) {
+        currentStep = targetStepNumber;
+        
+        // Update all steps
+        document.querySelectorAll('.step').forEach((stepEl, index) => {
+            const stepNum = parseInt(stepEl.dataset.stepNumber);
+            stepEl.classList.remove('active', 'completed', 'clickable');
+            stepEl.setAttribute('aria-disabled', 'true');
+
+            if (stepNum < targetStepNumber) {
+                stepEl.classList.add('completed', 'clickable');
+                stepEl.setAttribute('aria-disabled', 'false');
+            } else if (stepNum === targetStepNumber) {
+                stepEl.classList.add('active', 'clickable');
+                stepEl.setAttribute('aria-disabled', 'false');
+            } else {
+                stepEl.classList.add('clickable');
+                stepEl.setAttribute('aria-disabled', 'false');
+            }
+        });
+
+        // Update progress bar width safely
+        try {
+            const progressWidth = ((targetStepNumber - 1) / 2) * 80; // 80% max width between steps
+            const finalWidth = Math.min(Math.max(progressWidth, 0), 80);
+            document.documentElement.style.setProperty('--progress-width', `${finalWidth}%`);
+        } catch (error) {
+            console.warn('Could not update progress width:', error);
+        }
+    }
+    
+    function updateSummary() {
+        try {
+            const tipoRelatorio = tipoRelatorioInput?.value || '';
+            const formatoSaida = formatoSaidaInput?.value || '';
+            
+            const tipoNames = {
+                'umidade': 'Relatório de Umidade', 
+                'proteina': 'Relatório de Proteína', 
+                'completo': 'Relatório Completo',
+                'expedicao': 'Relatório de Expedição'
+            };
+            const formatNames = {
+                'HTML': 'Visualização Online', 
+                'PDF': 'Documento PDF', 
+                'EXCEL': 'Planilha Excel'
+            };
+            const formatIcons = {
+                'HTML': 'fas fa-globe text-info', 
+                'PDF': 'fas fa-file-pdf text-danger', 
+                'EXCEL': 'fas fa-file-excel text-success'
+            };
+            
+            const activeFiltersEl = document.getElementById('active-filters');
+            if (activeFiltersEl) {
+                activeFiltersEl.innerHTML = 
+                    `<span class="filter-badge">${tipoNames[tipoRelatorio] || 'N/A'}</span>`;
+            }
+            
+            let sampleFiltersHtml = '';
+            if (umidadeFilterGroup && umidadeFilterGroup.style.display !== 'none' && tipoAmostraUmidadeSelect?.value) {
+                const selectedText = tipoAmostraUmidadeSelect.options[tipoAmostraUmidadeSelect.selectedIndex].text;
+                sampleFiltersHtml += `<span class="filter-badge bg-secondary">Umidade: ${selectedText}</span> `;
+            } else if (umidadeFilterGroup && umidadeFilterGroup.style.display !== 'none') {
+                 sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Umidade: Todos</span> `;
+            }
+            if (proteinaFilterGroup && proteinaFilterGroup.style.display !== 'none' && tipoAmostraProteinaSelect?.value) {
+                const selectedText = tipoAmostraProteinaSelect.options[tipoAmostraProteinaSelect.selectedIndex].text;
+                sampleFiltersHtml += `<span class="filter-badge bg-secondary">Proteína: ${selectedText}</span>`;
+            } else if (proteinaFilterGroup && proteinaFilterGroup.style.display !== 'none') {
+                sampleFiltersHtml += `<span class="filter-badge bg-light text-dark border">Proteína: Todos</span>`;
+            }
+            
+            const activeSampleFiltersEl = document.getElementById('active-sample-filters');
+            if (activeSampleFiltersEl) {
+                activeSampleFiltersEl.innerHTML = sampleFiltersHtml;
+            }
+
+            const di = dataInicialInput?.value;
+            const df = dataFinalInput?.value;
+            const periodTextEl = document.getElementById('period-text');
+            
+            if (periodTextEl) {
+                if (di && df) {
+                    const inicio = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR', {
+                        day:'2-digit', 
+                        month:'2-digit', 
+                        year:'numeric'
+                    });
+                    const fim = new Date(df + 'T00:00:00').toLocaleDateString('pt-BR', {
+                        day:'2-digit', 
+                        month:'2-digit', 
+                        year:'numeric'
+                    });
+                    periodTextEl.textContent = `${inicio} até ${fim}`;
+                } else {
+                    periodTextEl.textContent = "Selecione um período";
+                }
+            }
+            
+            const formatSummaryEl = document.getElementById('format-summary');
+            if (formatSummaryEl) {
+                formatSummaryEl.innerHTML = 
+                    `<i class="${formatIcons[formatoSaida] || 'fas fa-file'} me-2"></i>${formatNames[formatoSaida] || 'N/A'}`;
+            }
+        } catch (error) {
+            console.error('Error updating summary:', error);
+        }
+    }
+    
+    function previewData() {
+        const preview = document.getElementById('data-preview');
+        const tipoRelatorio = tipoRelatorioInput.value;
+        const dataInicial = dataInicialInput.value;
+        const dataFinal = dataFinalInput.value;
+        
+        if (!tipoRelatorio || !dataInicial || !dataFinal) {
+            showError('Configure todos os campos antes de visualizar os dados.');
+            return;
+        }
+        
+        preview.innerHTML = `
+            <h6 class="mb-3"><i class="fas fa-chart-area me-2"></i>Carregando Pré-visualização</h6>
+            <div class="text-center p-4">
+                <div class="spinner-border spinner-border-sm text-success mb-3" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="small mb-0 fw-medium">Analisando dados do período selecionado...</p>
+            </div>`;
+        
+        const formData = new FormData();
+        formData.append('tipo_relatorio', tipoRelatorio);
+        formData.append('data_inicial', dataInicial);
+        formData.append('data_final', dataFinal);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        setTimeout(() => {
+            const diasSelecionados = Math.ceil((new Date(dataFinal) - new Date(dataInicial)) / (1000 * 60 * 60 * 24));
+            const estimativaAnalises = Math.floor(diasSelecionados * (Math.random() * 5 + 2));
+            
+            let tiposIncluidos = [];
+            if (tipoRelatorio === 'umidade' || tipoRelatorio === 'completo') {
+                tiposIncluidos.push('Umidade');
+            }
+            if (tipoRelatorio === 'proteina' || tipoRelatorio === 'completo') {
+                tiposIncluidos.push('Proteína');
+            }
+            
+            preview.innerHTML = `
+                <h6 class="mb-3"><i class="fas fa-chart-area me-2"></i>Pré-visualização dos Dados</h6>
+                <div class="preview-stats">
+                    <div class="row text-center mb-4">
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number">${estimativaAnalises}</div>
+                                <div class="stat-label">Análises</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number">${diasSelecionados}</div>
+                                <div class="stat-label">Dias</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-item">
+                                <div class="stat-number">${tiposIncluidos.length}</div>
+                                <div class="stat-label">Tipos</div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled small mb-0">
+                        <li class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="fw-medium"><i class="fas fa-calendar me-2"></i>Período:</span>
+                            <strong>${new Date(dataInicial + 'T00:00:00').toLocaleDateString('pt-BR')} - ${new Date(dataFinal + 'T00:00:00').toLocaleDateString('pt-BR')}</strong>
+                        </li>
+                        <li class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="fw-medium"><i class="fas fa-flask me-2"></i>Tipos incluídos:</span>
+                            <strong>${tiposIncluidos.join(', ')}</strong>
+                        </li>
+                        <li class="d-flex justify-content-between py-2">
+                            <span class="fw-medium"><i class="fas fa-file me-2"></i>Formato:</span>
+                            <strong>${document.getElementById('format-summary').textContent.replace(/^\s*[\w\s]*\s+/, '')}</strong>
+                        </li>
+                    </ul>
+                    <div class="small text-success mt-3 p-3 bg-light rounded">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Dados disponíveis!</strong> Clique em "Gerar Relatório" para continuar.
+                    </div>
+                </div>`;
+        }, 1200);
+    }
+    
+    function validateForm() {
+        const diValue = dataInicialInput.value;
+        const dfValue = dataFinalInput.value;
+        const tipoRelatorio = tipoRelatorioInput.value;
+        const formatoSaida = formatoSaidaInput.value;
+
+        if (!tipoRelatorio) {
+            showError('Por favor, selecione um tipo de relatório.');
+            document.querySelector('.report-type-card').focus();
+            return false;
+        }
+
+        if (!diValue || !dfValue) {
+            showError('Por favor, selecione as datas inicial e final.');
+            (!diValue ? dataInicialInput : dataFinalInput).focus();
+            return false;
+        }
+
+        const dataInicial = new Date(diValue);
+        const dataFinal = new Date(dfValue);
+        const hoje = new Date();
+        
+        if (dataInicial > dataFinal) {
+            showError('A data inicial não pode ser posterior à data final.');
+            dataInicialInput.focus();
+            return false;
+        }
+
+        if (dataInicial > hoje || dataFinal > hoje) {
+            showError('As datas não podem ser futuras.');
+            (dataInicial > hoje ? dataInicialInput : dataFinalInput).focus();
+            return false;
+        }
+
+        const umAnoAtras = new Date();
+        umAnoAtras.setFullYear(hoje.getFullYear() - 1);
+        
+        if (dataInicial < umAnoAtras) {
+            showError('O período não pode ser superior a 1 ano.');
+            dataInicialInput.focus();
+            return false;
+        }
+
+        if (!formatoSaida) {
+            showError('Por favor, selecione um formato de saída.');
+            document.querySelector('.format-option').focus();
+            return false;
+        }
+        
+        clearErrors();
+        return true;
+    }
+
+    function showError(message) {
+        clearErrors();
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message animate-fade-in';
+        errorDiv.innerHTML = `
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Erro de Validação</h5>
+            <p class="mb-0">${message}</p>
+        `;
+        
+        const container = document.querySelector('.container');
+        const firstCard = container.querySelector('.card-modern');
+        container.insertBefore(errorDiv, firstCard);
+        
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 5000);
+    }
+
+    function clearErrors() {
+        document.querySelectorAll('.error-message').forEach(el => el.remove());
+    }
+    
+    function showLoading(isLoading) {
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const generateBtn = document.getElementById('generate-btn');
+        const btnText = generateBtn.querySelector('.btn-text');
+        const btnLoading = generateBtn.querySelector('.btn-loading');
+
+        if (isLoading) {
+            loadingSpinner.style.display = 'flex';
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline';
+            generateBtn.disabled = true;
+        } else {
+            loadingSpinner.style.display = 'none';
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+            generateBtn.disabled = false;
+        }
+    }
+
+    initializePage();
+    setupEventListeners();
+});
+</script>
+{% endblock %}
