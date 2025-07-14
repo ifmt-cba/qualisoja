@@ -123,6 +123,58 @@ class AnaliseHomeView(TemplateView):
             except Exception as e:
                 print(f"Erro ao buscar última análise: {e}")
             
+            # Últimas análises para a seção "Análises Recentes"
+            context['ultimas_analises'] = []
+            try:
+                from datetime import datetime, timedelta
+                
+                # Buscar análises dos últimos 7 dias
+                data_limite = date.today() - timedelta(days=7)
+                ultimas_analises = []
+                
+                modelos = [
+                    (AnaliseUmidade, 'Umidade'),
+                    (AnaliseProteina, 'Proteína'), 
+                    (AnaliseOleoDegomado, 'Óleo Degomado'),
+                    (AnaliseUrase, 'Urase'),
+                    (AnaliseCinza, 'Cinza'),
+                    (AnaliseFibra, 'Fibra'),
+                    (AnaliseFosforo, 'Fósforo'),
+                    (AnaliseTeorOleo, 'Teor de Óleo'),
+                ]
+                
+                for modelo, nome in modelos:
+                    try:
+                        analises = modelo.objects.filter(
+                            data__gte=data_limite
+                        ).order_by('-data', '-criado_em')[:3]  # Últimas 3 de cada tipo
+                        
+                        for analise in analises:
+                            ultimas_analises.append({
+                                'tipo': nome,
+                                'data': analise.data,
+                                'horario': getattr(analise, 'horario', None),
+                                'tipo_amostra': getattr(analise, 'tipo_amostra', 'N/D'),
+                                'resultado': getattr(analise, 'resultado', None),
+                                'status': 'Concluída' if getattr(analise, 'resultado', None) is not None else 'Pendente'
+                            })
+                    except Exception as e:
+                        print(f"Erro ao buscar análises recentes de {nome}: {e}")
+                        continue
+                
+                # Ordenar por data e horário (mais recente primeiro) e limitar a 5
+                ultimas_analises.sort(
+                    key=lambda x: (x['data'], x['horario'] or datetime.min.time()), 
+                    reverse=True
+                )
+                context['ultimas_analises'] = ultimas_analises[:5]
+                
+                print(f"DEBUG: Encontradas {len(context['ultimas_analises'])} análises recentes")
+                
+            except Exception as e:
+                print(f"Erro ao buscar análises recentes: {e}")
+                context['ultimas_analises'] = []
+            
         except Exception as e:
             print(f"Erro ao preparar contexto do dashboard: {e}")
             # Valores padrão em caso de erro

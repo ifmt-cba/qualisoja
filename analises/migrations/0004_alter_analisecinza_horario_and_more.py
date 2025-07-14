@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analises', '0003_add_new_analysis_models'),
+        ('analises', '0002_analisecinza_analisefibra_analisefosforo_and_more'),
     ]
 
     operations = [
