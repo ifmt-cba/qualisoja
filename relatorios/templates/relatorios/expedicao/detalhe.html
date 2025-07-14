@@ -442,7 +442,7 @@
                                     <td>{{ dados_param.tipo_amostra|default:"N/D" }}</td>
                                     <td>
                                         {% if dados_param.resultado %}
-                                            <span class="valor-conforme">{{ dados_param.resultado|floatformat:2 }}%</span>
+                                            <span class="valor-conforme">{{ dados_param.resultado|floatformat:2 }}{{ dados_param.unidade|default:"" }}</span>
                                         {% else %}
                                             <span style="color: var(--text-muted);">N/D</span>
                                         {% endif %}
@@ -469,7 +469,7 @@
                                     <td>{{ analise.tipo_amostra|default:"N/D" }}</td>
                                     <td>
                                         {% if analise.resultado %}
-                                            <span class="valor-conforme">{{ analise.resultado|floatformat:2 }}%</span>
+                                            <span class="valor-conforme">{{ analise.resultado|floatformat:2 }}{{ analise.unidade|default:"" }}</span>
                                         {% else %}
                                             <span style="color: var(--text-muted);">N/D</span>
                                         {% endif %}

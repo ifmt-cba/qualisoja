@@ -2319,7 +2319,8 @@ class RelatorioExpedicaoDetailView(TemplateView):
                         'resultado': analise.resultado if hasattr(analise, 'resultado') else None,
                         'tipo_amostra': analise.tipo_amostra if hasattr(analise, 'tipo_amostra') else 'N/D',
                         'horario': analise.horario if hasattr(analise, 'horario') else None,
-                        'modelo': nome_modelo
+                        'modelo': nome_modelo,
+                        'unidade': self._get_unidade_parametro(nome_modelo)
                     }
             except Exception as e:
                 continue
@@ -2358,7 +2359,8 @@ class RelatorioExpedicaoDetailView(TemplateView):
                     'resultado': analise.resultado if hasattr(analise, 'resultado') else None,
                     'tipo_amostra': analise.tipo_amostra if hasattr(analise, 'tipo_amostra') else 'N/D',
                     'horario': analise.horario if hasattr(analise, 'horario') else None,
-                    'modelo': modelo
+                    'modelo': modelo,
+                    'unidade': self._get_unidade_parametro(modelo)
                 }
             except Exception as e:
                 pass
@@ -2412,11 +2414,12 @@ class RelatorioExpedicaoDetailView(TemplateView):
                         'tipo': 'periodo',
                         'parametro': parametro_nome,
                         'data': analise.data,
-                        'resultado': f"{resultado}%" if resultado is not None else 'N/D',
+                        'resultado': resultado if resultado is not None else None,
                         'tipo_amostra': getattr(analise, 'tipo_amostra', 'N/D'),
                         'horario': getattr(analise, 'horario', None),
                         'modelo': nome_modelo,
-                        'status': status
+                        'status': status,
+                        'unidade': self._get_unidade_parametro(nome_modelo)
                     }
             except Exception as e:
                 print(f"DEBUG: Erro ao buscar {nome_modelo}: {e}")
@@ -2482,6 +2485,21 @@ class RelatorioExpedicaoDetailView(TemplateView):
             'AnaliseSilica': 'Sílica',
         }
         return mapeamento.get(modelo, modelo)
+    
+    def _get_unidade_parametro(self, modelo):
+        """Retorna a unidade de medida para cada tipo de análise."""
+        unidades = {
+            'AnaliseUmidade': '%',
+            'AnaliseProteina': '%',
+            'AnaliseOleoDegomado': 'ml',
+            'AnaliseTeorOleo': '%',
+            'AnaliseFibra': '%',
+            'AnaliseCinza': '%',
+            'AnaliseFosforo': 'ppm',
+            'AnaliseUrase': 'pH',
+            'AnaliseSilica': '%',
+        }
+        return unidades.get(modelo, '')
 
 class RelatorioExpedicaoEnviarView(FormView):
     """View para enviar relatório por e-mail."""
