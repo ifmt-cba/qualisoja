@@ -62,6 +62,14 @@ Nova Análise de Sílica - QualiSoja
                             {% endif %}
                         </div>
 
+                        <!-- Mensagem para casos especiais (FP/SA) -->
+                        <div id="special-case-message" class="alert alert-info d-none">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <span id="special-case-text"></span>
+                        </div>
+
+                        <!-- Campos da Análise -->
+                        <div id="analise-fields-wrapper">
                         <div class="mb-3">
                             <label for="{{ form.analise_cinza.id_for_label }}" class="form-label">
                                 <i class="bi bi-link-45deg me-1"></i>{{ form.analise_cinza.label }} *
@@ -93,6 +101,7 @@ Nova Análise de Sílica - QualiSoja
                             <strong>Resultado Final:</strong> Será calculado automaticamente como <strong>Resultado
                                 Cinza - Resultado Sílica</strong>
                         </div>
+                        </div> <!-- Fim do analise-fields-wrapper -->
 
                         {% if form.non_field_errors %}
                         <div class="alert alert-danger">
@@ -115,4 +124,60 @@ Nova Análise de Sílica - QualiSoja
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Função para controlar campos em casos especiais (FP/SA)
+    function toggleAnaliseFields() {
+        const tipoAmostra = document.querySelector('#id_tipo_amostra').value;
+        const specialMessage = document.getElementById('special-case-message');
+        const specialText = document.getElementById('special-case-text');
+        const fieldsWrapper = document.getElementById('analise-fields-wrapper');
+        
+        if (tipoAmostra === 'FP') {
+            specialMessage.classList.remove('d-none');
+            specialText.textContent = 'FÁBRICA PARADA - Não há necessidade de inserir dados de análise.';
+            fieldsWrapper.style.display = 'none';
+            
+            // Desabilitar campos obrigatórios
+            const inputs = fieldsWrapper.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.required = false;
+            });
+            
+        } else if (tipoAmostra === 'SA') {
+            specialMessage.classList.remove('d-none');
+            specialText.textContent = 'SEM AMOSTRA - Não há necessidade de inserir dados de análise.';
+            fieldsWrapper.style.display = 'none';
+            
+            // Desabilitar campos obrigatórios
+            const inputs = fieldsWrapper.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.required = false;
+            });
+            
+        } else {
+            specialMessage.classList.add('d-none');
+            fieldsWrapper.style.display = 'block';
+            
+            // Reabilitar campos
+            const inputs = fieldsWrapper.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = false;
+                if (input.id === 'id_analise_cinza' || input.id === 'id_resultado_silica') {
+                    input.required = true;
+                }
+            });
+        }
+    }
+    
+    // Vincular função ao campo tipo_amostra
+    document.querySelector('#id_tipo_amostra').addEventListener('change', toggleAnaliseFields);
+    
+    // Executar na inicialização
+    toggleAnaliseFields();
+});
+</script>
 {% endblock %}

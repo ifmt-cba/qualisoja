@@ -47,22 +47,31 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-floating mb-3">
-                        {{ form.amostra_1|add_class:"form-control text-success border-success" }}
-                        <label for="{{ form.amostra_1.id_for_label }}" class="text-success">{{ form.amostra_1.label }}</label>
-                        {% if form.amostra_1.errors %}
-                            <div class="invalid-feedback d-block text-success">{{ form.amostra_1.errors }}</div>
-                        {% endif %}
-                    </div>
+                
+                <!-- Mensagem para casos especiais -->
+                <div id="special-case-message" class="text-center my-4" style="display: none">
+                    <h3 class="text-danger fw-bold"></h3>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-floating mb-3">
-                        {{ form.amostra_2|add_class:"form-control text-success border-success" }}
-                        <label for="{{ form.amostra_2.id_for_label }}" class="text-success">{{ form.amostra_2.label }}</label>
-                        {% if form.amostra_2.errors %}
-                            <div class="invalid-feedback d-block text-success">{{ form.amostra_2.errors }}</div>
-                        {% endif %}
+
+                <!-- Wrapper para os campos de análise -->
+                <div id="analise-fields-wrapper" class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form.amostra_1|add_class:"form-control text-success border-success" }}
+                            <label for="{{ form.amostra_1.id_for_label }}" class="text-success">{{ form.amostra_1.label }}</label>
+                            {% if form.amostra_1.errors %}
+                                <div class="invalid-feedback d-block text-success">{{ form.amostra_1.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form.amostra_2|add_class:"form-control text-success border-success" }}
+                            <label for="{{ form.amostra_2.id_for_label }}" class="text-success">{{ form.amostra_2.label }}</label>
+                            {% if form.amostra_2.errors %}
+                                <div class="invalid-feedback d-block text-success">{{ form.amostra_2.errors }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -87,19 +96,54 @@
 </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tipoAmostraSelect = document.getElementById("id_tipo_amostra");
+        const analiseFieldsWrapper = document.getElementById("analise-fields-wrapper");
+        const messageContainer = document.getElementById("special-case-message");
+        const messageText = messageContainer.querySelector("h3");
+
+        function toggleAnaliseFields() {
+            const selectedValue = tipoAmostraSelect.value;
+            const camposAnalise = analiseFieldsWrapper.querySelectorAll("input");
+
+            // Reseta o estado
+            messageContainer.style.display = "none";
+            analiseFieldsWrapper.style.display = "";
+            camposAnalise.forEach((input) => (input.disabled = false));
+
+            if (selectedValue === "FP") {
+                messageText.textContent = "FÁBRICA PARADA";
+                messageContainer.style.display = "block";
+                analiseFieldsWrapper.style.display = "none";
+                camposAnalise.forEach((input) => (input.disabled = true));
+            } else if (selectedValue === "SA") {
+                messageText.textContent = "SEM AMOSTRA";
+                messageContainer.style.display = "block";
+                analiseFieldsWrapper.style.display = "none";
+                camposAnalise.forEach((input) => (input.disabled = true));
+            }
+        }
+
+        // Executa a função quando a página carrega
+        toggleAnaliseFields();
+
+        // Adiciona o listener para o evento de mudança
+        tipoAmostraSelect.addEventListener("change", toggleAnaliseFields);
+    });
+
     // Função para calcular e exibir o resultado em tempo real
     function calcularResultado() {
-        const PH1 = parseFloat(document.getElementById('{{ form.PH1.id_for_label }}').value) || 0;
-        const PH2 = parseFloat(document.getElementById('{{ form.PH2.id_for_label }}').value) || 0;
-        const resultado = PH1 - PH2;
+        const amostra1 = parseFloat(document.getElementById('{{ form.amostra_1.id_for_label }}').value) || 0;
+        const amostra2 = parseFloat(document.getElementById('{{ form.amostra_2.id_for_label }}').value) || 0;
+        const resultado = amostra1 - amostra2;
         document.getElementById('resultado-preview').textContent = resultado.toFixed(2);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const PH11Input = document.getElementById('{{ form.PH1.id_for_label }}');
-        const PH2Input = document.getElementById('{{ form.PH2.id_for_label }}');
-        PH11Input.addEventListener('input', calcularResultado);
-        PH2Input.addEventListener('input', calcularResultado);
+        const amostra1Input = document.getElementById('{{ form.amostra_1.id_for_label }}');
+        const amostra2Input = document.getElementById('{{ form.amostra_2.id_for_label }}');
+        amostra1Input.addEventListener('input', calcularResultado);
+        amostra2Input.addEventListener('input', calcularResultado);
         calcularResultado();
     });
 </script>
