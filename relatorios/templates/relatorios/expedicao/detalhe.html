@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+{% load relatorios_tags %}
+
+{% block title %}{{ relatorio.codigo }} - Relatório de Expedição - QualiSoja{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-green: #065f46;
+        --light-green: #d1fae5;
+        --accent-green: #059669;
+        --text-dark: #111827;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --success-green: #10b981;
+        --warning-yellow: #f59e0b;
+        --error-red: #ef4444;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .relatorio-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2rem;
+        align-items: start;
+        margin-bottom: 2rem;
+    }
+
+    .relatorio-info h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .relatorio-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .meta-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .meta-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-top: 0.25rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-gerado {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-enviado {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .conformidade-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .conformidade-conforme {
+        background: var(--light-green);
+        color: var(--primary-green);
+    }
+
+    .conformidade-nao-conforme {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background: var(--accent-green);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-green);
+        color: white;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--accent-green);
+        border: 1px solid var(--accent-green);
+    }
+
+    .btn-outline:hover {
+        background: var(--accent-green);
+        color: white;
+    }
+
+    .btn-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table th {
+        background: #f9fafb;
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.875rem;
+    }
+
+    .table td {
+        font-size: 0.875rem;
+    }
+
+    .valor-conforme {
+        color: var(--success-green);
+        font-weight: 600;
+    }
+
+    .valor-nao-conforme {
+        color: var(--error-red);
+        font-weight: 600;
+    }
+
+    .observacoes {
+        background: #f9fafb;
+        border-left: 4px solid var(--accent-green);
+        padding: 1rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+        margin-top: 1rem;
+    }
+
+    .observacoes h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .observacoes-content {
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: var(--text-muted);
+        white-space: pre-line;
+    }
+
+    .certificacao {
+        background: linear-gradient(135deg, var(--light-green) 0%, #ecfdf5 100%);
+        border: 1px solid var(--accent-green);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        margin: 1.5rem 0;
+    }
+
+    .certificacao h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--primary-green);
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .certificacao p {
+        margin: 0;
+        color: var(--primary-green);
+        font-size: 0.875rem;
+    }
+
+    .historico-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .historico-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--accent-green);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .historico-content {
+        flex: 1;
+    }
+
+    .historico-titulo {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .historico-detalhes {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title i {
+        margin-right: 0.5rem;
+        color: var(--accent-green);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; font-size: 2rem; font-weight: 700;">📋 {{ relatorio.codigo }}</h1>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Relatório de Expedição - {{ relatorio.get_cliente_nome }}</p>
+            </div>
+            <div class="btn-actions">
+                <a href="{% url 'relatorios:expedicao_lista' %}" class="btn btn-outline" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
+                    Voltar
+                </a>
+                {% if relatorio.status != 'RASCUNHO' %}
+                <a href="{% url 'relatorios:expedicao_enviar' relatorio.pk %}" class="btn btn-primary" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i>
+                    Enviar
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Informações do Relatório -->
+    <div class="card">
+        <div class="relatorio-header">
+            <div class="relatorio-info">
+                <h2>{{ relatorio.codigo }}</h2>
+                <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                    <span class="status-badge status-{{ relatorio.status|lower }}">
+                        {% if relatorio.status == 'GERADO' %}📊 Gerado
+                        {% elif relatorio.status == 'ENVIADO' %}📧 Enviado
+                        {% elif relatorio.status == 'VISUALIZADO' %}👁️ Visualizado
+                        {% endif %}
+                    </span>
+                    
+                    {% if relatorio.certificacao_conformidade %}
+                        <span class="conformidade-badge conformidade-conforme">
+                            <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>
+                            Conforme às Especificações
+                        </span>
+                    {% else %}
+                        <span class="conformidade-badge conformidade-nao-conforme">
+                            <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>
+                            Requer Atenção
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <div class="relatorio-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Cliente</span>
+                        <span class="meta-value">{{ relatorio.get_cliente_nome }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Período</span>
+                        <span class="meta-value">{{ relatorio.data_inicial|date:"d/m/Y" }} - {{ relatorio.data_final|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Responsável</span>
+                        <span class="meta-value">{{ relatorio.usuario_responsavel.get_full_name|default:relatorio.usuario_responsavel.username }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Data de Geração</span>
+                        <span class="meta-value">{{ relatorio.data_geracao|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Contrato</span>
+                        <span class="meta-value">{{ relatorio.get_contrato_info.nome }}</span>
+                    </div>
+                    {% if relatorio.get_contrato_info.numero != 'N/A' %}
+                    <div class="meta-item">
+                        <span class="meta-label">Número do Contrato</span>
+                        <span class="meta-value">{{ relatorio.get_contrato_info.numero }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="btn-actions">
+                <button class="btn btn-outline" onclick="window.print()">
+                    <i class="fas fa-print" style="margin-right: 0.5rem;"></i>
+                    Imprimir
+                </button>
+                <a href="{% url 'relatorios:expedicao_download' relatorio.pk %}" class="btn btn-primary">
+                    <i class="fas fa-download" style="margin-right: 0.5rem;"></i>
+                    Download PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificação de Conformidade -->
+    {% if relatorio.certificacao_conformidade %}
+    <div class="certificacao">
+        <h3>✅ Certificação de Conformidade</h3>
+        <p>Todos os parâmetros de qualidade estão dentro das especificações contratuais.</p>
+    </div>
+    {% endif %}
+
+    <!-- Resultados das Análises -->
+    <div class="card">
+        <h3 class="section-title">
+            <i class="fas fa-flask"></i>
+            Resultados das Análises
+        </h3>
+        
+        <div style="overflow-x: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Lote</th>
+                        <th>Data Produção</th>
+                        {% for parametro in relatorio.get_parametros_completos %}
+                            <th>
+                                {{ parametro|title }}
+                                {% if parametro in relatorio.parametros_obrigatorios %}
+                                    <span style="color: var(--accent-green); font-size: 0.75rem;">★</span>
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lote in relatorio.lotes.all %}
+                    <tr>
+                        <td><strong>{{ lote.codigo }}</strong></td>
+                        <td>{{ lote.data_producao|date:"d/m/Y" }}</td>
+                        {% for parametro in relatorio.get_parametros_completos %}
+                            <td>
+                                {% get_analise_valor dados_analises lote.codigo parametro as valor %}
+                                {% if valor and valor != 'N/D' %}
+                                    <span class="valor-conforme">{{ valor }}</span>
+                                {% else %}
+                                    <span style="color: var(--text-muted);">N/D</span>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                        <td>
+                            {% if lote.status == 'APROVADO' %}
+                                <span style="color: var(--success-green);">✅ Aprovado</span>
+                            {% elif lote.status == 'REPROVADO' %}
+                                <span style="color: var(--error-red);">❌ Reprovado</span>
+                            {% else %}
+                                <span style="color: var(--warning-yellow);">⏳ {{ lote.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 1rem; padding: 0.75rem; background: #f0f9ff; border-radius: 0.5rem; font-size: 0.875rem;">
+                <p style="margin: 0; color: var(--text-muted);">
+                    <i class="fas fa-star" style="color: var(--accent-green); margin-right: 0.5rem;"></i>
+                    Parâmetros marcados com ★ são obrigatórios na expedição
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Observações -->
+    {% if relatorio.observacoes_automaticas or relatorio.observacoes_manuais %}
+    <div class="card">
+        <h3 class="section-title">
+            <i class="fas fa-clipboard-list"></i>
+            Observações
+        </h3>
+        
+        {% if relatorio.observacoes_automaticas %}
+        <div class="observacoes">
+            <h4>🤖 Observações Automáticas</h4>
+            <div class="observacoes-content">{{ relatorio.observacoes_automaticas }}</div>
+        </div>
+        {% endif %}
+        
+        {% if relatorio.observacoes_manuais %}
+        <div class="observacoes">
+            <h4>📝 Observações Manuais</h4>
+            <div class="observacoes-content">{{ relatorio.observacoes_manuais }}</div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Histórico de Envios -->
+    {% if historico_envios %}
+    <div class="card">
+        <h3 class="section-title">
+            <i class="fas fa-history"></i>
+            Histórico de Envios
+        </h3>
+        
+        {% for envio in historico_envios %}
+        <div class="historico-item">
+            <div class="historico-icon">
+                {% if envio.sucesso_envio %}
+                    <i class="fas fa-check"></i>
+                {% else %}
+                    <i class="fas fa-times"></i>
+                {% endif %}
+            </div>
+            <div class="historico-content">
+                <div class="historico-titulo">
+                    Enviado para {{ envio.destinatario }}
+                    {% if envio.sucesso_envio %}
+                        <span style="color: var(--success-green);">(Sucesso)</span>
+                    {% else %}
+                        <span style="color: var(--error-red);">(Falha)</span>
+                    {% endif %}
+                </div>
+                <div class="historico-detalhes">
+                    {{ envio.data_envio|date:"d/m/Y H:i" }} - 
+                    Por {{ envio.usuario_responsavel.get_full_name|default:envio.usuario_responsavel.username }} - 
+                    Versão {{ envio.versao_relatorio }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+<script>
+// Filtros de template personalizados para acessar dicionários
+document.addEventListener('DOMContentLoaded', function() {
+    // Implementar lógica adicional se necessário
+});
+</script>
+{% endblock %}

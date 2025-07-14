@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Enviar {{ relatorio.codigo }} - QualiSoja{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-green: #065f46;
+        --light-green: #d1fae5;
+        --accent-green: #059669;
+        --text-dark: #111827;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent-green);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background: var(--accent-green);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-green);
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--accent-green);
+        border: 1px solid var(--accent-green);
+    }
+
+    .btn-outline:hover {
+        background: var(--accent-green);
+        color: white;
+    }
+
+    .btn-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .help-text {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    .errorlist {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        list-style: none;
+        padding: 0;
+    }
+
+    .relatorio-preview {
+        background: #f9fafb;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .preview-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .preview-label {
+        color: var(--text-muted);
+    }
+
+    .preview-value {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title i {
+        margin-right: 0.5rem;
+        color: var(--accent-green);
+    }
+
+    .email-template {
+        background: #f9fafb;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-family: monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; font-size: 2rem; font-weight: 700;">📧 Enviar Relatório</h1>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">{{ relatorio.codigo }} - {{ relatorio.cliente.nome }}</p>
+            </div>
+            <a href="{% url 'relatorios:expedicao_detalhe' relatorio.pk %}" class="btn btn-outline" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
+                Voltar
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Preview do Relatório -->
+    <div class="card">
+        <h3 class="section-title">
+            <i class="fas fa-eye"></i>
+            Resumo do Relatório
+        </h3>
+        
+        <div class="relatorio-preview">
+            <div class="preview-item">
+                <span class="preview-label">Código:</span>
+                <span class="preview-value">{{ relatorio.codigo }}</span>
+            </div>
+            <div class="preview-item">
+                <span class="preview-label">Cliente:</span>
+                <span class="preview-value">{{ relatorio.cliente.nome }}</span>
+            </div>
+            <div class="preview-item">
+                <span class="preview-label">Período:</span>
+                <span class="preview-value">{{ relatorio.data_inicial|date:"d/m/Y" }} - {{ relatorio.data_final|date:"d/m/Y" }}</span>
+            </div>
+            <div class="preview-item">
+                <span class="preview-label">Lotes:</span>
+                <span class="preview-value">
+                    {% for lote in relatorio.lotes.all %}
+                        {{ lote.codigo }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+            <div class="preview-item">
+                <span class="preview-label">Parâmetros:</span>
+                <span class="preview-value">
+                    {% for parametro in relatorio.parametros_incluidos %}
+                        {{ parametro|title }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+            <div class="preview-item">
+                <span class="preview-label">Conformidade:</span>
+                <span class="preview-value">
+                    {% if relatorio.certificacao_conformidade %}
+                        <span style="color: var(--success-green);">✅ Conforme</span>
+                    {% else %}
+                        <span style="color: var(--error-red);">⚠️ Requer Atenção</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulário de Envio -->
+    <div class="card">
+        <h3 class="section-title">
+            <i class="fas fa-envelope"></i>
+            Dados do Envio
+        </h3>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.destinatarios.id_for_label }}">Destinatários *</label>
+                {{ form.destinatarios|add_class:"form-control" }}
+                <div class="help-text">{{ form.destinatarios.help_text }}</div>
+                {% if form.destinatarios.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.destinatarios.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.assunto.id_for_label }}">Assunto *</label>
+                {{ form.assunto|add_class:"form-control" }}
+                {% if form.assunto.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.assunto.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.mensagem.id_for_label }}">Mensagem</label>
+                {{ form.mensagem|add_class:"form-control" }}
+                <div class="help-text">{{ form.mensagem.help_text }}</div>
+                {% if form.mensagem.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.mensagem.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <!-- Preview do E-mail -->
+            <div style="margin-top: 1.5rem;">
+                <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">📋 Preview do E-mail</h4>
+                <div class="email-template">
+                    <strong>Para:</strong> [Destinatários selecionados]<br>
+                    <strong>Assunto:</strong> <span id="preview-assunto">[Assunto do e-mail]</span><br>
+                    <strong>Anexo:</strong> {{ relatorio.codigo }}.pdf<br><br>
+                    
+                    <div id="preview-mensagem">[Mensagem personalizada]</div><br>
+                    
+                    ---<br>
+                    Este relatório de expedição foi gerado automaticamente pelo sistema QualiSoja.<br>
+                    Data de geração: {{ relatorio.data_geracao|date:"d/m/Y H:i" }}<br>
+                    Responsável: {{ relatorio.usuario_responsavel.get_full_name|default:relatorio.usuario_responsavel.username }}
+                </div>
+            </div>
+
+            <div class="btn-actions">
+                <a href="{% url 'relatorios:expedicao_detalhe' relatorio.pk %}" class="btn btn-outline">
+                    <i class="fas fa-times" style="margin-right: 0.5rem;"></i>
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i>
+                    Enviar Relatório
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+{{ relatorio|json_script:"relatorio-data" }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Obter dados do relatório
+    const relatorioData = JSON.parse(document.getElementById('relatorio-data').textContent);
+    
+    const assuntoInput = document.getElementById('id_assunto');
+    const mensagemInput = document.getElementById('id_mensagem');
+    const previewAssunto = document.getElementById('preview-assunto');
+    const previewMensagem = document.getElementById('preview-mensagem');
+
+    // Pré-preencher campos
+    if (!assuntoInput.value) {
+        assuntoInput.value = `Relatório de Expedição - ${relatorioData.codigo} - ${relatorioData.cliente.nome}`;
+    }
+
+    if (!mensagemInput.value) {
+        const dataInicial = new Date(relatorioData.data_inicial).toLocaleDateString('pt-BR');
+        const dataFinal = new Date(relatorioData.data_final).toLocaleDateString('pt-BR');
+        const statusTexto = relatorioData.certificacao_conformidade 
+            ? '✅ Todos os parâmetros estão dentro das especificações contratuais.'
+            : '⚠️ Alguns parâmetros requerem atenção. Favor verificar as observações no relatório.';
+        const usuarioNome = relatorioData.usuario_responsavel.first_name && relatorioData.usuario_responsavel.last_name
+            ? `${relatorioData.usuario_responsavel.first_name} ${relatorioData.usuario_responsavel.last_name}`
+            : relatorioData.usuario_responsavel.username;
+            
+        mensagemInput.value = `Prezados,
+
+Segue em anexo o relatório de expedição ${relatorioData.codigo} referente aos lotes do período de ${dataInicial} a ${dataFinal}.
+
+${statusTexto}
+
+Atenciosamente,
+${usuarioNome}
+QualiSoja`;
+    }
+
+    // Atualizar preview em tempo real
+    function updatePreview() {
+        previewAssunto.textContent = assuntoInput.value || '[Assunto do e-mail]';
+        previewMensagem.innerHTML = (mensagemInput.value || '[Mensagem personalizada]').replace(/\n/g, '<br>');
+    }
+
+    assuntoInput.addEventListener('input', updatePreview);
+    mensagemInput.addEventListener('input', updatePreview);
+
+    // Inicializar preview
+    updatePreview();
+
+    // Adicionar sugestões de e-mail do cliente
+    const destinatariosInput = document.getElementById('id_destinatarios');
+    if (relatorioData.cliente.email && !destinatariosInput.value) {
+        destinatariosInput.value = relatorioData.cliente.email;
+    }
+});
+</script>
+{% endblock %}

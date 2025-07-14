@@ -1,6 +1,6 @@
 from urllib.parse import urlencode
 from django.views.generic import TemplateView, View, FormView
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.shortcuts import redirect, render
 from django.db.models import Avg, Max, Min, Count
@@ -15,12 +15,14 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 
 # Importar models e forms do app analises
-from analises.models import (
-    AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado,
-    AnaliseUrase, AnaliseCinza, AnaliseTeorOleo, 
-    AnaliseFibra, AnaliseFosforo, AnaliseSilica
-)
 from .forms import RelatorioFiltroForm
+from logs.utils import registrar_log
+from .models import Cliente, EspecificacaoContrato, Lote, RelatorioExpedicao, HistoricoEnvioRelatorio
+from .forms import RelatorioExpedicaoForm, FiltroRelatorioExpedicaoForm, EnvioRelatorioForm
+from analises.models import (
+    AnaliseUmidade, AnaliseProteina, AnaliseOleoDegomado, AnaliseTeorOleo,
+    AnaliseFibra, AnaliseCinza, AnaliseFosforo, AnaliseUrase, AnaliseSilica
+)
 
 
 class RelatorioGerarClassicoView(FormView):
@@ -81,7 +83,7 @@ class RelatorioGerarClassicoView(FormView):
 
 class RelatorioGerarView(FormView):
     """View moderna para selecionar parâmetros e gerar relatórios"""
-    template_name = 'relatorios/gerar_relatorio.html'
+    template_name = 'relatorios/gerar_relatorio_moderno.html'
     form_class = RelatorioFiltroForm
 
     def get_initial(self):
@@ -115,23 +117,17 @@ class RelatorioGerarView(FormView):
             'fim': data_final.strftime('%Y-%m-%d'),
             'formato': formato_saida,
         }
-        
         if tipo_amostra_umidade:
             query_params['umidade_tipo'] = tipo_amostra_umidade
-        
         if tipo_amostra_proteina:
             query_params['proteina_tipo'] = tipo_amostra_proteina
         
         # Construir a URL com os parâmetros
         url = reverse('relatorios:visualizar')
         url = f"{url}?{urlencode(query_params)}"
-        
-        # Logs para depuração
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f"Redirecionando para URL: {url}")
-        
-        # Redirecionar para a visualização do relatório
+        # Log de exportação de relatório
+        if self.request.user.is_authenticated:
+            registrar_log(self.request.user, f"Exportou relatório de {tipo_relatorio} ({formato_saida})")
         return redirect(url)
 
 
@@ -1726,3 +1722,560 @@ class RelatorioGerarModernoView(FormView):
         
         # Redirecionar para a visualização do relatório
         return redirect(url)
+
+
+class RelatorioExpedicaoListView(TemplateView):
+    """View para listar relatórios de expedição."""
+    template_name = 'relatorios/expedicao/lista.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Aplicar filtros
+        relatorios = RelatorioExpedicao.objects.all()
+        form = FiltroRelatorioExpedicaoForm(self.request.GET)
+        
+        if form.is_valid():
+            if form.cleaned_data.get('cliente'):
+                relatorios = relatorios.filter(cliente=form.cleaned_data['cliente'])
+            if form.cleaned_data.get('status'):
+                relatorios = relatorios.filter(status=form.cleaned_data['status'])
+            if form.cleaned_data.get('data_inicial'):
+                relatorios = relatorios.filter(data_geracao__date__gte=form.cleaned_data['data_inicial'])
+            if form.cleaned_data.get('data_final'):
+                relatorios = relatorios.filter(data_geracao__date__lte=form.cleaned_data['data_final'])
+        
+        context.update({
+            'relatorios': relatorios.order_by('-data_geracao'),
+            'form_filtro': form,
+            'total_relatorios': relatorios.count(),
+        })
+        
+        return context
+
+class RelatorioExpedicaoCreateView(FormView):
+    """View para criar novos relatórios de expedição."""
+    template_name = 'relatorios/expedicao/criar.html'
+    form_class = RelatorioExpedicaoForm
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Obter análises disponíveis agrupadas por data
+        analises_disponiveis = self._obter_analises_disponiveis()
+        context['lotes_com_analises'] = analises_disponiveis  # Mantendo o nome para compatibilidade com template
+        context['analises_disponiveis'] = analises_disponiveis
+        
+        return context
+    
+    def _obter_analises_disponiveis(self):
+        """Obtém análises disponíveis agrupadas por data e tipo."""
+        from analises.models import (
+            AnaliseUmidade, AnaliseProteina, AnaliseTeorOleo, AnaliseFibra, 
+            AnaliseCinza, AnaliseFosforo, AnaliseOleoDegomado, AnaliseUrase, AnaliseSilica
+        )
+        from datetime import timedelta, date
+        
+        # Buscar análises dos últimos 30 dias
+        data_limite = date.today() - timedelta(days=30)
+        
+        # Definir os tipos de análises e seus modelos
+        tipos_analise = {
+            'umidade': (AnaliseUmidade, 'resultado'),
+            'proteina': (AnaliseProteina, 'resultado'),
+            'teor_oleo': (AnaliseTeorOleo, 'teor_oleo'),
+            'fibra': (AnaliseFibra, 'resultado'),
+            'cinza': (AnaliseCinza, 'resultado'),
+            'fosforo': (AnaliseFosforo, 'resultado'),
+            'acidez': (AnaliseOleoDegomado, 'acidez'),
+            'urase': (AnaliseUrase, 'resultado'),
+            'silica': (AnaliseSilica, 'resultado'),
+        }
+        
+        analises_agrupadas = {}
+        
+        # Buscar todas as análises e agrupar por data
+        for tipo_nome, (modelo, campo_resultado) in tipos_analise.items():
+            try:
+                analises = modelo.objects.filter(
+                    data__gte=data_limite
+                ).order_by('-data', '-horario' if hasattr(modelo._meta.get_field('horario'), 'name') else '-criado_em')
+                
+                for analise in analises:
+                    data_str = analise.data.strftime('%Y-%m-%d')
+                    
+                    if data_str not in analises_agrupadas:
+                        analises_agrupadas[data_str] = {
+                            'data': analise.data,
+                            'analises': {},
+                            'tipo_predominante': None,
+                            'total_analises': 0
+                        }
+                    
+                    # Obter resultado
+                    resultado = getattr(analise, campo_resultado, None)
+                    if resultado is not None:
+                        analises_agrupadas[data_str]['analises'][tipo_nome] = {
+                            'id': analise.id,
+                            'resultado': f"{resultado:.2f}%",
+                            'valor_numerico': float(resultado),
+                            'tipo_amostra': getattr(analise, 'tipo_amostra', ''),
+                            'horario': getattr(analise, 'horario', None),
+                            'modelo': modelo.__name__
+                        }
+                        analises_agrupadas[data_str]['total_analises'] += 1
+            except Exception as e:
+                # Log do erro mas continua processando outros tipos
+                print(f"Erro ao processar {tipo_nome}: {e}")
+        
+        # Determinar tipo predominante para cada data
+        for data_str, dados in analises_agrupadas.items():
+            tipos_oleo = {'acidez', 'silica', 'fosforo', 'urase'}
+            tipos_farelo = {'umidade', 'proteina', 'teor_oleo', 'fibra', 'cinza'}
+            
+            analises_dia = set(dados['analises'].keys())
+            
+            tem_oleo = bool(tipos_oleo.intersection(analises_dia))
+            tem_farelo = bool(tipos_farelo.intersection(analises_dia))
+            
+            if tem_oleo and tem_farelo:
+                dados['tipo_predominante'] = 'ambos'
+            elif tem_oleo:
+                dados['tipo_predominante'] = 'oleo'
+            elif tem_farelo:
+                dados['tipo_predominante'] = 'farelo'
+            else:
+                dados['tipo_predominante'] = 'outros'
+        
+        # Converter para lista ordenada por data (mais recente primeiro)
+        dados_ordenados = []
+        for data_str in sorted(analises_agrupadas.keys(), reverse=True):
+            dados = analises_agrupadas[data_str]
+            
+            # Criar um identificador único para este grupo de análises
+            identificador = f"ANALISES-{data_str}"
+            
+            dados_ordenados.append({
+                'identificador': identificador,
+                'data': dados['data'],
+                'tipo_predominante': dados['tipo_predominante'],
+                'total_analises': dados['total_analises'],
+                'analises': dados['analises'],
+                # Campos para compatibilidade com template (podem ser removidos depois)
+                'codigo': identificador,
+                'data_producao': dados['data'],
+            })
+        
+        return dados_ordenados
+    
+    def form_valid(self, form):
+        # Gerar código único para o relatório
+        import uuid
+        codigo = f"REL-{uuid.uuid4().hex[:8].upper()}"
+        
+        # Determinar cliente e contrato baseado na escolha do usuário
+        cliente = None
+        cliente_nome_manual = None
+        contrato = None
+        contrato_nome_manual = None
+        contrato_numero_manual = None
+        
+        if form.cleaned_data.get('usar_cliente_cadastrado') and form.cleaned_data.get('cliente'):
+            cliente = form.cleaned_data['cliente']
+        else:
+            cliente_nome_manual = form.cleaned_data.get('cliente_nome_manual')
+        
+        if form.cleaned_data.get('usar_contrato_cadastrado') and form.cleaned_data.get('contrato'):
+            contrato = form.cleaned_data['contrato']
+        else:
+            contrato_nome_manual = form.cleaned_data.get('contrato_nome_manual')
+            contrato_numero_manual = form.cleaned_data.get('contrato_numero_manual')
+        
+        # Determinar datas
+        data_inicial = form.cleaned_data.get('data_inicial')
+        data_final = form.cleaned_data.get('data_final')
+        
+        # Se não foram fornecidas datas específicas, calcular baseado no período predefinido
+        if not data_inicial or not data_final:
+            from datetime import date, timedelta
+            periodo = form.cleaned_data.get('periodo_predefinido', '7')
+            if periodo != 'custom':
+                data_final = date.today()
+                data_inicial = data_final - timedelta(days=int(periodo))
+        
+        # Criar o relatório
+        relatorio = RelatorioExpedicao.objects.create(
+            codigo=codigo,
+            cliente=cliente,
+            cliente_nome_manual=cliente_nome_manual,
+            contrato=contrato,
+            contrato_nome_manual=contrato_nome_manual,
+            contrato_numero_manual=contrato_numero_manual,
+            tipo_analise=form.cleaned_data.get('tipo_analise', 'auto'),
+            data_inicial=data_inicial,
+            data_final=data_final,
+            parametros_incluidos=form.cleaned_data['parametros_incluidos'],
+            parametros_obrigatorios=form.cleaned_data.get('parametros_obrigatorios', []),
+            usuario_responsavel=self.request.user,
+            observacoes_manuais=form.cleaned_data.get('observacoes_manuais', ''),
+            formato=form.cleaned_data['formato']
+        )
+        
+        # Buscar e adicionar análises automaticamente baseado no período e tipo
+        analises_automaticas = self._adicionar_analises_automaticamente(relatorio, form.cleaned_data)
+        
+        # Processar análises específicas selecionadas pelo usuário
+        analises_selecionadas = self._processar_analises_selecionadas(relatorio, self.request.POST)
+        
+        # Processar dados e gerar observações automáticas
+        self._processar_dados_relatorio_analises(relatorio, form.cleaned_data)
+        
+        # Registrar log
+        registrar_log(
+            usuario=self.request.user,
+            acao=f"CRIAR_RELATORIO_EXPEDICAO - Relatório {codigo} criado para {relatorio.get_cliente_nome()}",
+            obj=relatorio
+        )
+        
+        if form.cleaned_data['formato'] == 'HTML':
+            return redirect('relatorios:expedicao_visualizar', pk=relatorio.pk)
+        else:
+            return redirect('relatorios:expedicao_download', pk=relatorio.pk)
+    
+    def _adicionar_analises_automaticamente(self, relatorio, cleaned_data):
+        """Adiciona análises automaticamente baseado no período e tipo selecionado."""
+        from analises.models import (
+            AnaliseUmidade, AnaliseProteina, AnaliseTeorOleo, AnaliseFibra, 
+            AnaliseCinza, AnaliseFosforo, AnaliseOleoDegomado, AnaliseUrase
+        )
+        
+        data_inicial = relatorio.data_inicial
+        data_final = relatorio.data_final
+        tipo_analise = relatorio.tipo_analise
+        parametros = relatorio.get_parametros_completos()
+        
+        # Mapear parâmetros para modelos de análise
+        mapeamento_analises = {
+            'umidade': (AnaliseUmidade, 'umidade'),
+            'proteina': (AnaliseProteina, 'proteina'),
+            'teor_oleo': (AnaliseTeorOleo, 'teor_oleo'),
+            'oleo': (AnaliseTeorOleo, 'teor_oleo'),  # Alias para teor_oleo
+            'fibra': (AnaliseFibra, 'fibra'),
+            'cinza': (AnaliseCinza, 'cinza'),
+            'fosforo': (AnaliseFosforo, 'fosforo'),
+            'acidez': (AnaliseOleoDegomado, 'acidez'),
+            'indice_sabao': (AnaliseOleoDegomado, 'indice_sabao'),
+            'silica': (AnaliseOleoDegomado, 'silica'),
+            'urase': (AnaliseUrase, 'urase'),
+        }
+        
+        # Adicionar análises baseado nos parâmetros selecionados
+        for parametro in parametros:
+            if parametro in mapeamento_analises:
+                modelo_analise, tipo_nome = mapeamento_analises[parametro]
+                
+                # Buscar análises no período
+                analises = modelo_analise.objects.filter(
+                    data__gte=data_inicial,
+                    data__lte=data_final
+                ).order_by('data')
+                
+                # Filtrar por tipo de análise se necessário
+                if tipo_analise == 'oleo' and parametro in ['umidade', 'proteina', 'fibra', 'cinza']:
+                    continue  # Pular análises de farelo se foco é óleo
+                elif tipo_analise == 'farelo' and parametro in ['acidez', 'indice_sabao', 'silica', 'fosforo']:
+                    continue  # Pular análises de óleo se foco é farelo
+                
+                # Adicionar cada análise encontrada
+                for analise in analises:
+                    try:
+                        relatorio.adicionar_analise(analise, tipo_nome)
+                    except Exception as e:
+                        # Log do erro, mas continua processando outras análises
+                        print(f"Erro ao adicionar análise {analise.id}: {e}")
+        
+        # Se tipo é 'auto', determinar automaticamente baseado nas análises encontradas
+        if tipo_analise == 'auto':
+            self._determinar_tipo_analise_automatico(relatorio)
+    
+    def _determinar_tipo_analise_automatico(self, relatorio):
+        """Determina automaticamente o tipo de análise baseado nas análises incluídas."""
+        analises = relatorio.get_analises_relacionadas()
+        tipos_encontrados = set(analises.values_list('tipo_analise', flat=True))
+        
+        tipos_oleo = {'acidez', 'indice_sabao', 'silica', 'fosforo', 'urase'}
+        tipos_farelo = {'umidade', 'proteina', 'teor_oleo', 'fibra', 'cinza'}
+        
+        tem_oleo = bool(tipos_oleo.intersection(tipos_encontrados))
+        tem_farelo = bool(tipos_farelo.intersection(tipos_encontrados))
+        
+        if tem_oleo and tem_farelo:
+            relatorio.tipo_analise = 'ambos'
+        elif tem_oleo:
+            relatorio.tipo_analise = 'oleo'
+        elif tem_farelo:
+            relatorio.tipo_analise = 'farelo'
+        else:
+            relatorio.tipo_analise = 'personalizado'
+        
+        relatorio.save()
+    
+    def _processar_dados_relatorio_analises(self, relatorio, cleaned_data):
+        """Processa os dados do relatório baseado nas análises e gera observações automáticas."""
+        observacoes = []
+        conformidade_geral = True
+        
+        # Obter todas as análises do relatório
+        analises = relatorio.get_analises_relacionadas()
+        
+        # Verificar conformidade de cada análise com o contrato
+        if relatorio.contrato:
+            for analise_relatorio in analises:
+                conformidade = self._verificar_conformidade_analise(analise_relatorio, relatorio.contrato)
+                
+                # Atualizar status de conformidade da análise
+                analise_relatorio.conforme = conformidade['conforme']
+                analise_relatorio.observacao_conformidade = conformidade['observacao']
+                analise_relatorio.save()
+                
+                if not conformidade['conforme']:
+                    observacoes.append(f"{analise_relatorio.tipo_analise} ({analise_relatorio.data_analise}): {conformidade['observacao']}")
+                    conformidade_geral = False
+        
+        # Gerar observações estatísticas
+        resumo = relatorio.get_resumo_analises()
+        medias = relatorio.calcular_medias_por_tipo()
+        
+        observacoes_estatisticas = []
+        for tipo, dados in resumo.items():
+            if dados['count'] > 0:
+                if tipo in medias and medias[tipo] is not None:
+                    observacoes_estatisticas.append(
+                        f"{tipo.title()}: {dados['count']} análises, média: {medias[tipo]}%"
+                    )
+                if dados['conformes'] > 0 or dados['nao_conformes'] > 0:
+                    observacoes_estatisticas.append(
+                        f"  - Conformes: {dados['conformes']}, Não conformes: {dados['nao_conformes']}"
+                    )
+        
+        # Combinar observações
+        todas_observacoes = []
+        if observacoes:
+            todas_observacoes.append("=== NÃO CONFORMIDADES ===")
+            todas_observacoes.extend(observacoes)
+        
+        if observacoes_estatisticas:
+            todas_observacoes.append("\n=== RESUMO ESTATÍSTICO ===")
+            todas_observacoes.extend(observacoes_estatisticas)
+        
+        # Atualizar o relatório
+        relatorio.observacoes_automaticas = '\n'.join(todas_observacoes)
+        relatorio.certificacao_conformidade = conformidade_geral
+        relatorio.save()
+    
+    def _verificar_conformidade_analise(self, analise_relatorio, contrato):
+        """Verifica conformidade de uma análise específica com o contrato."""
+        tipo_analise = analise_relatorio.tipo_analise
+        resultado = analise_relatorio.resultado
+        
+        if resultado is None:
+            return {'conforme': False, 'observacao': 'Resultado não disponível'}
+        
+        # Mapear tipos de análise para campos do contrato
+        mapeamento_contrato = {
+            'umidade': ('umidade_min', 'umidade_max'),
+            'proteina': ('proteina_min', 'proteina_max'),
+            'teor_oleo': ('oleo_min', 'oleo_max'),
+            'fibra': ('fibra_min', 'fibra_max'),
+            'cinza': ('cinza_min', 'cinza_max'),
+        }
+        
+        if tipo_analise not in mapeamento_contrato:
+            return {'conforme': True, 'observacao': 'Sem especificação no contrato'}
+        
+        campo_min, campo_max = mapeamento_contrato[tipo_analise]
+        valor_min = getattr(contrato, campo_min, None)
+        valor_max = getattr(contrato, campo_max, None)
+        
+        if valor_min is None and valor_max is None:
+            return {'conforme': True, 'observacao': 'Sem especificação no contrato'}
+        
+        # Verificar limites
+        if valor_min is not None and resultado < valor_min:
+            return {
+                'conforme': False, 
+                'observacao': f'{tipo_analise.title()} abaixo do mínimo: {resultado}% < {valor_min}%'
+            }
+        
+        if valor_max is not None and resultado > valor_max:
+            return {
+                'conforme': False, 
+                'observacao': f'{tipo_analise.title()} acima do máximo: {resultado}% > {valor_max}%'
+            }
+        
+        return {'conforme': True, 'observacao': 'Conforme especificação'}
+
+class RelatorioExpedicaoDetailView(TemplateView):
+    """View para visualizar relatório de expedição."""
+    template_name = 'relatorios/expedicao/detalhe.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        relatorio = RelatorioExpedicao.objects.get(pk=kwargs['pk'])
+        
+        # Obter dados das análises
+        dados_analises = self._obter_dados_analises(relatorio)
+        
+        context.update({
+            'relatorio': relatorio,
+            'dados_analises': dados_analises,
+            'historico_envios': HistoricoEnvioRelatorio.objects.filter(relatorio=relatorio).order_by('-data_envio'),
+        })
+        
+        return context
+    
+    def _obter_dados_analises(self, relatorio):
+        """Obtém os dados das análises relacionadas ao relatório."""
+        dados = {}
+        parametros_completos = relatorio.get_parametros_completos()
+        
+        # Obter análises relacionadas através de RelatorioAnalise
+        relatorio_analises = relatorio.get_analises_relacionadas()
+        
+        for rel_analise in relatorio_analises:
+            analise = rel_analise.content_object
+            tipo_analise = rel_analise.tipo_analise
+            analise_id = f"{tipo_analise}_{analise.id}"
+            
+            dados[analise_id] = {
+                'tipo': tipo_analise,
+                'data': analise.data,
+                'amostra': analise.numero_amostra,
+                'resultado': f"{analise.resultado:.2f}%" if analise.resultado else "N/D"
+            }
+        
+        return dados
+
+class RelatorioExpedicaoEnviarView(FormView):
+    """View para enviar relatório por e-mail."""
+    template_name = 'relatorios/expedicao/enviar.html'
+    form_class = EnvioRelatorioForm
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        relatorio = RelatorioExpedicao.objects.get(pk=self.kwargs['pk'])
+        context['relatorio'] = relatorio
+        return context
+    
+    def form_valid(self, form):
+        relatorio = RelatorioExpedicao.objects.get(pk=self.kwargs['pk'])
+        
+        # Implementar envio por e-mail
+        sucesso = self._enviar_email(relatorio, form.cleaned_data)
+        
+        # Registrar histórico
+        for destinatario in form.cleaned_data['destinatarios']:
+            HistoricoEnvioRelatorio.objects.create(
+                relatorio=relatorio,
+                destinatario=destinatario,
+                assunto=form.cleaned_data['assunto'],
+                mensagem=form.cleaned_data.get('mensagem', ''),
+                usuario_responsavel=self.request.user,
+                sucesso_envio=sucesso
+            )
+        
+        # Atualizar status do relatório
+        if sucesso:
+            relatorio.status = 'ENVIADO'
+            relatorio.save()
+        
+        return redirect('relatorios:expedicao_detalhe', pk=relatorio.pk)
+    
+    def _enviar_email(self, relatorio, dados):
+        """Envia o relatório por e-mail."""
+        # Implementar lógica de envio de e-mail
+        # Por enquanto, retorna True (simulando sucesso)
+        return True
+
+from django.http import JsonResponse
+
+class ClienteDadosAPIView(View):
+    """API endpoint para buscar dados do cliente (contratos e lotes)."""
+    
+    def get(self, request, cliente_id):
+        try:
+            cliente = Cliente.objects.get(id=cliente_id)
+            
+            # Buscar contratos ativos do cliente
+            contratos = EspecificacaoContrato.objects.filter(
+                cliente=cliente, 
+                ativo=True
+            ).values('id', 'nome_contrato')
+            
+            # Buscar lotes do cliente
+            lotes = Lote.objects.filter(
+                cliente=cliente
+            ).order_by('-data_producao').values('id', 'codigo', 'data_producao')
+            
+            # Converter datas para string
+            for lote in lotes:
+                lote['data_producao'] = lote['data_producao'].strftime('%d/%m/%Y')
+            
+            return JsonResponse({
+                'contratos': list(contratos),
+                'lotes': list(lotes)
+            })
+            
+        except Cliente.DoesNotExist:
+            return JsonResponse({'error': 'Cliente não encontrado'}, status=404)
+
+    def _processar_analises_selecionadas(self, relatorio, request_data):
+        """Processa análises específicas selecionadas pelo usuário através de checkboxes."""
+        analises_selecionadas = []
+        
+        # Buscar por campos que começam com 'analise_' no request
+        for key, value in request_data.items():
+            if key.startswith('analise_') and value == 'on':
+                # Formato esperado: analise_{modelo}_{id}
+                try:
+                    parts = key.split('_')
+                    if len(parts) >= 3:
+                        modelo_nome = parts[1]
+                        analise_id = parts[2]
+                        analises_selecionadas.append((modelo_nome, analise_id))
+                except Exception as e:
+                    print(f"Erro ao processar análise selecionada {key}: {e}")
+        
+        # Mapear nomes dos modelos para classes reais
+        modelos_mapeamento = {
+            'AnaliseUmidade': ('analises.models', 'AnaliseUmidade', 'umidade'),
+            'AnaliseProteina': ('analises.models', 'AnaliseProteina', 'proteina'),
+            'AnaliseTeorOleo': ('analises.models', 'AnaliseTeorOleo', 'teor_oleo'),
+            'AnaliseFibra': ('analises.models', 'AnaliseFibra', 'fibra'),
+            'AnaliseCinza': ('analises.models', 'AnaliseCinza', 'cinza'),
+            'AnaliseFosforo': ('analises.models', 'AnaliseFosforo', 'fosforo'),
+            'AnaliseOleoDegomado': ('analises.models', 'AnaliseOleoDegomado', 'acidez'),
+            'AnaliseUrase': ('analises.models', 'AnaliseUrase', 'urase'),
+            'AnaliseSilica': ('analises.models', 'AnaliseSilica', 'silica'),
+        }
+        
+        # Adicionar análises selecionadas ao relatório
+        for modelo_nome, analise_id in analises_selecionadas:
+            if modelo_nome in modelos_mapeamento:
+                try:
+                    # Importar o modelo dinamicamente
+                    from importlib import import_module
+                    module_name, class_name, tipo_analise = modelos_mapeamento[modelo_nome]
+                    module = import_module(module_name)
+                    modelo_class = getattr(module, class_name)
+                    
+                    # Buscar a análise específica
+                    analise = modelo_class.objects.get(id=analise_id)
+                    
+                    # Adicionar ao relatório
+                    relatorio.adicionar_analise(analise, tipo_analise)
+                    
+                except Exception as e:
+                    print(f"Erro ao adicionar análise {modelo_nome}:{analise_id}: {e}")
+        
+        return len(analises_selecionadas)

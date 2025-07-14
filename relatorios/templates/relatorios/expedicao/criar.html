@@ -1,0 +1,880 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Criar Relatório de Expedição - QualiSoja{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-green: #065f46;
+        --light-green: #d1fae5;
+        --accent-green: #059669;
+        --text-dark: #111827;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .form-section h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+    }
+
+    .form-section h3 i {
+        margin-right: 0.5rem;
+        color: var(--accent-green);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+    }
+
+    .form-control {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent-green);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s;
+    }
+
+    .checkbox-item:hover {
+        background: var(--light-green);
+        border-color: var(--accent-green);
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        margin-right: 0.5rem;
+        accent-color: var(--accent-green);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background: var(--accent-green);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-green);
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--accent-green);
+        border: 1px solid var(--accent-green);
+    }
+
+    .btn-outline:hover {
+        background: var(--accent-green);
+        color: white;
+    }
+
+    .btn-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .help-text {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    .errorlist {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        list-style: none;
+        padding: 0;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-error {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; font-size: 2rem; font-weight: 700;">📊 Novo Relatório de Expedição</h1>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Configure e gere relatórios personalizados para vendas</p>
+            </div>
+            <a href="{% url 'relatorios:expedicao_lista' %}" class="btn btn-outline" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
+                Voltar à Lista
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <!-- Seção Cliente e Contrato -->
+            <div class="form-section">
+                <h3><i class="fas fa-building"></i> Cliente e Contrato</h3>
+                
+                <!-- Cliente -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            {{ form.usar_cliente_cadastrado|add_class:"form-check-input" }}
+                            <label for="{{ form.usar_cliente_cadastrado.id_for_label }}" style="margin: 0 0 0 0.5rem;">
+                                Usar cliente cadastrado
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row" id="cliente-fields">
+                    <div class="form-group" id="cliente-cadastrado-field">
+                        <label for="{{ form.cliente.id_for_label }}">Cliente Cadastrado</label>
+                        {{ form.cliente|add_class:"form-control" }}
+                        {% if form.cliente.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.cliente.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <div class="form-group" id="cliente-manual-field" style="display: none;">
+                        <label for="{{ form.cliente_nome_manual.id_for_label }}">Nome do Cliente *</label>
+                        {{ form.cliente_nome_manual|add_class:"form-control" }}
+                        {% if form.cliente_nome_manual.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.cliente_nome_manual.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Contrato -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            {{ form.usar_contrato_cadastrado|add_class:"form-check-input" }}
+                            <label for="{{ form.usar_contrato_cadastrado.id_for_label }}" style="margin: 0 0 0 0.5rem;">
+                                Usar contrato cadastrado
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row" id="contrato-fields">
+                    <div class="form-group" id="contrato-cadastrado-field" style="display: none;">
+                        <label for="{{ form.contrato.id_for_label }}">Contrato Cadastrado</label>
+                        {{ form.contrato|add_class:"form-control" }}
+                        <div class="help-text">Selecione um contrato para verificação automática de conformidade</div>
+                        {% if form.contrato.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.contrato.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <div class="form-group" id="contrato-nome-field">
+                        <label for="{{ form.contrato_nome_manual.id_for_label }}">Nome do Contrato</label>
+                        {{ form.contrato_nome_manual|add_class:"form-control" }}
+                        {% if form.contrato_nome_manual.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.contrato_nome_manual.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <div class="form-group" id="contrato-numero-field">
+                        <label for="{{ form.contrato_numero_manual.id_for_label }}">Número do Contrato</label>
+                        {{ form.contrato_numero_manual|add_class:"form-control" }}
+                        {% if form.contrato_numero_manual.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.contrato_numero_manual.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Período -->
+            <div class="form-section">
+                <h3><i class="fas fa-calendar-alt"></i> Período de Análise</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.data_inicial.id_for_label }}">Data Inicial *</label>
+                        {{ form.data_inicial|add_class:"form-control" }}
+                        {% if form.data_inicial.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.data_inicial.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.data_final.id_for_label }}">Data Final *</label>
+                        {{ form.data_final|add_class:"form-control" }}
+                        {% if form.data_final.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.data_final.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Análises Disponíveis -->
+            <div class="form-section">
+                <h3><i class="fas fa-microscope"></i> Análises Disponíveis</h3>
+                <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.875rem;">
+                    Selecione as análises específicas que devem ser incluídas no relatório. As análises estão agrupadas por data:
+                </p>
+                
+                <div style="overflow-x: auto; margin-bottom: 1rem;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                        <thead style="background: #f9fafb;">
+                            <tr>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: left;">Selecionar</th>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: left;">Data</th>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">Tipo</th>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">Umidade</th>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">Proteína</th>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">Teor Óleo</th>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">Fibra</th>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">Cinza</th>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">Acidez</th>
+                                <th style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">Fósforo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in analises_disponiveis %}
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">
+                                        <input type="checkbox" name="grupo_analises" value="{{ item.identificador }}" id="grupo_{{ item.identificador }}" class="form-check-input" onchange="toggleAnalisesIndividuais('{{ item.identificador }}')">
+                                        <label for="grupo_{{ item.identificador }}" style="margin-left: 0.5rem; font-size: 0.75rem;">Todas</label>
+                                    </td>
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color);">
+                                        <strong>{{ item.data|date:"d/m/Y" }}</strong>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                            {{ item.total_analises }} análise{{ item.total_analises|pluralize }}
+                                        </div>
+                                    </td>
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">
+                                        {% if item.tipo_predominante == 'oleo' %}
+                                            <span style="color: #f59e0b; font-weight: 500; font-size: 0.75rem;">ÓLEO</span>
+                                        {% elif item.tipo_predominante == 'farelo' %}
+                                            <span style="color: #10b981; font-weight: 500; font-size: 0.75rem;">FARELO</span>
+                                        {% elif item.tipo_predominante == 'ambos' %}
+                                            <span style="color: #6366f1; font-weight: 500; font-size: 0.75rem;">AMBOS</span>
+                                        {% else %}
+                                            <span style="color: var(--text-muted); font-size: 0.75rem;">OUTROS</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">
+                                        {% if item.analises.umidade %}
+                                            <div style="margin-bottom: 0.25rem;">
+                                                <input type="checkbox" name="analise_{{ item.analises.umidade.modelo }}_{{ item.analises.umidade.id }}" id="analise_{{ item.analises.umidade.modelo }}_{{ item.analises.umidade.id }}" class="analise-checkbox grupo-{{ item.identificador }}" style="margin-right: 0.25rem;">
+                                                <span style="color: var(--success-green); font-weight: 500; font-size: 0.75rem;">{{ item.analises.umidade.resultado }}</span>
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/D</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">
+                                        {% if item.analises.proteina %}
+                                            <div style="margin-bottom: 0.25rem;">
+                                                <input type="checkbox" name="analise_{{ item.analises.proteina.modelo }}_{{ item.analises.proteina.id }}" id="analise_{{ item.analises.proteina.modelo }}_{{ item.analises.proteina.id }}" class="analise-checkbox grupo-{{ item.identificador }}" style="margin-right: 0.25rem;">
+                                                <span style="color: var(--success-green); font-weight: 500; font-size: 0.75rem;">{{ item.analises.proteina.resultado }}</span>
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/D</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">
+                                        {% if item.analises.teor_oleo %}
+                                            <div style="margin-bottom: 0.25rem;">
+                                                <input type="checkbox" name="analise_{{ item.analises.teor_oleo.modelo }}_{{ item.analises.teor_oleo.id }}" id="analise_{{ item.analises.teor_oleo.modelo }}_{{ item.analises.teor_oleo.id }}" class="analise-checkbox grupo-{{ item.identificador }}" style="margin-right: 0.25rem;">
+                                                <span style="color: var(--success-green); font-weight: 500; font-size: 0.75rem;">{{ item.analises.teor_oleo.resultado }}</span>
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/D</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">
+                                        {% if item.analises.fibra %}
+                                            <div style="margin-bottom: 0.25rem;">
+                                                <input type="checkbox" name="analise_{{ item.analises.fibra.modelo }}_{{ item.analises.fibra.id }}" id="analise_{{ item.analises.fibra.modelo }}_{{ item.analises.fibra.id }}" class="analise-checkbox grupo-{{ item.identificador }}" style="margin-right: 0.25rem;">
+                                                <span style="color: var(--success-green); font-weight: 500; font-size: 0.75rem;">{{ item.analises.fibra.resultado }}</span>
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/D</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">
+                                        {% if item.analises.cinza %}
+                                            <div style="margin-bottom: 0.25rem;">
+                                                <input type="checkbox" name="analise_{{ item.analises.cinza.modelo }}_{{ item.analises.cinza.id }}" id="analise_{{ item.analises.cinza.modelo }}_{{ item.analises.cinza.id }}" class="analise-checkbox grupo-{{ item.identificador }}" style="margin-right: 0.25rem;">
+                                                <span style="color: var(--success-green); font-weight: 500; font-size: 0.75rem;">{{ item.analises.cinza.resultado }}</span>
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/D</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">
+                                        {% if item.analises.acidez %}
+                                            <div style="margin-bottom: 0.25rem;">
+                                                <input type="checkbox" name="analise_{{ item.analises.acidez.modelo }}_{{ item.analises.acidez.id }}" id="analise_{{ item.analises.acidez.modelo }}_{{ item.analises.acidez.id }}" class="analise-checkbox grupo-{{ item.identificador }}" style="margin-right: 0.25rem;">
+                                                <span style="color: var(--success-green); font-weight: 500; font-size: 0.75rem;">{{ item.analises.acidez.resultado }}</span>
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/D</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 0.75rem; border: 1px solid var(--border-color); text-align: center;">
+                                        {% if item.analises.fosforo %}
+                                            <div style="margin-bottom: 0.25rem;">
+                                                <input type="checkbox" name="analise_{{ item.analises.fosforo.modelo }}_{{ item.analises.fosforo.id }}" id="analise_{{ item.analises.fosforo.modelo }}_{{ item.analises.fosforo.id }}" class="analise-checkbox grupo-{{ item.identificador }}" style="margin-right: 0.25rem;">
+                                                <span style="color: var(--success-green); font-weight: 500; font-size: 0.75rem;">{{ item.analises.fosforo.resultado }}</span>
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/D</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="10" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                                        <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                                        <div>Nenhuma análise disponível no período selecionado.</div>
+                                        <div style="font-size: 0.875rem; margin-top: 0.5rem;">
+                                            Verifique se existem análises cadastradas ou ajuste o período de busca.
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem;">
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <i class="fas fa-lightbulb" style="color: #f59e0b; margin-right: 0.5rem;"></i>
+                        <strong style="color: #92400e;">Dica:</strong>
+                    </div>
+                    <p style="margin: 0; color: #92400e; font-size: 0.875rem;">
+                        Use o checkbox "Todas" para selecionar todas as análises de uma data específica, ou marque análises individuais para maior controle.
+                    </p>
+                </div>
+                
+                <div id="analises-group" style="margin-top: 1rem;">
+                    <!-- Conteúdo dinâmico será inserido aqui via JavaScript quando necessário -->
+                </div>
+            </div>
+        </div>
+
+            <!-- Seção Parâmetros -->
+            <div class="form-section">
+                <h3><i class="fas fa-list-check"></i> Parâmetros de Qualidade</h3>
+                
+                <!-- Parâmetros Obrigatórios -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--accent-green);">
+                        <i class="fas fa-star" style="margin-right: 0.5rem;"></i>
+                        Obrigatórios na Expedição
+                    </h4>
+                    <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 0.5rem; padding: 1rem;">
+                        <div id="parametros-obrigatorios-lista" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <!-- Parâmetros obrigatórios serão inseridos dinamicamente aqui -->
+                        </div>
+                        <p id="parametros-obrigatorios-info" style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: var(--text-muted);">
+                            Selecione os lotes para ver os parâmetros obrigatórios baseados no tipo de análise (óleo ou farelo).
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Parâmetros Adicionais -->
+                <div>
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-dark);">
+                        <i class="fas fa-plus-circle" style="margin-right: 0.5rem;"></i>
+                        {{ form.parametros_incluidos.label }}
+                    </h4>
+                    <div class="checkbox-group">
+                        {% for choice in form.parametros_incluidos %}
+                            <div class="checkbox-item">
+                                {{ choice.tag }}
+                                <label for="{{ choice.choice_value }}">{{ choice.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.parametros_incluidos.help_text %}
+                        <div class="help-text">{{ form.parametros_incluidos.help_text }}</div>
+                    {% endif %}
+                    {% if form.parametros_incluidos.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.parametros_incluidos.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Seção Configurações -->
+            <div class="form-section">
+                <h3><i class="fas fa-cogs"></i> Configurações do Relatório</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.formato.id_for_label }}">Formato de Saída *</label>
+                        {{ form.formato|add_class:"form-control" }}
+                        {% if form.formato.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.formato.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.observacoes_manuais.id_for_label }}">Observações Manuais</label>
+                    {{ form.observacoes_manuais|add_class:"form-control" }}
+                    <div class="help-text">Adicione observações específicas que serão incluídas no relatório</div>
+                    {% if form.observacoes_manuais.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.observacoes_manuais.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <div class="checkbox-item" style="margin-bottom: 0.5rem;">
+                        <input type="checkbox" name="incluir_graficos" id="incluir_graficos" checked>
+                        <label for="incluir_graficos">Incluir Gráficos Comparativos</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="incluir_certificacao" id="incluir_certificacao" checked>
+                        <label for="incluir_certificacao">Incluir Certificação de Conformidade (se aplicável)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="btn-actions">
+                <a href="{% url 'relatorios:expedicao_lista' %}" class="btn btn-outline">
+                    <i class="fas fa-times" style="margin-right: 0.5rem;"></i>
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-chart-line" style="margin-right: 0.5rem;"></i>
+                    Gerar Relatório
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+<script>
+// Função para alternar entre cliente cadastrado e manual
+function toggleClienteFields() {
+    const usarCadastrado = document.getElementById('id_usar_cliente_cadastrado').checked;
+    const clienteCadastradoField = document.getElementById('cliente-cadastrado-field');
+    const clienteManualField = document.getElementById('cliente-manual-field');
+    
+    if (usarCadastrado) {
+        clienteCadastradoField.style.display = 'flex';
+        clienteManualField.style.display = 'none';
+        document.getElementById('id_cliente_nome_manual').value = '';
+    } else {
+        clienteCadastradoField.style.display = 'none';
+        clienteManualField.style.display = 'flex';
+        document.getElementById('id_cliente').value = '';
+    }
+}
+
+// Função para alternar entre contrato cadastrado e manual
+function toggleContratoFields() {
+    const usarCadastrado = document.getElementById('id_usar_contrato_cadastrado').checked;
+    const contratoCadastradoField = document.getElementById('contrato-cadastrado-field');
+    const contratoNomeField = document.getElementById('contrato-nome-field');
+    const contratoNumeroField = document.getElementById('contrato-numero-field');
+    
+    if (usarCadastrado) {
+        contratoCadastradoField.style.display = 'flex';
+        contratoNomeField.style.display = 'none';
+        contratoNumeroField.style.display = 'none';
+        document.getElementById('id_contrato_nome_manual').value = '';
+        document.getElementById('id_contrato_numero_manual').value = '';
+    } else {
+        contratoCadastradoField.style.display = 'none';
+        contratoNomeField.style.display = 'flex';
+        contratoNumeroField.style.display = 'flex';
+        document.getElementById('id_contrato').value = '';
+    }
+}
+
+// Função para atualizar contratos quando cliente muda
+function updateContratos() {
+    const clienteSelect = document.getElementById('id_cliente');
+    const contratoSelect = document.getElementById('id_contrato');
+    const lotesGroup = document.getElementById('lotes-group');
+    
+    if (clienteSelect.value) {
+        // Fazer requisição AJAX para buscar contratos e lotes do cliente
+        fetch(`/relatorios/api/cliente/${clienteSelect.value}/dados/`)
+            .then(response => response.json())
+            .then(data => {
+                // Atualizar contratos
+                contratoSelect.innerHTML = '<option value="">Selecione um contrato</option>';
+                data.contratos.forEach(contrato => {
+                    contratoSelect.innerHTML += `<option value="${contrato.id}">${contrato.nome}</option>`;
+                });
+                
+                // Atualizar lotes
+                lotesGroup.innerHTML = '';
+                data.lotes.forEach(lote => {
+                    lotesGroup.innerHTML += `
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="lotes" value="${lote.id}" id="lote_${lote.id}" onchange="updateParametrosObrigatorios()">
+                            <label for="lote_${lote.id}">${lote.codigo} (${lote.data_producao})</label>
+                        </div>
+                    `;
+                });
+                
+                // Atualizar parâmetros obrigatórios
+                updateParametrosObrigatorios();
+            })
+            .catch(error => {
+                console.error('Erro ao buscar dados do cliente:', error);
+            });
+    } else {
+        contratoSelect.innerHTML = '<option value="">Selecione um contrato</option>';
+        lotesGroup.innerHTML = '';
+        updateParametrosObrigatorios();
+    }
+}
+
+// Definir parâmetros obrigatórios para cada tipo de análise
+const PARAMETROS_OLEO = ['umidade', 'acidez', 'indice_sabao', 'silica', 'fosforo', 'urase'];
+const PARAMETROS_FARELO = ['umidade', 'proteina', 'teor_oleo'];
+
+const PARAMETROS_LABELS = {
+    'umidade': 'Umidade',
+    'acidez': 'Acidez',
+    'indice_sabao': 'Índice de Sabão',
+    'silica': 'Sílica',
+    'fosforo': 'Fósforo',
+    'urase': 'Urase',
+    'proteina': 'Proteína',
+    'teor_oleo': 'Teor de Óleo'
+};
+
+// Função para atualizar parâmetros obrigatórios baseado nos lotes selecionados
+function updateParametrosObrigatorios() {
+    const lotesCheckboxes = document.querySelectorAll('input[name="lotes"]:checked');
+    const parametrosLista = document.getElementById('parametros-obrigatorios-lista');
+    const parametrosInfo = document.getElementById('parametros-obrigatorios-info');
+    
+    if (lotesCheckboxes.length === 0) {
+        parametrosLista.innerHTML = '';
+        parametrosInfo.textContent = 'Selecione os lotes para ver os parâmetros obrigatórios baseados no tipo de análise (óleo ou farelo).';
+        return;
+    }
+    
+    // Verificar se algum lote selecionado é de farelo
+    let temFarelo = false;
+    lotesCheckboxes.forEach(checkbox => {
+        const label = checkbox.nextElementSibling.textContent.toLowerCase();
+        if (label.includes('farelo')) {
+            temFarelo = true;
+        }
+    });
+    
+    // Determinar parâmetros obrigatórios
+    const parametrosObrigatorios = temFarelo ? PARAMETROS_FARELO : PARAMETROS_OLEO;
+    const tipoAnalise = temFarelo ? 'farelo' : 'óleo';
+    
+    // Atualizar a lista
+    parametrosLista.innerHTML = '';
+    parametrosObrigatorios.forEach(parametro => {
+        const span = document.createElement('span');
+        span.style.cssText = 'background: var(--accent-green); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.875rem;';
+        span.innerHTML = `✓ ${PARAMETROS_LABELS[parametro]}`;
+        parametrosLista.appendChild(span);
+    });
+    
+    // Atualizar informação
+    parametrosInfo.textContent = `Parâmetros obrigatórios para análise de ${tipoAnalise}. Estes são incluídos automaticamente no relatório.`;
+}
+
+// Função para alternar seleção de análises individuais de um grupo
+function toggleAnalisesIndividuais(identificador) {
+    const grupoCheckbox = document.getElementById(`grupo_${identificador}`);
+    const checkboxesIndividuais = document.querySelectorAll(`.grupo-${identificador}`);
+    
+    checkboxesIndividuais.forEach(checkbox => {
+        checkbox.checked = grupoCheckbox.checked;
+    });
+    
+    updateParametrosObrigatorios();
+}
+
+// Função para atualizar parâmetros obrigatórios baseado nas análises selecionadas
+function updateParametrosObrigatorios() {
+    const analisesCheckboxes = document.querySelectorAll('.analise-checkbox:checked');
+    const parametrosLista = document.getElementById('parametros-obrigatorios-lista');
+    const parametrosInfo = document.getElementById('parametros-obrigatorios-info');
+    
+    if (analisesCheckboxes.length === 0) {
+        if (parametrosLista) {
+            parametrosLista.innerHTML = '';
+        }
+        if (parametrosInfo) {
+            parametrosInfo.textContent = 'Selecione as análises para ver os parâmetros obrigatórios baseados no tipo de análise (óleo ou farelo).';
+        }
+        return;
+    }
+    
+    // Detectar tipos de análises selecionadas
+    let temOleo = false;
+    let temFarelo = false;
+    
+    analisesCheckboxes.forEach(checkbox => {
+        const name = checkbox.name;
+        if (name.includes('acidez') || name.includes('fosforo') || name.includes('urase') || name.includes('silica')) {
+            temOleo = true;
+        }
+        if (name.includes('umidade') || name.includes('proteina') || name.includes('teor_oleo') || name.includes('fibra') || name.includes('cinza')) {
+            temFarelo = true;
+        }
+    });
+    
+    // Determinar parâmetros obrigatórios
+    let parametrosObrigatorios = [];
+    let tipoAnalise = '';
+    
+    if (temOleo && temFarelo) {
+        parametrosObrigatorios = [...new Set([...PARAMETROS_OLEO, ...PARAMETROS_FARELO])];
+        tipoAnalise = 'ambas as análises (óleo e farelo)';
+    } else if (temOleo) {
+        parametrosObrigatorios = PARAMETROS_OLEO;
+        tipoAnalise = 'análise de óleo';
+    } else if (temFarelo) {
+        parametrosObrigatorios = PARAMETROS_FARELO;
+        tipoAnalise = 'análise de farelo';
+    }
+    
+    // Atualizar a lista se existir
+    if (parametrosLista) {
+        parametrosLista.innerHTML = '';
+        parametrosObrigatorios.forEach(parametro => {
+            const span = document.createElement('span');
+            span.style.cssText = 'background: var(--accent-green); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; margin-right: 0.5rem; margin-bottom: 0.5rem; display: inline-block;';
+            span.innerHTML = `✓ ${PARAMETROS_LABELS[parametro]}`;
+            parametrosLista.appendChild(span);
+        });
+    }
+    
+    // Atualizar informação se existir
+    if (parametrosInfo) {
+        parametrosInfo.textContent = `Parâmetros obrigatórios para ${tipoAnalise}. Estes são incluídos automaticamente no relatório.`;
+    }
+}
+
+// Função para validar se pelo menos uma análise foi selecionada antes do envio
+function validarFormulario(event) {
+    const analisesCheckboxes = document.querySelectorAll('.analise-checkbox:checked');
+    const gruposCheckboxes = document.querySelectorAll('input[name="grupo_analises"]:checked');
+    
+    // Verificar se há parâmetros selecionados para inclusão automática
+    const parametrosIncluidos = document.querySelectorAll('input[name="parametros_incluidos"]:checked');
+    
+    if (analisesCheckboxes.length === 0 && gruposCheckboxes.length === 0 && parametrosIncluidos.length === 0) {
+        event.preventDefault();
+        alert('Por favor, selecione pelo menos um parâmetro para incluir no relatório ou marque análises específicas.');
+        return false;
+    }
+    
+    return true;
+}
+
+// Adicionar event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const clienteSelect = document.getElementById('id_cliente');
+    const usarClienteCheckbox = document.getElementById('id_usar_cliente_cadastrado');
+    const usarContratoCheckbox = document.getElementById('id_usar_contrato_cadastrado');
+    const form = document.querySelector('form');
+    
+    if (clienteSelect) {
+        clienteSelect.addEventListener('change', updateContratos);
+    }
+    
+    if (usarClienteCheckbox) {
+        usarClienteCheckbox.addEventListener('change', toggleClienteFields);
+        // Inicializar estado
+        toggleClienteFields();
+    }
+    
+    if (usarContratoCheckbox) {
+        usarContratoCheckbox.addEventListener('change', toggleContratoFields);
+        // Inicializar estado
+        toggleContratoFields();
+    }
+    
+    // Inicializar parâmetros obrigatórios
+    updateParametrosObrigatorios();
+    
+    // Adicionar listeners para análises individuais
+    document.querySelectorAll('.analise-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateParametrosObrigatorios);
+    });
+    
+    // Adicionar validação ao formulário
+    if (form) {
+        form.addEventListener('submit', validarFormulario);
+    }
+    
+    // Adicionar listener para mudanças nos lotes existentes (se houver)
+    document.querySelectorAll('input[name="lotes"]').forEach(checkbox => {
+        checkbox.addEventListener('change', updateParametrosObrigatorios);
+    });
+});
+</script>
+{% endblock %}

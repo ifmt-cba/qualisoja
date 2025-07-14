@@ -21,9 +21,9 @@
                     {% for error in form.non_field_errors %}
                         <div>{{ error }}</div>
                     {% endfor %}
-                 </div>
+                </div>
             {% endif %}    
-            
+
             <div class="row g-3">
                 <!-- Primeira linha -->
                 <div class="col-md-6">
@@ -45,7 +45,7 @@
                         {% endif %}
                     </div>
                 </div>
-                
+
                 <!-- Segunda linha -->
                 <div class="col-md-4">
                     <div class="form-floating mb-3">
@@ -56,7 +56,7 @@
                         {% endif %}
                     </div>
                 </div>
-                
+
                 <div class="col-md-4">
                     <div class="form-floating mb-3">
                         {{ form.tipo_analise|add_class:"form-select" }}
@@ -76,7 +76,7 @@
                         {% endif %}
                     </div>
                 </div>
-                
+
                 <div class="col-md-3">
                     <div class="form-floating mb-3">
                         {{ form.tara|add_class:"form-control" }}
@@ -86,7 +86,7 @@
                         {% endif %}
                     </div>
                 </div>
-                
+
                 <!-- Terceira linha -->
                 <div class="col-md-3">
                     <div class="form-floating mb-3">
@@ -100,8 +100,7 @@
 
                 <div class="col-md-3">
                     <div class="form-floating mb-3">
-                        
-                        {{ form.fator_correcao|add_class:"form-control"|attr:"required:False" }}
+                        {{ form.fator_correcao|add_class:"form-control" }}
                         <label for="{{ form.fator_correcao.id_for_label }}">{{ form.fator_correcao.label }}</label>
                         {% if form.fator_correcao.errors %}
                             <div class="invalid-feedback d-block">{{ form.fator_correcao.errors }}</div>
@@ -111,15 +110,15 @@
 
                 <div class="col-md-3">
                     <div class="form-floating mb-3">
-                        
-                        {{ form.titulacao|add_class:"form-control"|attr:"required:False" }}
+                        {{ form.titulacao|add_class:"form-control" }}
                         <label for="{{ form.titulacao.id_for_label }}">{{ form.titulacao.label }}</label>
                         {% if form.titulacao.errors %}
                             <div class="invalid-feedback d-block">{{ form.titulacao.errors }}</div>
                         {% endif %}
                     </div>
                 </div>
-            
+            </div>
+
             <div class="d-flex justify-content-between mt-4">
                 <a href="{% url 'analises:oleo_list' %}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-1"></i>Voltar
@@ -133,7 +132,7 @@
 </div>
 
 <script>
-    // Script para validação do formulário
+    // Validação visual do formulário
     (function () {
         'use strict'
         var forms = document.querySelectorAll('.needs-validation')
@@ -148,28 +147,21 @@
                 }, false)
             })
     })()
-
-    // Alterar visual dos campos conforme preenchimento
-    const resultFields = document.querySelectorAll('#id_tara, #id_resultado, #id_resultado_corrigido, #id_liquido, #id_peso_amostra, #id_fator_correcao');
-    resultFields.forEach(field => {
-        field.addEventListener('input', function() {
-            if (this.value) {
-                this.classList.add('bg-success', 'bg-opacity-10');
-            } else {
-                this.classList.remove('bg-success', 'bg-opacity-10');
-            }
-        });
-    });
 </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const tipoAnaliseField = document.querySelector("#id_tipo_analise");
-        const fatorCorrecaoDiv = document.querySelector("#id_fator_correcao").closest(".col-md-3");
-        const titulacaoDiv = document.querySelector("#id_titulacao").closest(".col-md-3");
+        const fatorCorrecaoInput = document.querySelector("#id_fator_correcao");
+        const titulacaoInput = document.querySelector("#id_titulacao");
+        const fatorCorrecaoDiv = fatorCorrecaoInput.closest(".col-md-3");
+        const titulacaoDiv = titulacaoInput.closest(".col-md-3");
 
         function toggleCamposPorAnalise() {
             const tipo = tipoAnaliseField.value;
             if (tipo === "UMI") {
+                fatorCorrecaoInput.value = "";
+                titulacaoInput.value = "";
                 fatorCorrecaoDiv.style.display = "none";
                 titulacaoDiv.style.display = "none";
             } else {
@@ -178,14 +170,8 @@
             }
         }
 
-        // Executa na inicialização
-        toggleCamposPorAnalise();
-
-        // Executa ao mudar o valor do select
+        toggleCamposPorAnalise(); // Inicial
         tipoAnaliseField.addEventListener("change", toggleCamposPorAnalise);
     });
 </script>
-
-
 {% endblock %}
-
