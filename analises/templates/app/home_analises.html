@@ -302,20 +302,55 @@ document.addEventListener('DOMContentLoaded', function() {
         parseInt('{{ total_fosforo|default:0 }}'),
         parseInt('{{ total_teor_oleo|default:0 }}')
     ];
+    
+    console.log('=== DEBUG DASHBOARD ===');
+    console.log('Dados do gráfico:', dadosAnalises);
+    console.log('Total Umidade:', '{{ total_umidade|default:0 }}');
+    console.log('Total Proteína:', '{{ total_proteina|default:0 }}');
+    console.log('Total Óleo:', '{{ total_oleo|default:0 }}');
+    console.log('Total Urase:', '{{ total_urase|default:0 }}');
+    console.log('Total Cinza:', '{{ total_cinza|default:0 }}');
+    console.log('Total Fibra:', '{{ total_fibra|default:0 }}');
+    console.log('Total Fósforo:', '{{ total_fosforo|default:0 }}');
+    console.log('Total Teor Óleo:', '{{ total_teor_oleo|default:0 }}');
+    console.log('Soma dos dados:', dadosAnalises.reduce((a, b) => a + b, 0));
+    
+    // Verificar se todos os valores são zero
+    const somaTotal = dadosAnalises.reduce((a, b) => a + b, 0);
+    if (somaTotal === 0) {
+        console.warn('AVISO: Todos os valores são zero. Será exibido gráfico informativo.');
+    }
 
     // Configuração do gráfico de distribuição
     const ctx = document.getElementById('graficoAnalises');
     if (ctx) {
+        // Verificar se há dados válidos
+        const somaTotal = dadosAnalises.reduce((a, b) => a + b, 0);
+        
+        let dadosGrafico, labelsGrafico, coresGrafico;
+        
+        if (somaTotal === 0) {
+            // Exibir gráfico informativo quando não há dados
+            dadosGrafico = [1];
+            labelsGrafico = ['Nenhuma análise registrada'];
+            coresGrafico = ['#e5e7eb'];
+        } else {
+            // Usar dados reais
+            dadosGrafico = dadosAnalises;
+            labelsGrafico = ['Umidade', 'Proteína', 'Óleo Degomado', 'Urase', 'Cinza', 'Fibra', 'Fósforo', 'Teor Óleo'];
+            coresGrafico = [
+                '#0d6efd', '#198754', '#ffc107', '#dc3545',
+                '#6c757d', '#20c997', '#fd7e14', '#6f42c1'
+            ];
+        }
+        
         const graficoAnalises = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Umidade', 'Proteína', 'Óleo Degomado', 'Urase', 'Cinza', 'Fibra', 'Fósforo', 'Teor Óleo'],
+                labels: labelsGrafico,
                 datasets: [{
-                    data: dadosAnalises,
-                    backgroundColor: [
-                        '#0d6efd', '#198754', '#ffc107', '#dc3545',
-                        '#6c757d', '#20c997', '#fd7e14', '#6f42c1'
-                    ],
+                    data: dadosGrafico,
+                    backgroundColor: coresGrafico,
                     borderWidth: 2,
                     borderColor: '#fff'
                 }]
@@ -334,6 +369,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
+                                if (somaTotal === 0) {
+                                    return 'Nenhuma análise encontrada';
+                                }
                                 return context.label + ': ' + context.parsed + ' análises';
                             }
                         }
