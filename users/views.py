@@ -56,12 +56,13 @@ def loginViews(request):  # Login deve ser público
         # Tentar autenticação por username primeiro
         user = auth.authenticate(request, username=username_or_email, password=password)
         
-        # Se não funcionar, tentar por email
+        # Se não funcionar, tentar por email (usando filter para evitar múltiplos resultados)
         if not user:
             try:
-                user_obj = User.objects.get(email=username_or_email)
-                user = auth.authenticate(request, username=user_obj.username, password=password)
-            except User.DoesNotExist:
+                user_obj = User.objects.filter(email=username_or_email).first()
+                if user_obj:
+                    user = auth.authenticate(request, username=user_obj.username, password=password)
+            except Exception:
                 user = None
 
         if not user:
