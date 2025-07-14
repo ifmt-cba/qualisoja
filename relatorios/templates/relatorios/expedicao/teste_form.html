@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste de Formulário</title>
+</head>
+<body>
+    <h1>Teste de Formulário Simples</h1>
+    <form method="post" action="/relatorios/expedicao/criar/">
+        {% csrf_token %}
+        
+        <p>
+            <label>Tipo de Análise:</label>
+            <select name="tipo_analise">
+                <option value="auto">Automático</option>
+                <option value="oleo">Óleo</option>
+                <option value="farelo">Farelo</option>
+            </select>
+        </p>
+        
+        <p>
+            <label>Data Inicial:</label>
+            <input type="date" name="data_inicial" value="2025-07-07">
+        </p>
+        
+        <p>
+            <label>Data Final:</label>
+            <input type="date" name="data_final" value="2025-07-14">
+        </p>
+        
+        <p>
+            <input type="hidden" name="periodo_predefinido" value="7">
+            <input type="hidden" name="parametros_incluidos" value="">
+            <input type="hidden" name="analises_selecionadas" value="">
+            <input type="hidden" name="observacoes_manuais" value="">
+        </p>
+        
+        <p>
+            <button type="submit">Enviar Teste</button>
+        </p>
+    </form>
+</body>
+</html>

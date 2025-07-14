@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Selecionar Formato - {{ relatorio.codigo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Relatório Criado com Sucesso!
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    {% if erro %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ erro }}
+                        </div>
+                    {% else %}
+                        <!-- Informações do Relatório -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Código do Relatório</h6>
+                                <p class="fw-bold">{{ relatorio.codigo }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Cliente</h6>
+                                <p class="fw-bold">{{ relatorio.get_cliente_nome }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Período</h6>
+                                <p class="fw-bold">
+                                    {% if relatorio.data_inicial and relatorio.data_final %}
+                                        {{ relatorio.data_inicial|date:"d/m/Y" }} a {{ relatorio.data_final|date:"d/m/Y" }}
+                                    {% else %}
+                                        Não especificado
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Tipo de Análise</h6>
+                                <p class="fw-bold">{{ relatorio.get_tipo_analise_display }}</p>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Seleção de Formato -->
+                        <div class="text-center mb-4">
+                            <h5 class="text-primary mb-4">
+                                <i class="fas fa-download me-2"></i>
+                                Formato de Saída
+                            </h5>
+                            
+                            <div class="row g-3 justify-content-center">
+                                <!-- Visualizar Online -->
+                                <div class="col-lg-4 col-md-6">
+                                    <a href="{% url 'relatorios:expedicao_visualizar' relatorio.pk %}" 
+                                       class="btn btn-outline-success btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none format-option">
+                                        <div class="format-icon mb-3">
+                                            <i class="fas fa-globe fa-3x text-success"></i>
+                                        </div>
+                                        <h6 class="mb-2">Visualizar Online</h6>
+                                        <small class="text-muted">Interativo no navegador</small>
+                                        <div class="check-icon mt-2">
+                                            <i class="fas fa-check-circle fa-lg text-success"></i>
+                                        </div>
+                                    </a>
+                                </div>
+                                
+                                <!-- Exportar PDF -->
+                                <div class="col-lg-4 col-md-6">
+                                    <a href="{% url 'relatorios:expedicao_download' relatorio.pk %}" 
+                                       class="btn btn-outline-danger btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none format-option">
+                                        <div class="format-icon mb-3">
+                                            <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                        </div>
+                                        <h6 class="mb-2">Exportar PDF</h6>
+                                        <small class="text-muted">Documento para impressão</small>
+                                    </a>
+                                </div>
+                                
+                                <!-- Exportar Excel -->
+                                <div class="col-lg-4 col-md-6">
+                                    <a href="{% url 'relatorios:expedicao_excel' relatorio.pk %}" 
+                                       class="btn btn-outline-info btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none format-option">
+                                        <div class="format-icon mb-3">
+                                            <i class="fas fa-file-excel fa-3x text-info"></i>
+                                        </div>
+                                        <h6 class="mb-2">Exportar Excel</h6>
+                                        <small class="text-muted">Planilha para análise</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Botões de Ação -->
+                        <div class="text-center">
+                            <a href="{% url 'relatorios:expedicao_criar' %}" class="btn btn-secondary me-2">
+                                <i class="fas fa-plus me-2"></i>
+                                Criar Novo Relatório
+                            </a>
+                            <a href="{% url 'relatorios:expedicao_lista' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-list me-2"></i>
+                                Ver Todos os Relatórios
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.format-option {
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    min-height: 200px;
+}
+
+.format-option:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: var(--bs-primary);
+}
+
+.format-option:hover .format-icon i {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+.format-option.selected {
+    border-color: var(--bs-success);
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
+.check-icon {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.format-option.selected .check-icon {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .format-option {
+        min-height: 150px;
+    }
+    
+    .format-icon i {
+        font-size: 2rem !important;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Marcar a primeira opção como selecionada por padrão
+    const firstOption = document.querySelector('.format-option');
+    if (firstOption) {
+        firstOption.classList.add('selected');
+    }
+    
+    // Adicionar efeito hover
+    document.querySelectorAll('.format-option').forEach(option => {
+        option.addEventListener('mouseenter', function() {
+            document.querySelectorAll('.format-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+});
+</script>
+{% endblock %}

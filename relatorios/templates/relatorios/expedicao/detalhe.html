@@ -413,59 +413,94 @@
             Resultados das Análises
         </h3>
         
-        <div style="overflow-x: auto;">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Lote</th>
-                        <th>Data Produção</th>
-                        {% for parametro in relatorio.get_parametros_completos %}
-                            <th>
-                                {{ parametro|title }}
-                                {% if parametro in relatorio.parametros_obrigatorios %}
-                                    <span style="color: var(--accent-green); font-size: 0.75rem;">★</span>
-                                {% endif %}
-                            </th>
-                        {% endfor %}
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lote in relatorio.lotes.all %}
-                    <tr>
-                        <td><strong>{{ lote.codigo }}</strong></td>
-                        <td>{{ lote.data_producao|date:"d/m/Y" }}</td>
-                        {% for parametro in relatorio.get_parametros_completos %}
-                            <td>
-                                {% get_analise_valor dados_analises lote.codigo parametro as valor %}
-                                {% if valor and valor != 'N/D' %}
-                                    <span class="valor-conforme">{{ valor }}</span>
-                                {% else %}
-                                    <span style="color: var(--text-muted);">N/D</span>
-                                {% endif %}
-                            </td>
-                        {% endfor %}
-                        <td>
-                            {% if lote.status == 'APROVADO' %}
-                                <span style="color: var(--success-green);">✅ Aprovado</span>
-                            {% elif lote.status == 'REPROVADO' %}
-                                <span style="color: var(--error-red);">❌ Reprovado</span>
+        {% if dados_analises %}
+            <div style="overflow-x: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Parâmetro</th>
+                            <th>Tipo Amostra</th>
+                            <th>Resultado</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for chave, analise in dados_analises.items %}
+                            {% if analise.tipo == 'grupo' %}
+                                <!-- Análises em grupo -->
+                                {% for parametro, dados_param in analise.analises.items %}
+                                <tr>
+                                    <td><strong>{{ analise.data|date:"d/m/Y" }}</strong></td>
+                                    <td>{{ dados_param.horario|time:"H:i"|default:"--:--" }}</td>
+                                    <td>
+                                        <span style="color: var(--accent-green); font-weight: 500;">
+                                            {{ parametro }}
+                                        </span>
+                                    </td>
+                                    <td>{{ dados_param.tipo_amostra|default:"N/D" }}</td>
+                                    <td>
+                                        {% if dados_param.resultado %}
+                                            <span class="valor-conforme">{{ dados_param.resultado|floatformat:2 }}%</span>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/D</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if dados_param.resultado %}
+                                            <span style="color: var(--success-green);">✅ Analisado</span>
+                                        {% else %}
+                                            <span style="color: var(--warning-yellow);">⏳ Pendente</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
                             {% else %}
-                                <span style="color: var(--warning-yellow);">⏳ {{ lote.get_status_display }}</span>
+                                <!-- Análises individuais ou por período -->
+                                <tr>
+                                    <td><strong>{{ analise.data|date:"d/m/Y" }}</strong></td>
+                                    <td>{{ analise.horario|time:"H:i"|default:"--:--" }}</td>
+                                    <td>
+                                        <span style="color: var(--accent-green); font-weight: 500;">
+                                            {{ analise.parametro }}
+                                        </span>
+                                    </td>
+                                    <td>{{ analise.tipo_amostra|default:"N/D" }}</td>
+                                    <td>
+                                        {% if analise.resultado %}
+                                            <span class="valor-conforme">{{ analise.resultado|floatformat:2 }}%</span>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">N/D</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if analise.resultado %}
+                                            <span style="color: var(--success-green);">✅ Analisado</span>
+                                        {% else %}
+                                            <span style="color: var(--warning-yellow);">⏳ Pendente</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
                             {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            
-            <div style="margin-top: 1rem; padding: 0.75rem; background: #f0f9ff; border-radius: 0.5rem; font-size: 0.875rem;">
-                <p style="margin: 0; color: var(--text-muted);">
-                    <i class="fas fa-star" style="color: var(--accent-green); margin-right: 0.5rem;"></i>
-                    Parâmetros marcados com ★ são obrigatórios na expedição
-                </p>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 1rem; padding: 0.75rem; background: #f0f9ff; border-radius: 0.5rem; font-size: 0.875rem;">
+                    <p style="margin: 0; color: var(--text-muted);">
+                        <i class="fas fa-info-circle" style="color: var(--accent-green); margin-right: 0.5rem;"></i>
+                        Exibindo {{ dados_analises|length }} análise{{ dados_analises|length|pluralize }} do período selecionado
+                    </p>
+                </div>
             </div>
-        </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                <i class="fas fa-flask" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <h4 style="margin: 0 0 0.5rem 0;">Nenhuma análise encontrada</h4>
+                <p style="margin: 0;">Não foram encontradas análises para o período especificado neste relatório.</p>
+            </div>
+        {% endif %}
     </div>
 
     <!-- Observações -->

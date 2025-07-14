@@ -334,7 +334,7 @@
 
 {% block extra_js %}
 <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
-{{ relatorio|json_script:"relatorio-data" }}
+{{ relatorio_data|json_script:"relatorio-data" }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Obter dados do relatório

@@ -19,9 +19,12 @@ urlpatterns = [
     path('expedicao/', views.RelatorioExpedicaoListView.as_view(), name='expedicao_lista'),
     path('expedicao/criar/', views.RelatorioExpedicaoCreateView.as_view(), name='expedicao_criar'),
     path('expedicao/<int:pk>/', views.RelatorioExpedicaoDetailView.as_view(), name='expedicao_detalhe'),
+    path('expedicao/<int:pk>/pdf/', views.RelatorioExpedicaoPDFView.as_view(), name='expedicao_pdf'),
+    path('expedicao/<int:pk>/formato/', views.RelatorioExpedicaoFormatoView.as_view(), name='expedicao_formato'),
     path('expedicao/<int:pk>/visualizar/', views.RelatorioExpedicaoDetailView.as_view(), name='expedicao_visualizar'),
     path('expedicao/<int:pk>/enviar/', views.RelatorioExpedicaoEnviarView.as_view(), name='expedicao_enviar'),
-    path('expedicao/<int:pk>/download/', views.RelatorioExpedicaoDetailView.as_view(), name='expedicao_download'),
+    path('expedicao/<int:pk>/download/', views.RelatorioExpedicaoDownloadView.as_view(), name='expedicao_download'),
+    path('expedicao/<int:pk>/excel/', views.RelatorioExpedicaoExcelView.as_view(), name='expedicao_excel'),
     
     # API endpoints
     path('api/cliente/<int:cliente_id>/dados/', views.ClienteDadosAPIView.as_view(), name='api_cliente_dados'),

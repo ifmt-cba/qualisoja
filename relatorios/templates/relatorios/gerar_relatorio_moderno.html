@@ -1420,9 +1420,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupEventListeners() {
         document.querySelectorAll('.report-type-card').forEach(card => {
             card.addEventListener('click', function() {
-                // Se for o card de expedição, redireciona para a página de criação de expedição
+                // Se for o card de expedição, redireciona para a página de listagem de expedição
                 if (this.dataset.type === 'expedicao') {
-                    window.location.href = "{% url 'relatorios:expedicao_criar' %}";
+                    window.location.href = "{% url 'relatorios:expedicao_lista' %}";
                     return;
                 }
                 

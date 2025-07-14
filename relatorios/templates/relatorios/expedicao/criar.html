@@ -235,101 +235,21 @@
         {% endif %}
 
         <div class="card">
-            <!-- Seção Cliente e Contrato -->
-            <div class="form-section">
-                <h3><i class="fas fa-building"></i> Cliente e Contrato</h3>
-                
-                <!-- Cliente -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            {{ form.usar_cliente_cadastrado|add_class:"form-check-input" }}
-                            <label for="{{ form.usar_cliente_cadastrado.id_for_label }}" style="margin: 0 0 0 0.5rem;">
-                                Usar cliente cadastrado
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-row" id="cliente-fields">
-                    <div class="form-group" id="cliente-cadastrado-field">
-                        <label for="{{ form.cliente.id_for_label }}">Cliente Cadastrado</label>
-                        {{ form.cliente|add_class:"form-control" }}
-                        {% if form.cliente.errors %}
-                            <ul class="errorlist">
-                                {% for error in form.cliente.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                    <div class="form-group" id="cliente-manual-field" style="display: none;">
-                        <label for="{{ form.cliente_nome_manual.id_for_label }}">Nome do Cliente *</label>
-                        {{ form.cliente_nome_manual|add_class:"form-control" }}
-                        {% if form.cliente_nome_manual.errors %}
-                            <ul class="errorlist">
-                                {% for error in form.cliente_nome_manual.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <!-- Contrato -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            {{ form.usar_contrato_cadastrado|add_class:"form-check-input" }}
-                            <label for="{{ form.usar_contrato_cadastrado.id_for_label }}" style="margin: 0 0 0 0.5rem;">
-                                Usar contrato cadastrado
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-row" id="contrato-fields">
-                    <div class="form-group" id="contrato-cadastrado-field" style="display: none;">
-                        <label for="{{ form.contrato.id_for_label }}">Contrato Cadastrado</label>
-                        {{ form.contrato|add_class:"form-control" }}
-                        <div class="help-text">Selecione um contrato para verificação automática de conformidade</div>
-                        {% if form.contrato.errors %}
-                            <ul class="errorlist">
-                                {% for error in form.contrato.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                    <div class="form-group" id="contrato-nome-field">
-                        <label for="{{ form.contrato_nome_manual.id_for_label }}">Nome do Contrato</label>
-                        {{ form.contrato_nome_manual|add_class:"form-control" }}
-                        {% if form.contrato_nome_manual.errors %}
-                            <ul class="errorlist">
-                                {% for error in form.contrato_nome_manual.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                    <div class="form-group" id="contrato-numero-field">
-                        <label for="{{ form.contrato_numero_manual.id_for_label }}">Número do Contrato</label>
-                        {{ form.contrato_numero_manual|add_class:"form-control" }}
-                        {% if form.contrato_numero_manual.errors %}
-                            <ul class="errorlist">
-                                {% for error in form.contrato_numero_manual.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
             <!-- Seção Período -->
             <div class="form-section">
                 <h3><i class="fas fa-calendar-alt"></i> Período de Análise</h3>
                 <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.periodo_predefinido.id_for_label }}">Período Predefinido</label>
+                        {{ form.periodo_predefinido|add_class:"form-control" }}
+                        {% if form.periodo_predefinido.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.periodo_predefinido.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
                     <div class="form-group">
                         <label for="{{ form.data_inicial.id_for_label }}">Data Inicial *</label>
                         {{ form.data_inicial|add_class:"form-control" }}
@@ -351,6 +271,27 @@
                                 {% endfor %}
                             </ul>
                         {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Tipo de Análise -->
+            <div class="form-section">
+                <h3><i class="fas fa-cogs"></i> Tipo de Análise</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.tipo_analise.id_for_label }}">Tipo de Análise *</label>
+                        {{ form.tipo_analise|add_class:"form-control" }}
+                        {% if form.tipo_analise.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.tipo_analise.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <small style="color: var(--text-muted); font-size: 0.875rem;">
+                            Escolha "Detectar automaticamente" para que o sistema identifique o tipo baseado nas análises disponíveis.
+                        </small>
                     </div>
                 </div>
             </div>
@@ -554,19 +495,6 @@
             <!-- Seção Configurações -->
             <div class="form-section">
                 <h3><i class="fas fa-cogs"></i> Configurações do Relatório</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="{{ form.formato.id_for_label }}">Formato de Saída *</label>
-                        {{ form.formato|add_class:"form-control" }}
-                        {% if form.formato.errors %}
-                            <ul class="errorlist">
-                                {% for error in form.formato.errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                </div>
                 
                 <div class="form-group">
                     <label for="{{ form.observacoes_manuais.id_for_label }}">Observações Manuais</label>
@@ -593,13 +521,16 @@
                 </div>
             </div>
 
+            <!-- Campo hidden para análises selecionadas -->
+            {{ form.analises_selecionadas }}
+
             <!-- Botões de Ação -->
             <div class="btn-actions">
                 <a href="{% url 'relatorios:expedicao_lista' %}" class="btn btn-outline">
                     <i class="fas fa-times" style="margin-right: 0.5rem;"></i>
                     Cancelar
                 </a>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" onclick="console.log('Botão clicado!'); alert('Botão foi clicado!');">
                     <i class="fas fa-chart-line" style="margin-right: 0.5rem;"></i>
                     Gerar Relatório
                 </button>
@@ -820,43 +751,89 @@ function updateParametrosObrigatorios() {
 
 // Função para validar se pelo menos uma análise foi selecionada antes do envio
 function validarFormulario(event) {
+    // Capturar análises selecionadas primeiro
+    capturarAnalisesSelecionadas();
+    
     const analisesCheckboxes = document.querySelectorAll('.analise-checkbox:checked');
     const gruposCheckboxes = document.querySelectorAll('input[name="grupo_analises"]:checked');
     
     // Verificar se há parâmetros selecionados para inclusão automática
     const parametrosIncluidos = document.querySelectorAll('input[name="parametros_incluidos"]:checked');
     
+    // Verificar o tipo de análise selecionado
+    const tipoAnalise = document.querySelector('select[name="tipo_analise"]');
+    const tipoSelecionado = tipoAnalise ? tipoAnalise.value : 'auto';
+    
+    // Se o tipo for "auto", permitir envio mesmo sem seleções específicas
+    if (tipoSelecionado === 'auto') {
+        console.log('Modo automático - permitindo envio sem seleções específicas');
+        return true;
+    }
+    
+    // Para outros tipos, verificar se há pelo menos alguma seleção
     if (analisesCheckboxes.length === 0 && gruposCheckboxes.length === 0 && parametrosIncluidos.length === 0) {
         event.preventDefault();
-        alert('Por favor, selecione pelo menos um parâmetro para incluir no relatório ou marque análises específicas.');
+        alert('Por favor, selecione pelo menos um parâmetro para incluir no relatório ou marque análises específicas.\n\nOu altere o tipo de análise para "Detectar automaticamente" para usar o modo automático.');
         return false;
     }
     
+    console.log('Validação aprovada - enviando formulário');
     return true;
+}
+
+function capturarAnalisesSelecionadas() {
+    const analisesSelecionadas = [];
+    
+    // Capturar grupos de análises selecionados
+    document.querySelectorAll('input[name="grupo_analises"]:checked').forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        const data = row.querySelector('td:nth-child(2) strong').textContent;
+        const tipo = row.querySelector('td:nth-child(3) span').textContent;
+        
+        analisesSelecionadas.push({
+            tipo: 'grupo',
+            identificador: checkbox.value,
+            data: data.trim(),
+            tipo_analise: tipo.trim()
+        });
+    });
+    
+    // Capturar análises individuais selecionadas
+    document.querySelectorAll('.analise-checkbox:checked').forEach(checkbox => {
+        const name = checkbox.name;
+        const match = name.match(/analise_(.+)_(\d+)/);
+        if (match) {
+            const [, modelo, id] = match;
+            const row = checkbox.closest('tr');
+            const data = row.querySelector('td:nth-child(2) strong').textContent;
+            
+            // Determinar qual parâmetro baseado na coluna
+            const cellIndex = Array.from(checkbox.closest('td').parentNode.children).indexOf(checkbox.closest('td'));
+            const parametros = ['', '', '', 'Umidade', 'Proteína', 'Teor Óleo', 'Fibra', 'Cinza', 'Acidez', 'Fósforo'];
+            const parametro = parametros[cellIndex] || 'Desconhecido';
+            
+            analisesSelecionadas.push({
+                tipo: 'individual',
+                modelo: modelo,
+                id: parseInt(id),
+                parametro: parametro,
+                data: data.trim(),
+                valor: checkbox.nextElementSibling ? checkbox.nextElementSibling.textContent.trim() : ''
+            });
+        }
+    });
+    
+    // Salvar no campo hidden
+    const campoHidden = document.querySelector('input[name="analises_selecionadas"]');
+    if (campoHidden) {
+        campoHidden.value = JSON.stringify(analisesSelecionadas);
+        console.log('Análises selecionadas capturadas:', analisesSelecionadas);
+    }
 }
 
 // Adicionar event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    const clienteSelect = document.getElementById('id_cliente');
-    const usarClienteCheckbox = document.getElementById('id_usar_cliente_cadastrado');
-    const usarContratoCheckbox = document.getElementById('id_usar_contrato_cadastrado');
     const form = document.querySelector('form');
-    
-    if (clienteSelect) {
-        clienteSelect.addEventListener('change', updateContratos);
-    }
-    
-    if (usarClienteCheckbox) {
-        usarClienteCheckbox.addEventListener('change', toggleClienteFields);
-        // Inicializar estado
-        toggleClienteFields();
-    }
-    
-    if (usarContratoCheckbox) {
-        usarContratoCheckbox.addEventListener('change', toggleContratoFields);
-        // Inicializar estado
-        toggleContratoFields();
-    }
     
     // Inicializar parâmetros obrigatórios
     updateParametrosObrigatorios();
@@ -866,9 +843,26 @@ document.addEventListener('DOMContentLoaded', function() {
         checkbox.addEventListener('change', updateParametrosObrigatorios);
     });
     
-    // Adicionar validação ao formulário
+    // Adicionar validação ao formulário (TEMPORARIAMENTE DESABILITADO PARA TESTE)
     if (form) {
-        form.addEventListener('submit', validarFormulario);
+        form.addEventListener('submit', function(event) {
+            console.log('Formulário sendo enviado...');
+            console.log('Event target:', event.target);
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+            
+            // REMOVENDO VALIDAÇÃO TEMPORARIAMENTE
+            // const resultado = validarFormulario(event);
+            // console.log('Resultado da validação:', resultado);
+            
+            // if (!resultado) {
+            //     console.log('Validação falhou - envio cancelado');
+            // } else {
+            //     console.log('Validação passou - formulário será enviado');
+            // }
+            
+            console.log('Enviando formulário SEM validação para teste...');
+        });
     }
     
     // Adicionar listener para mudanças nos lotes existentes (se houver)

@@ -210,6 +210,13 @@ class RelatorioExpedicao(BaseModel):
         help_text="Lista de parâmetros obrigatórios na expedição (sempre incluídos)"
     )
     
+    # Análises específicas selecionadas pelo usuário
+    analises_selecionadas = models.JSONField(
+        default=list,
+        verbose_name="Análises Selecionadas",
+        help_text="Lista de análises específicas selecionadas pelo usuário"
+    )
+    
     usuario_responsavel = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name="Responsável")
     data_geracao = models.DateTimeField(auto_now_add=True, verbose_name="Data de Geração")
     

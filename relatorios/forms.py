@@ -101,8 +101,7 @@ class RelatorioExpedicaoForm(forms.ModelForm):
 
     FORMATO_CHOICES = [
         ('PDF', 'PDF'),
-        ('EXCEL', 'Excel'),
-        ('HTML', 'Visualização Online'),
+        ('HTML', 'Visualizar Online'),
     ]
     
     PERIODO_CHOICES = [
@@ -137,59 +136,6 @@ class RelatorioExpedicaoForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-control', 'onchange': 'updateParametrosObrigatorios()'})
     )
 
-    # Opção de usar cliente cadastrado ou digitar manualmente
-    usar_cliente_cadastrado = forms.BooleanField(
-        required=False,
-        initial=True,
-        label="Usar cliente cadastrado",
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'onchange': 'toggleClienteFields()'})
-    )
-    
-    cliente = forms.ModelChoiceField(
-        queryset=Cliente.objects.filter(ativo=True),
-        empty_label="Selecione um cliente",
-        required=False,
-        label="Cliente",
-        widget=forms.Select(attrs={'class': 'form-control', 'onchange': 'updateContratos()'})
-    )
-    
-    cliente_nome_manual = forms.CharField(
-        max_length=200,
-        required=False,
-        label="Nome do Cliente",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Digite o nome do cliente'})
-    )
-    
-    # Opção de usar contrato cadastrado ou digitar manualmente
-    usar_contrato_cadastrado = forms.BooleanField(
-        required=False,
-        initial=False,
-        label="Usar contrato cadastrado",
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'onchange': 'toggleContratoFields()'})
-    )
-    
-    contrato = forms.ModelChoiceField(
-        queryset=EspecificacaoContrato.objects.none(),
-        empty_label="Selecione um contrato",
-        required=False,
-        label="Contrato",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    
-    contrato_nome_manual = forms.CharField(
-        max_length=100,
-        required=False,
-        label="Nome do Contrato",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Digite o nome do contrato'})
-    )
-    
-    contrato_numero_manual = forms.CharField(
-        max_length=50,
-        required=False,
-        label="Número do Contrato",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Digite o número do contrato'})
-    )
-    
     parametros_incluidos = forms.MultipleChoiceField(
         choices=PARAMETROS_CHOICES,
         required=False,
@@ -212,14 +158,6 @@ class RelatorioExpedicaoForm(forms.ModelForm):
         initial=datetime.date.today()
     )
     
-    formato = forms.ChoiceField(
-        choices=FORMATO_CHOICES,
-        initial='PDF',
-        required=True,
-        label="Formato de Saída",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    
     observacoes_manuais = forms.CharField(
         required=False,
         label="Observações Manuais",
@@ -228,6 +166,13 @@ class RelatorioExpedicaoForm(forms.ModelForm):
             'rows': 4,
             'placeholder': 'Adicione observações específicas para este relatório...'
         })
+    )
+    
+    # Campo para armazenar análises selecionadas
+    analises_selecionadas = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+        help_text="Análises específicas selecionadas pelo usuário"
     )
     
     incluir_graficos = forms.BooleanField(
@@ -246,26 +191,12 @@ class RelatorioExpedicaoForm(forms.ModelForm):
     
     class Meta:
         model = RelatorioExpedicao
-        fields = ['cliente', 'cliente_nome_manual', 'contrato', 'contrato_nome_manual', 
-                 'contrato_numero_manual', 'tipo_analise', 'data_inicial', 'data_final', 
-                 'parametros_incluidos', 'formato', 'observacoes_manuais']
+        fields = ['tipo_analise', 'data_inicial', 'data_final', 
+                 'parametros_incluidos', 'observacoes_manuais', 'analises_selecionadas']
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # Se um cliente foi selecionado, filtrar contratos
-        if 'cliente' in self.data:
-            try:
-                cliente_id = int(self.data.get('cliente'))
-                self.fields['contrato'].queryset = EspecificacaoContrato.objects.filter(
-                    cliente_id=cliente_id, ativo=True
-                )
-            except (ValueError, TypeError):
-                pass
-        elif self.instance.pk and self.instance.cliente:
-            self.fields['contrato'].queryset = EspecificacaoContrato.objects.filter(
-                cliente=self.instance.cliente, ativo=True
-            )
+        # Formulário simplificado - não precisa de lógica especial
     
     def _obter_periodo_analises(self, periodo_predefinido, data_inicial, data_final):
         """Determina o período das análises baseado na seleção do usuário."""
@@ -335,9 +266,6 @@ class RelatorioExpedicaoForm(forms.ModelForm):
         data_inicial = cleaned_data.get('data_inicial')
         data_final = cleaned_data.get('data_final')
         tipo_analise = cleaned_data.get('tipo_analise', 'auto')
-        usar_cliente_cadastrado = cleaned_data.get('usar_cliente_cadastrado')
-        cliente = cleaned_data.get('cliente')
-        cliente_nome_manual = cleaned_data.get('cliente_nome_manual')
         
         # Determinar período das análises
         try:
@@ -346,13 +274,6 @@ class RelatorioExpedicaoForm(forms.ModelForm):
             cleaned_data['data_final'] = data_fim
         except forms.ValidationError as e:
             raise e
-        
-        # Validar cliente
-        if usar_cliente_cadastrado and not cliente:
-            raise forms.ValidationError("Selecione um cliente cadastrado ou desmarque a opção.")
-        
-        if not usar_cliente_cadastrado and not cliente_nome_manual:
-            raise forms.ValidationError("Digite o nome do cliente ou selecione um cliente cadastrado.")
         
         # Determinar tipo de análise
         if tipo_analise == 'auto':
