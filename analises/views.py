@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from decimal import Decimal
+import logging
 from django.views.generic import (
     CreateView,
     ListView,
@@ -34,6 +35,8 @@ from .forms import (
     AnaliseSilicaForm,
 )
 from logs.utils import registrar_log
+
+logger = logging.getLogger(__name__)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -360,7 +363,6 @@ class ProteinaListView(ListView):
     ordering = ["-data", "-horario"]
 
 
-@method_decorator(login_required, name="dispatch")
 class ProteinaCreateView(CreateView):
     model = AnaliseProteina
     form_class = AnaliseProteinaForm
@@ -386,20 +388,31 @@ class ProteinaCreateView(CreateView):
                 .first()
             )
 
-            # Garante que um valor decimal seja passado, mesmo que a umidade não seja encontrada.
-            umidade_valor = (
-                umidade_obj.resultado
-                if umidade_obj and umidade_obj.resultado is not None
-                else Decimal("0.00")
-            )
+            # Log para debug da view
+            logger.info(f"VIEW: Buscando umidade para proteína - Data: {proteina.data}, Tipos: {umidade_tipos_lookup}")
+            
+            if umidade_obj:
+                umidade_valor = umidade_obj.resultado if umidade_obj.resultado is not None else Decimal("0.00")
+                logger.info(f"VIEW: Umidade encontrada: {umidade_valor}% (ID: {umidade_obj.id})")
+            else:
+                umidade_valor = Decimal("0.00")
+                logger.warning(f"VIEW: Nenhuma umidade encontrada para a data {proteina.data} e tipos {umidade_tipos_lookup}")
 
+            # Chama o método de cálculo
             proteina.calcular_proteina(umidade_valor)
+            logger.info(f"VIEW: Após calcular - Resultado: {proteina.resultado}%, Corrigido: {proteina.resultado_corrigido}%")
         else:
             # Garante que os resultados sejam zero para casos especiais, evitando erros nos relatórios.
             proteina.resultado = Decimal("0.00")
             proteina.resultado_corrigido = Decimal("0.00")
 
         proteina.save()
+        messages.success(self.request, f"Análise de proteína salva com sucesso! Resultado: {proteina.resultado_corrigido}%")
+        
+        if self.request.user.is_authenticated:
+            registrar_log(
+                self.request.user, "Criou uma nova análise de Proteína", obj=proteina
+            )
         return super().form_valid(form)
 
     def form_invalid(self, form):

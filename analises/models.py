@@ -73,12 +73,12 @@ class AnaliseUmidade(BaseModel):
         max_digits=10, decimal_places=2, verbose_name="Peso da Amostra"
     )
     resultado = models.DecimalField(
-        max_digits=10, 
-        decimal_places=4, 
-        blank=True, 
-        null=True, 
+        max_digits=10,
+        decimal_places=4,
+        blank=True,
+        null=True,
         verbose_name="Umidade (%)",
-        help_text="Calculado automaticamente: ((tara + peso_amostra) - liquido) / peso_amostra * 100"
+        help_text="Calculado automaticamente: ((tara + peso_amostra) - liquido) / peso_amostra * 100",
     )
 
     def save(self, *args, **kwargs):
@@ -87,9 +87,9 @@ class AnaliseUmidade(BaseModel):
         Fórmula: Umidade (%) = ((tara + peso_amostra) - liquido) / peso_amostra * 100
         """
         if (
-            self.tara is not None 
-            and self.liquido is not None 
-            and self.peso_amostra is not None 
+            self.tara is not None
+            and self.liquido is not None
+            and self.peso_amostra is not None
             and self.peso_amostra != 0
         ):
             self.resultado = (
@@ -218,7 +218,18 @@ class AnaliseProteina(BaseModel):
             if umidade == 0 or umidade >= 100:
                 proteina_corrigida = proteina_bruta
             else:
-                proteina_corrigida = (proteina_bruta * 100) / (Decimal("100") - umidade)
+                # Fórmula correta para correção de proteína com umidade padrão por tipo
+                # Proteína Corrigida = (Proteína Bruta × (100 - Umidade Padrão)) / (100 - Umidade Real)
+                if self.tipo_amostra == "FL":  # Farelo
+                    umidade_padrao = Decimal("12.0")  # Farelo: 12%
+                elif self.tipo_amostra == "SI":  # Soja Industrializada
+                    umidade_padrao = Decimal("14.0")  # Soja: 14%
+                else:
+                    umidade_padrao = Decimal("12.0")  # Padrão para outros tipos
+
+                proteina_corrigida = (
+                    proteina_bruta * (Decimal("100") - umidade_padrao)
+                ) / (Decimal("100") - umidade)
 
             self.resultado = proteina_bruta.quantize(Decimal("0.01"))
             self.resultado_corrigido = proteina_corrigida.quantize(Decimal("0.01"))
@@ -232,6 +243,71 @@ class AnaliseProteina(BaseModel):
             self.resultado = Decimal("0.00")
             self.resultado_corrigido = Decimal("0.00")
             return self.resultado, self.resultado_corrigido
+
+    def save(self, *args, **kwargs):
+        """
+        Sobrescreve o método save para calcular automaticamente o resultado da proteína.
+        """
+        if self.tipo_amostra not in ["FP", "SA"]:
+            try:
+                # Define os tipos de amostra de umidade correspondentes
+                umidade_tipos_lookup = [self.tipo_amostra]
+                if self.tipo_amostra == "FL":  # Farelo
+                    umidade_tipos_lookup = ["FG", "FF"]  # Farelo Grosso e Fino
+
+                # Busca a umidade da mesma data e tipo de amostra, a mais recente por horário
+                umidade_obj = (
+                    AnaliseUmidade.objects.filter(
+                        data=self.data, tipo_amostra__in=umidade_tipos_lookup
+                    )
+                    .order_by("-horario")
+                    .first()
+                )
+
+                if umidade_obj and umidade_obj.resultado is not None:
+                    umidade_valor = umidade_obj.resultado
+                else:
+                    umidade_valor = Decimal("0.00")
+
+                # Calcula a proteína
+                self.calcular_proteina(umidade_valor)
+
+            except Exception as e:
+                logger.error(f"Erro ao calcular proteína no save(): {e}")
+                self.resultado = Decimal("0.00")
+                self.resultado_corrigido = Decimal("0.00")
+        else:
+            # Para casos especiais (FP, SA)
+            self.resultado = Decimal("0.00")
+            self.resultado_corrigido = Decimal("0.00")
+
+        super().save(*args, **kwargs)
+
+    def get_umidade_utilizada(self):
+        """
+        Retorna a análise de umidade utilizada no cálculo da proteína corrigida.
+        """
+        if self.tipo_amostra in ["FP", "SA"]:
+            return None
+
+        try:
+            # Define os tipos de amostra de umidade correspondentes
+            umidade_tipos_lookup = [self.tipo_amostra]
+            if self.tipo_amostra == "FL":  # Farelo
+                umidade_tipos_lookup = ["FG", "FF"]  # Farelo Grosso e Fino
+
+            # Busca a umidade da mesma data e tipo de amostra, a mais recente por horário
+            umidade_obj = (
+                AnaliseUmidade.objects.filter(
+                    data=self.data, tipo_amostra__in=umidade_tipos_lookup
+                )
+                .order_by("-horario")
+                .first()
+            )
+
+            return umidade_obj
+        except Exception:
+            return None
 
     def __str__(self):
         media = " (Média 24h)" if self.eh_media_24h else ""

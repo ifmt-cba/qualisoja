@@ -24,6 +24,7 @@
                         <th>Peso da Amostra (g)</th>
                         <th>ML Gastos</th>
                         <th>Resultado (%)</th>
+                        <th>Umidade Usada (%)</th>
                         <th>Resultado Corrigido (%)</th>
                         <th>Média 24h</th>
                         <th>Ações</th>
@@ -49,6 +50,16 @@
                             {% else %}
                             <span class="badge bg-secondary">N/A</span>
                             {% endif %}
+                        </td>
+                        <td>
+                            {% with umidade=analise.get_umidade_utilizada %}
+                                {% if umidade and umidade.resultado %}
+                                    <span class="badge bg-primary">{{ umidade.resultado|floatformat:2 }}%</span>
+                                    <small class="d-block text-muted">{{ umidade.get_tipo_amostra_display }}</small>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Sem umidade</span>
+                                {% endif %}
+                            {% endwith %}
                         </td>
                         <td>
                             {% if analise.resultado_corrigido %}
@@ -83,7 +94,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="text-center text-muted py-4">
+                        <td colspan="10" class="text-center text-muted py-4">
                             <i class="bi bi-inbox display-4 d-block mb-3"></i>
                             <p class="mb-0">Nenhuma análise de proteína encontrada.</p>
                             <a href="{% url 'analises:proteina_create' %}" class="btn btn-success mt-2">
