@@ -70,10 +70,10 @@ O **QualiSoja** é uma solução completa para controle de qualidade na cadeia p
 python teste\executar_testes.py
 
 # Ver relatório detalhado
-cat TESTES_EXECUTADOS.md
+cat teste\testes_executados.md
 ```
 
-📖 **[Ver Relatório Completo de Testes →](TESTES_EXECUTADOS.md)**
+📖 **[Ver Relatório Completo de Testes →](teste/testes_executados.md)**
 
 ---
 

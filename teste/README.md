@@ -6,10 +6,16 @@ Esta pasta contém scripts de teste automatizados para validar o funcionamento d
 
 ```
 teste/
-├── README.md                 # Este arquivo
-├── executar_testes.py       # Script principal que executa todos os testes
-├── teste_analises.py        # Testes específicos do módulo de análises
-└── teste_relatorios.py      # Testes específicos do módulo de relatórios
+├── README.md                    # Este arquivo
+├── executar_testes.py          # Script principal que executa todos os testes
+├── teste_analises.py           # Testes específicos do módulo de análises
+├── teste_relatorios.py         # Testes específicos do módulo de relatórios
+├── analise_cobertura.py        # Análise de cobertura de código
+├── teste_feito.md              # Documentação técnica completa para apresentação
+├── testes_executados.md        # Relatório de execução com resultados detalhados
+├── resumo_apresentacao.md      # Guia prático para apresentação oral
+├── verificar_dados.py          # Script para verificação de dados no banco
+└── verificar_proteina.py       # Script específico para verificar análises de proteína
 ```
 
 ## Como Executar
@@ -67,6 +73,48 @@ python teste\teste_relatorios.py
 - ✅ Integração entre módulos (análises ↔ relatórios)
 - ✅ Criação de dados relacionados
 - ✅ Relatório completo de resultados
+
+## 📖 Documentação Técnica
+
+### `teste_feito.md` - Explicação Completa para Professor
+Documento técnico abrangente que explica:
+- **Metodologia aplicada**: Strategy Pattern, Factory Pattern, Template Method
+- **Estratégias de teste**: Black Box, White Box, Gray Box Testing
+- **Padrões de qualidade**: Princípios FIRST, Clean Code, AAA Pattern
+- **Métricas detalhadas**: Cobertura de código, performance, bugs detectados
+- **Análise de qualidade**: Pontos fortes, oportunidades de melhoria
+- **Guia para apresentação**: Estrutura sugerida, perguntas antecipadas
+
+**Uso recomendado**: 
+- Estudo técnico antes de apresentações
+- Referência para explicar conceitos de Engenharia de Software
+- Base para discussões acadêmicas sobre qualidade de código
+
+### `testes_executados.md` - Relatório de Execução
+Relatório detalhado da última execução dos testes com:
+- **Resumo executivo**: Taxa de sucesso por módulo
+- **Detalhamento técnico**: Resultados específicos de cada teste
+- **Métricas quantitativas**: Tempo de execução, bugs detectados
+- **Análise de resultados**: Sucessos, falhas e recomendações
+- **Guia de uso**: Como executar e interpretar os testes
+
+### `resumo_apresentacao.md` - Guia de Apresentação Oral
+Material prático para apresentações acadêmicas:
+- **Elevator pitch**: Resumo de 30 segundos
+- **Números impactantes**: Estatísticas para impressionar
+- **Script de demo**: Roteiro para demonstração ao vivo
+- **FAQ preparado**: Respostas para perguntas difíceis
+- **Conceitos simplificados**: Explicações técnicas acessíveis
+
+### Scripts de Verificação
+- **`verificar_dados.py`**: Validação geral da estrutura de dados
+- **`verificar_proteina.py`**: Verificação específica das análises de proteína
+- **`analise_cobertura.py`**: Análise detalhada da cobertura de testes
+
+**Uso recomendado**: 
+- Debugging de problemas específicos
+- Validação antes de apresentações
+- Verificação da integridade dos dados
 
 ## Interpretando os Resultados
 
