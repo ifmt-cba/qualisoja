@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Relatórios de Expedição - QualiSoja{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-green: #065f46;
+        --light-green: #d1fae5;
+        --accent-green: #059669;
+        --text-dark: #111827;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--accent-green);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-green);
+        color: white;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--accent-green);
+        border: 1px solid var(--accent-green);
+    }
+
+    .btn-outline:hover {
+        background: var(--accent-green);
+        color: white;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table th {
+        background: #f9fafb;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-rascunho {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-gerado {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-enviado {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-visualizado {
+        background: #f3e8ff;
+        color: #7c3aed;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-control {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent-green);
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; font-size: 2rem; font-weight: 700;">📊 Relatórios de Expedição</h1>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Gerencie e acompanhe relatórios de expedição para vendas</p>
+            </div>
+            <a href="{% url 'relatorios:expedicao_criar' %}" class="btn btn-primary" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                Novo Relatório
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filtros -->
+    <div class="card">
+        <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem; font-weight: 600;">🔍 Filtros</h3>
+        <form method="get">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form_filtro.cliente.id_for_label }}">Cliente</label>
+                    {{ form_filtro.cliente|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form_filtro.status.id_for_label }}">Status</label>
+                    {{ form_filtro.status|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form_filtro.data_inicial.id_for_label }}">Data Inicial</label>
+                    {{ form_filtro.data_inicial|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form_filtro.data_final.id_for_label }}">Data Final</label>
+                    {{ form_filtro.data_final|add_class:"form-control" }}
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+                <a href="{% url 'relatorios:expedicao_lista' %}" class="btn btn-outline">Limpar</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Relatórios -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600;">📋 Relatórios ({{ total_relatorios }})</h3>
+        </div>
+
+        {% if relatorios %}
+            <div style="overflow-x: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Cliente</th>
+                            <th>Período</th>
+                            <th>Status</th>
+                            <th>Responsável</th>
+                            <th>Data Geração</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for relatorio in relatorios %}
+                        <tr>
+                            <td>
+                                <strong>{{ relatorio.codigo }}</strong>
+                                {% if relatorio.certificacao_conformidade %}
+                                    <span style="color: #059669; margin-left: 0.5rem;" title="Certificação de Conformidade">✓</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ relatorio.cliente.nome }}</td>
+                            <td>{{ relatorio.data_inicial|date:"d/m/Y" }} - {{ relatorio.data_final|date:"d/m/Y" }}</td>
+                            <td>
+                                <span class="status-badge status-{{ relatorio.status|lower }}">
+                                    {% if relatorio.status == 'RASCUNHO' %}📝 Rascunho
+                                    {% elif relatorio.status == 'GERADO' %}📊 Gerado
+                                    {% elif relatorio.status == 'ENVIADO' %}📧 Enviado
+                                    {% elif relatorio.status == 'VISUALIZADO' %}👁️ Visualizado
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>{{ relatorio.usuario_responsavel.get_full_name|default:relatorio.usuario_responsavel.username }}</td>
+                            <td>{{ relatorio.data_geracao|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <div class="actions">
+                                    <a href="{% url 'relatorios:expedicao_detalhe' relatorio.pk %}" class="btn btn-outline btn-sm">
+                                        <i class="fas fa-eye"></i> Ver
+                                    </a>
+                                    {% if relatorio.status != 'RASCUNHO' %}
+                                    <a href="{% url 'relatorios:expedicao_enviar' relatorio.pk %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-paper-plane"></i> Enviar
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-file-alt" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-muted);">Nenhum relatório encontrado</h4>
+                <p style="margin: 0;">Crie seu primeiro relatório de expedição clicando no botão "Novo Relatório"</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+{% endblock %}

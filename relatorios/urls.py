@@ -14,4 +14,15 @@ urlpatterns = [
     path('gerar/', views.RelatorioGerarView.as_view(), name='gerar'),
     path('gerar-classico/', views.RelatorioGerarModernoView.as_view(), name='gerar_classico'),
     path('visualizar/', views.RelatorioVisualizarView.as_view(), name='visualizar'),
+    
+    # URLs para Relatórios de Expedição
+    path('expedicao/', views.RelatorioExpedicaoListView.as_view(), name='expedicao_lista'),
+    path('expedicao/criar/', views.RelatorioExpedicaoCreateView.as_view(), name='expedicao_criar'),
+    path('expedicao/<int:pk>/', views.RelatorioExpedicaoDetailView.as_view(), name='expedicao_detalhe'),
+    path('expedicao/<int:pk>/visualizar/', views.RelatorioExpedicaoDetailView.as_view(), name='expedicao_visualizar'),
+    path('expedicao/<int:pk>/enviar/', views.RelatorioExpedicaoEnviarView.as_view(), name='expedicao_enviar'),
+    path('expedicao/<int:pk>/download/', views.RelatorioExpedicaoDetailView.as_view(), name='expedicao_download'),
+    
+    # API endpoints
+    path('api/cliente/<int:cliente_id>/dados/', views.ClienteDadosAPIView.as_view(), name='api_cliente_dados'),
 ]
