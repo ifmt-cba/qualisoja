@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {% if object %}
-        Editar Análise de Sílica - QualiSoja
-    {% else %}
-        Nova Análise de Sílica - QualiSoja
-    {% endif %}
+{% if object %}
+Editar Análise de Sílica - QualiSoja
+{% else %}
+Nova Análise de Sílica - QualiSoja
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -17,16 +17,16 @@
                     <h4 class="mb-0">
                         <i class="bi bi-layers me-2"></i>
                         {% if object %}
-                            Editar Análise de Sílica
+                        Editar Análise de Sílica
                         {% else %}
-                            Nova Análise de Sílica
+                        Nova Análise de Sílica
                         {% endif %}
                     </h4>
                 </div>
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -35,7 +35,7 @@
                                     </label>
                                     {{ form.data }}
                                     {% if form.data.errors %}
-                                        <div class="text-danger">{{ form.data.errors }}</div>
+                                    <div class="text-danger">{{ form.data.errors }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -46,7 +46,7 @@
                                     </label>
                                     {{ form.horario }}
                                     {% if form.horario.errors %}
-                                        <div class="text-danger">{{ form.horario.errors }}</div>
+                                    <div class="text-danger">{{ form.horario.errors }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -58,17 +58,25 @@
                             </label>
                             {{ form.tipo_amostra }}
                             {% if form.tipo_amostra.errors %}
-                                <div class="text-danger">{{ form.tipo_amostra.errors }}</div>
+                            <div class="text-danger">{{ form.tipo_amostra.errors }}</div>
                             {% endif %}
                         </div>
 
+                        <!-- Mensagem para casos especiais (FP/SA) -->
+                        <div id="special-case-message" class="alert alert-info d-none">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <span id="special-case-text"></span>
+                        </div>
+
+                        <!-- Campos da Análise -->
+                        <div id="analise-fields-wrapper">
                         <div class="mb-3">
                             <label for="{{ form.analise_cinza.id_for_label }}" class="form-label">
                                 <i class="bi bi-link-45deg me-1"></i>{{ form.analise_cinza.label }} *
                             </label>
                             {{ form.analise_cinza }}
                             {% if form.analise_cinza.errors %}
-                                <div class="text-danger">{{ form.analise_cinza.errors }}</div>
+                            <div class="text-danger">{{ form.analise_cinza.errors }}</div>
                             {% endif %}
                             <div class="form-text">
                                 {{ form.analise_cinza.help_text }}
@@ -81,7 +89,7 @@
                             </label>
                             {{ form.resultado_silica }}
                             {% if form.resultado_silica.errors %}
-                                <div class="text-danger">{{ form.resultado_silica.errors }}</div>
+                            <div class="text-danger">{{ form.resultado_silica.errors }}</div>
                             {% endif %}
                             <div class="form-text">
                                 {{ form.resultado_silica.help_text }}
@@ -90,13 +98,15 @@
 
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle me-2"></i>
-                            <strong>Resultado Final:</strong> Será calculado automaticamente como <strong>Resultado Cinza - Resultado Sílica</strong>
+                            <strong>Resultado Final:</strong> Será calculado automaticamente como <strong>Resultado
+                                Cinza - Resultado Sílica</strong>
                         </div>
+                        </div> <!-- Fim do analise-fields-wrapper -->
 
                         {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ form.non_field_errors }}
-                            </div>
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
                         {% endif %}
 
                         <div class="d-flex justify-content-between">
@@ -114,4 +124,60 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Função para controlar campos em casos especiais (FP/SA)
+    function toggleAnaliseFields() {
+        const tipoAmostra = document.querySelector('#id_tipo_amostra').value;
+        const specialMessage = document.getElementById('special-case-message');
+        const specialText = document.getElementById('special-case-text');
+        const fieldsWrapper = document.getElementById('analise-fields-wrapper');
+        
+        if (tipoAmostra === 'FP') {
+            specialMessage.classList.remove('d-none');
+            specialText.textContent = 'FÁBRICA PARADA - Não há necessidade de inserir dados de análise.';
+            fieldsWrapper.style.display = 'none';
+            
+            // Desabilitar campos obrigatórios
+            const inputs = fieldsWrapper.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.required = false;
+            });
+            
+        } else if (tipoAmostra === 'SA') {
+            specialMessage.classList.remove('d-none');
+            specialText.textContent = 'SEM AMOSTRA - Não há necessidade de inserir dados de análise.';
+            fieldsWrapper.style.display = 'none';
+            
+            // Desabilitar campos obrigatórios
+            const inputs = fieldsWrapper.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.required = false;
+            });
+            
+        } else {
+            specialMessage.classList.add('d-none');
+            fieldsWrapper.style.display = 'block';
+            
+            // Reabilitar campos
+            const inputs = fieldsWrapper.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = false;
+                if (input.id === 'id_analise_cinza' || input.id === 'id_resultado_silica') {
+                    input.required = true;
+                }
+            });
+        }
+    }
+    
+    // Vincular função ao campo tipo_amostra
+    document.querySelector('#id_tipo_amostra').addEventListener('change', toggleAnaliseFields);
+    
+    // Executar na inicialização
+    toggleAnaliseFields();
+});
+</script>
 {% endblock %}

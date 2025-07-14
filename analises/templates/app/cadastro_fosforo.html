@@ -92,7 +92,7 @@
                         {% for message in messages %}
                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                                 {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         {% endfor %}
                     {% endif %}
@@ -139,6 +139,14 @@
                                 </div>
                             </div>
 
+                            <!-- Mensagem para casos especiais (FP/SA) -->
+                            <div id="special-case-message" class="alert alert-info d-none">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span id="special-case-text"></span>
+                            </div>
+
+                        <!-- Campos da Análise -->
+                        <div id="analise-fields-wrapper">
                             <!-- Campo Principal: Absorbância -->
                             <div class="col-md-6">
                                 <div class="campo-destaque">
@@ -249,6 +257,7 @@
                                 </div>
                             </div>
                         </div>
+                        </div> <!-- Fim do analise-fields-wrapper -->
 
                         <!-- Botões -->
                         <div class="row mt-4">
@@ -275,6 +284,58 @@ document.addEventListener('DOMContentLoaded', function() {
     const campoAbsorbancia = document.getElementById('id_absorbancia_amostra');
     const campoCasasDecimais = document.getElementById('id_casas_decimais');
     const resultadoDisplay = document.getElementById('resultado-valor');
+    
+    // Função para controlar campos em casos especiais (FP/SA)
+    function toggleAnaliseFields() {
+        const tipoAmostra = document.querySelector('#id_tipo_amostra').value;
+        const specialMessage = document.getElementById('special-case-message');
+        const specialText = document.getElementById('special-case-text');
+        const fieldsWrapper = document.getElementById('analise-fields-wrapper');
+        
+        if (tipoAmostra === 'FP') {
+            specialMessage.classList.remove('d-none');
+            specialText.textContent = 'FÁBRICA PARADA - Não há necessidade de inserir dados de análise.';
+            fieldsWrapper.style.display = 'none';
+            
+            // Desabilitar campos obrigatórios
+            const inputs = fieldsWrapper.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.required = false;
+            });
+            
+        } else if (tipoAmostra === 'SA') {
+            specialMessage.classList.remove('d-none');
+            specialText.textContent = 'SEM AMOSTRA - Não há necessidade de inserir dados de análise.';
+            fieldsWrapper.style.display = 'none';
+            
+            // Desabilitar campos obrigatórios
+            const inputs = fieldsWrapper.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.required = false;
+            });
+            
+        } else {
+            specialMessage.classList.add('d-none');
+            fieldsWrapper.style.display = 'block';
+            
+            // Reabilitar campos
+            const inputs = fieldsWrapper.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.disabled = false;
+                if (input.id === 'id_absorbancia_amostra') {
+                    input.required = true;
+                }
+            });
+        }
+    }
+    
+    // Vincular função ao campo tipo_amostra
+    document.querySelector('#id_tipo_amostra').addEventListener('change', toggleAnaliseFields);
+    
+    // Executar na inicialização
+    toggleAnaliseFields();
     
     function calcularResultado() {
         const aa = parseFloat(campoAbsorbancia.value) || 0;

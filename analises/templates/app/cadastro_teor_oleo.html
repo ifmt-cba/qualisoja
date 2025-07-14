@@ -50,24 +50,31 @@
                     </div>
                 </div>
                 
-                <div class="col-md-6">
-                    <div class="form-floating mb-3">
-                        {{ form.peso_amostra|add_class:"form-control" }}
-                        <label for="{{ form.peso_amostra.id_for_label }}">{{ form.peso_amostra.label }}</label>
-                        {% if form.peso_amostra.errors %}
-                            <div class="invalid-feedback d-block">{{ form.peso_amostra.errors }}</div>
-                        {% endif %}
-                        <div class="form-text">
-                            <small class="text-muted">{{ form.peso_amostra.help_text }}</small>
+                <!-- Mensagem para casos especiais -->
+                <div id="special-case-message" class="text-center my-4" style="display: none">
+                    <h3 class="text-danger fw-bold"></h3>
+                </div>
+
+                <!-- Wrapper para os campos de análise -->
+                <div id="analise-fields-wrapper" class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form.peso_amostra|add_class:"form-control" }}
+                            <label for="{{ form.peso_amostra.id_for_label }}">{{ form.peso_amostra.label }}</label>
+                            {% if form.peso_amostra.errors %}
+                                <div class="invalid-feedback d-block">{{ form.peso_amostra.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                <small class="text-muted">{{ form.peso_amostra.help_text }}</small>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Terceira linha - Peso da Tara e Peso Líquido -->
-                <div class="col-md-6">
-                    <div class="form-floating mb-3">
-                        {{ form.peso_tara|add_class:"form-control" }}
-                        <label for="{{ form.peso_tara.id_for_label }}">{{ form.peso_tara.label }}</label>
+                    
+                    <!-- Terceira linha - Peso da Tara e Peso Líquido -->
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form.peso_tara|add_class:"form-control" }}
+                            <label for="{{ form.peso_tara.id_for_label }}">{{ form.peso_tara.label }}</label>
                         {% if form.peso_tara.errors %}
                             <div class="invalid-feedback d-block">{{ form.peso_tara.errors }}</div>
                         {% endif %}
@@ -88,6 +95,7 @@
                             <small class="text-muted">{{ form.peso_liquido.help_text }}</small>
                         </div>
                     </div>
+                </div>
                 </div>
                 
                 <!-- Quarta linha - Teor de Óleo (calculado automaticamente) -->
@@ -266,6 +274,42 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calcular na inicialização se já houver valores
         calcularTeorOleo();
     }
+});
+
+// Funcionalidade para ocultar campos quando FP ou SA for selecionado
+document.addEventListener("DOMContentLoaded", function () {
+    const tipoAmostraSelect = document.getElementById("id_tipo_amostra");
+    const analiseFieldsWrapper = document.getElementById("analise-fields-wrapper");
+    const messageContainer = document.getElementById("special-case-message");
+    const messageText = messageContainer.querySelector("h3");
+
+    function toggleAnaliseFields() {
+        const selectedValue = tipoAmostraSelect.value;
+        const camposAnalise = analiseFieldsWrapper.querySelectorAll("input");
+
+        // Reseta o estado
+        messageContainer.style.display = "none";
+        analiseFieldsWrapper.style.display = "";
+        camposAnalise.forEach((input) => (input.disabled = false));
+
+        if (selectedValue === "FP") {
+            messageText.textContent = "FÁBRICA PARADA";
+            messageContainer.style.display = "block";
+            analiseFieldsWrapper.style.display = "none";
+            camposAnalise.forEach((input) => (input.disabled = true));
+        } else if (selectedValue === "SA") {
+            messageText.textContent = "SEM AMOSTRA";
+            messageContainer.style.display = "block";
+            analiseFieldsWrapper.style.display = "none";
+            camposAnalise.forEach((input) => (input.disabled = true));
+        }
+    }
+
+    // Executa a função quando a página carrega
+    toggleAnaliseFields();
+
+    // Adiciona o listener para o evento de mudança
+    tipoAmostraSelect.addEventListener("change", toggleAnaliseFields);
 });
 </script>
 {% endblock %}

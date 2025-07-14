@@ -52,12 +52,13 @@
                         </label>
                         <p class="form-control-plaintext">
                             {% if analise.analise_cinza %}
-                                {{ analise.analise_cinza.get_tipo_amostra_display }} - {{ analise.analise_cinza.data|date:"d/m/Y" }}
-                                {% if analise.analise_cinza.resultado %}
-                                    <span class="badge bg-info ms-2">{{ analise.analise_cinza.resultado|floatformat:2 }}%</span>
-                                {% endif %}
+                            {{ analise.analise_cinza.get_tipo_amostra_display }} - {{
+                            analise.analise_cinza.data|date:"d/m/Y" }}
+                            {% if analise.analise_cinza.resultado %}
+                            <span class="badge bg-info ms-2">{{ analise.analise_cinza.resultado|floatformat:2 }}%</span>
+                            {% endif %}
                             {% else %}
-                                <span class="text-muted">Não vinculada</span>
+                            <span class="text-muted">Não vinculada</span>
                             {% endif %}
                         </p>
                     </div>
@@ -68,9 +69,9 @@
                         </label>
                         <p class="form-control-plaintext">
                             {% if analise.resultado_silica %}
-                                <span class="badge bg-secondary fs-6">{{ analise.resultado_silica|floatformat:2 }}%</span>
+                            <span class="badge bg-secondary fs-6">{{ analise.resultado_silica|floatformat:2 }}%</span>
                             {% else %}
-                                <span class="text-muted">Não informado</span>
+                            <span class="text-muted">Não informado</span>
                             {% endif %}
                         </p>
                     </div>
@@ -85,9 +86,9 @@
                         </label>
                         <p class="form-control-plaintext">
                             {% if analise.resultado_final %}
-                                <span class="badge bg-success fs-6">{{ analise.resultado_final|floatformat:2 }}%</span>
+                            <span class="badge bg-success fs-6">{{ analise.resultado_final|floatformat:2 }}%</span>
                             {% else %}
-                                <span class="text-muted">Não calculado</span>
+                            <span class="text-muted">Não calculado</span>
                             {% endif %}
                         </p>
                     </div>
@@ -95,7 +96,8 @@
                     {% if analise.analise_cinza and analise.resultado_silica and analise.resultado_final %}
                     <div class="alert alert-info">
                         <i class="bi bi-calculator me-2"></i>
-                        <strong>Cálculo:</strong> {{ analise.analise_cinza.resultado|floatformat:2 }}% - {{ analise.resultado_silica|floatformat:2 }}% = {{ analise.resultado_final|floatformat:2 }}%
+                        <strong>Cálculo:</strong> {{ analise.analise_cinza.resultado|floatformat:2 }}% - {{
+                        analise.resultado_silica|floatformat:2 }}% = {{ analise.resultado_final|floatformat:2 }}%
                     </div>
                     {% endif %}
 

@@ -1,173 +1,131 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block content %}
 <div class="card shadow-sm border-0">
-  <div
-    class="card-header bg-success bg-opacity-10 border-success border-opacity-25 d-flex justify-content-between align-items-center"
-  >
-    <h2 class="mb-0 text-success">
-      <i class="bi bi-list-ol me-2"></i>Histórico de Análises de Proteína
-    </h2>
-    <a href="{% url 'analises:proteina_create' %}" class="btn btn-success">
-      <i class="bi bi-plus-circle-fill me-1"></i>Nova Análise
-    </a>
-  </div>
-  <div class="card-body">
-    <div class="table-responsive">
-      <table class="table table-striped table-hover">
-        <thead>
-          <tr>
-            <th scope="col" class="text-center">Data</th>
-            <th scope="col" class="text-center">Horário</th>
-            <th scope="col" class="text-center">Tipo de Amostra</th>
-            <th scope="col" class="text-center">Peso (g)</th>
-            <th scope="col" class="text-center">mL Gasto</th>
-            <th scope="col" class="text-center">mL Branco</th>
-            <th scope="col" class="text-center">Normalidade</th>
-            <th scope="col" class="text-center">Resultado (%)</th>
-            <th scope="col" class="text-center">Umidade Usada (%)</th>
-            <th scope="col" class="text-center">Resultado Corrigido (%)</th>
-            <th scope="col" class="text-center">Média 24h</th>
-            <th scope="col" class="text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for analise in analises %}
-          <tr class="{% if analise.resultado_corrigido >= 46 %}table-success{% elif analise.resultado_corrigido < 43 %}table-danger{% else %}table-warning{% endif %}"
-          >
-            <td class="text-center">{{ analise.data|date:"d/m/Y" }}</td>
-            <td class="text-center">{{ analise.horario|time:"H:i" }}</td>
-            <td class="text-center">{{ analise.get_tipo_amostra_display }}</td>
-
-            <!-- prettier-ignore -->
-            <td class="text-center">
-                {% if analise.tipo_amostra not in "FP,SA" %}
-                  {{ analise.peso_amostra|floatformat:2 }}
-                {% else %}
-                  N/A
-                {% endif %}
-              </td>
-
-            <!-- prettier-ignore -->
-            <td class="text-center">
-                {% if analise.tipo_amostra not in "FP,SA" %}
-                  {{ analise.ml_gasto|floatformat:2 }}
-                {% else %}
-                  N/A
-                {% endif %}
-              </td>
-
-            <!-- prettier-ignore -->
-            <td class="text-center">
-                {% if analise.tipo_amostra not in "FP,SA" %}
-                  {{ analise.ml_branco|floatformat:2 }}
-                {% else %}
-                  N/A
-                {% endif %}
-              </td>
-
-            <!-- prettier-ignore -->
-            <td class="text-center">
-                {% if analise.tipo_amostra not in "FP,SA" %}
-                  {{ analise.normalidade|floatformat:4 }}
-                {% else %}
-                  N/A
-                {% endif %}
-              </td>
-
-            <!-- prettier-ignore -->
-            <td class="text-center">
-                {{ analise.resultado|floatformat:2 }}
-              </td>
-
-            <!-- prettier-ignore -->
-            <td class="text-center">
-                {{ analise.umidade_usada|floatformat:2|default_if_none:"N/A" }}
-              </td>
-
-            <!-- prettier-ignore -->
-            <td class="text-center">
-                <strong>{{ analise.resultado_corrigido|floatformat:2 }}</strong>
-              </td>
-
-            <!-- prettier-ignore -->
-            <td class="text-center">
-                {% if analise.eh_media_24h %}
-                  <i class="bi bi-check-circle-fill text-success" title="Sim"></i>
-                {% else %}
-                  <i class="bi bi-x-circle text-muted" title="Não"></i>
-                {% endif %}
-              </td>
-            <td class="text-center">
-              <div class="btn-group btn-group-sm">
-                <a
-                  href="{% url 'analises:proteina_detail' analise.pk %}"
-                  class="btn btn-outline-info"
-                  title="Visualizar"
-                  ><i class="bi bi-eye"></i
-                ></a>
-                <a
-                  href="{% url 'analises:proteina_update' analise.pk %}"
-                  class="btn btn-outline-warning"
-                  title="Editar"
-                  ><i class="bi bi-pencil"></i
-                ></a>
-                <a
-                  href="{% url 'analises:proteina_delete' analise.pk %}"
-                  class="btn btn-outline-danger"
-                  title="Excluir"
-                  ><i class="bi bi-trash"></i
-                ></a>
-              </div>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="12" class="text-center py-4">
-              <i class="bi bi-inbox display-4 d-block mb-3"></i>
-              <p class="mb-2">Nenhuma análise de proteína encontrada.</p>
-              <a href="{% url 'analises:proteina_create' %}" class="btn btn-success">
-                <i class="bi bi-plus-circle-fill me-1"></i>Nova Análise
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="card-header bg-success bg-opacity-10 border-success border-opacity-25">
+        <h2 class="mb-0 text-success">
+            <i class="bi bi-bar-chart-fill me-2"></i>Lista de Análises de Proteína
+        </h2>
     </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <a href="{% url 'analises:proteina_create' %}" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i>Nova Análise
+            </a>
+        </div>
 
-    {% if is_paginated %}
-    <nav aria-label="Navegação de páginas">
-      <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
-            >Anterior</a
-          >
-        </li>
-        {% else %}
-        <li class="page-item disabled">
-          <a class="page-link" href="#" tabindex="-1" aria-disabled="true"
-            >Anterior</a
-          >
-        </li>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-success">
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Tipo de Amostra</th>
+                        <th>Peso da Amostra (g)</th>
+                        <th>ML Gastos</th>
+                        <th>Resultado (%)</th>
+                        <th>Resultado Corrigido (%)</th>
+                        <th>Média 24h</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analise in object_list %}
+                    <tr>
+                        <td>{{ analise.data|date:"d/m/Y" }}</td>
+                        <td>{{ analise.horario|time:"H:i" }}</td>
+                        <td>{{ analise.get_tipo_amostra_display }}</td>
+                        <td>{{ analise.peso_amostra }}</td>
+                        <td>
+                            {% if analise.ml_gasto %}
+                            {{ analise.ml_gasto }}
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if analise.resultado %}
+                            <span class="badge bg-info">{{ analise.resultado }}%</span>
+                            {% else %}
+                            <span class="badge bg-secondary">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if analise.resultado_corrigido %}
+                            <span class="badge bg-success">{{ analise.resultado_corrigido }}%</span>
+                            {% else %}
+                            <span class="badge bg-secondary">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if analise.eh_media_24h %}
+                            <i class="bi bi-check-circle-fill text-success" title="Sim"></i>
+                            {% else %}
+                            <i class="bi bi-x-circle text-muted" title="Não"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'analises:proteina_detail' analise.pk %}" class="btn btn-outline-info"
+                                    title="Visualizar">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'analises:proteina_update' analise.pk %}"
+                                    class="btn btn-outline-warning" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'analises:proteina_delete' analise.pk %}" class="btn btn-outline-danger"
+                                    title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                            <p class="mb-0">Nenhuma análise de proteína encontrada.</p>
+                            <a href="{% url 'analises:proteina_create' %}" class="btn btn-success mt-2">
+                                <i class="bi bi-plus-circle me-2"></i>Criar primeira análise
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginação (se necessário) -->
+        {% if is_paginated %}
+        <nav aria-label="Paginação">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">Primeira</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
         {% endif %}
-
-        <li class="page-item active" aria-current="page">
-          <span class="page-link"
-            >Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages
-            }}</span
-          >
-        </li>
-
-        {% if page_obj.has_next %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.next_page_number }}"
-            >Próxima</a
-          >
-        </li>
-        {% endif %}
-      </ul>
-    </nav>
-    {% endif %}
-  </div>
+    </div>
 </div>
 {% endblock %}

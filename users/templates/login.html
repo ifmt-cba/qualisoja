@@ -1,42 +1,380 @@
 {% extends 'baseLogin.html' %}
 {% load static %}
 
-{% block 'title' %}Login{% endblock 'title' %}
+{% block 'title' %}Login - QualiSoja{% endblock 'title' %}
+
+{% block 'head' %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock 'head' %}
 
 {% block 'body' %}
-  <style>
-    .error-message {
-      color: #dc3545; /* vermelho Bootstrap */
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+<style>
+  /* ===== RESET E CONFIGURAÇÕES BASE ===== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* ===== CONTAINER DO LOGIN ===== */
+  .login-container {
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+  }
+
+  /* ===== CABEÇALHO DO FORMULÁRIO ===== */
+  .form-header {
+    margin-bottom: 35px;
+    text-align: center;
+    padding-bottom: 25px;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .form-icon-container {
+    margin-bottom: 20px;
+  }
+
+  .form-icon {
+    font-size: 4rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));
+  }
+
+  .form-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #10b981 0%, #1f2937 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .form-subtitle {
+    font-size: 1.1rem;
+    color: #718096;
+    font-weight: 400;
+  }
+
+  /* ===== CAMPOS DO FORMULÁRIO ===== */
+  .form-group {
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    color: #2d3748;
+    background: #ffffff;
+    transition: all 0.3s ease;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+
+  .form-input::placeholder {
+    color: #a0aec0;
+    font-weight: 400;
+  }
+
+  /* Ícones nos campos */
+  .input-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+    transition: color 0.3s ease;
+  }
+
+  .form-input:focus+.input-icon {
+    color: #10b981;
+  }
+
+  /* ===== OPÇÕES DO FORMULÁRIO ===== */
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #10b981;
+    cursor: pointer;
+  }
+
+  .checkbox-wrapper label {
+    font-size: 0.95rem;
+    color: #4a5568;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .forgot-link {
+    font-size: 0.95rem;
+    color: #10b981;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .forgot-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #10b981;
+    transition: width 0.3s ease;
+  }
+
+  .forgot-link:hover::after {
+    width: 100%;
+  }
+
+  .forgot-link:hover {
+    color: #059669;
+  }
+
+  /* ===== BOTÃO DE LOGIN ===== */
+  .login-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 30px;
+  }
+
+  .login-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+  }
+
+  /* ===== MENSAGENS DE ERRO ===== */
+  .error-alert {
+    background: #fee2e2;
+    color: #c53030;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border-left: 4px solid #e53e3e;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+  }
+
+  /* ===== LINK DE CADASTRO ===== */
+  .signup-link {
+    text-align: center;
+    font-size: 1rem;
+    color: #4a5568;
+    font-weight: 500;
+  }
+
+  .signup-link a {
+    color: #10b981;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .signup-link a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #10b981;
+    transition: width 0.3s ease;
+  }
+
+  .signup-link a:hover::after {
+    width: 100%;
+  }
+
+  .signup-link a:hover {
+    color: #059669;
+  }
+
+  /* ===== RESPONSIVIDADE ===== */
+  @media (max-width: 768px) {
+    .login-container {
+      max-width: 350px;
+      padding: 30px;
     }
-  </style>
 
-  <h1>Login</h1>
-  <p>Preencha os dados abaixo para entrar no sistema</p>
+    .form-icon {
+      font-size: 3rem;
+    }
 
-  <form action="{% url 'users:login' %}" method="POST">
+    .form-title {
+      font-size: 1.8rem;
+    }
+
+    .form-subtitle {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .login-container {
+      max-width: 320px;
+      padding: 25px;
+    }
+
+    .form-title {
+      font-size: 1.6rem;
+    }
+
+    .form-subtitle {
+      font-size: 0.9rem;
+    }
+
+    .form-input {
+      padding: 14px 18px;
+    }
+
+    .login-btn {
+      padding: 14px;
+    }
+  }
+</style>
+
+<!-- Container Principal -->
+<div class="login-container">
+  <!-- Cabeçalho do Formulário -->
+  <div class="form-header">
+    <div class="form-icon-container">
+      <i class="fas fa-seedling form-icon"></i>
+    </div>
+    <h2 class="form-title">QualiSoja</h2>
+    <p class="form-subtitle">Digite suas credenciais para entrar no sistema</p>
+  </div>
+
+  <!-- Mensagens de Erro -->
+  {% if messages %}
+  {% for message in messages %}
+  <div class="error-alert">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ message }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- Formulário de Login -->
+  <form id="loginForm" action="{% url 'users:login' %}" method="POST">
     {% csrf_token %}
 
-    {% if messages %}
-      {% for message in messages %}
-        <div class="error-message" style="border: 1px solid #dc3545; background-color: #f8d7da; padding: 10px; border-radius: 5px;">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
-
-
-    <div class="form-group mb-3">
-      <label for="email" class="form-label">E-mail</label>
-      <input type="email" name="email" id="email" required class="form-control" placeholder="seuemail@gmail.com">
+    <!-- Campo Username -->
+    <div class="form-group">
+      <input type="text" id="username" name="username" class="form-input" placeholder="Nome de usuário ou email" required
+        autocomplete="username">
+      <i class="fas fa-user input-icon"></i>
     </div>
 
-    <div class="form-group mb-4">
-      <label for="senha" class="form-label">Senha</label>
-      <input type="password" name="password" id="senha" required class="form-control">
+    <!-- Campo Senha -->
+    <div class="form-group">
+      <input type="password" id="password" name="password" class="form-input" placeholder="Senha" required
+        autocomplete="current-password">
+      <i class="fas fa-lock input-icon"></i>
     </div>
 
-    <button type="submit" class="btn btn-success">Entrar</button>
+    <!-- Opções do formulário -->
+    <div class="form-options">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="remember" name="remember">
+        <label for="remember">Lembrar-me</label>
+      </div>
+      <a href="#" class="forgot-link">Esqueceu a senha?</a>
+    </div>
+
+    <!-- Botão de Login -->
+    <button type="submit" class="login-btn">
+      <i class="fas fa-sign-in-alt"></i> Entrar
+    </button>
   </form>
+
+  <!-- Link de Cadastro -->
+  <div class="signup-link">
+    Novo aqui? <a href="#">Criar uma Conta</a>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('loginForm');
+    const button = form.querySelector('.login-btn');
+
+    form.addEventListener('submit', function (e) {
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+      button.disabled = true;
+    });
+
+    // Validação simples dos campos
+    const inputs = form.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+      input.addEventListener('focus', function () {
+        this.style.borderColor = '#10b981';
+      });
+
+      input.addEventListener('blur', function () {
+        if (this.value.trim() === '') {
+          this.style.borderColor = '#e53e3e';
+        } else {
+          this.style.borderColor = '#10b981';
+        }
+      });
+    });
+  });
+</script>
 {% endblock 'body' %}

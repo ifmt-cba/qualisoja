@@ -25,7 +25,7 @@ const chartInstances = {
         tipo: null
     },
     oleoDegomado: {
-        acidez: null,
+        resultado: null,
         tipo: null
     }
 };
@@ -627,8 +627,8 @@ function renderOleoDegomadoCharts(commonTimeOptions) {
     // Estatísticas de óleo degomado
     renderOleoDegomadoStats(oleoDegomadoData);
 
-    // Gráfico de evolução da acidez ao longo do tempo
-    renderOleoAcidezTimeChart(oleoDegomadoData, commonTimeOptions);
+    // Gráfico de evolução dos resultados ao longo do tempo
+    renderOleoResultadoTimeChart(oleoDegomadoData, commonTimeOptions);
     
     // Gráfico de tipos de amostra de óleo
     renderOleoTipoChart(oleoDegomadoData);
@@ -642,22 +642,22 @@ function renderOleoDegomadoStats(data) {
     const statsDiv = document.getElementById('oleo-degomado-stats');
     if (!statsDiv) return;
     
-    // Calcular estatísticas para acidez, umidade e impurezas
-    const acidezValues = data.map(item => parseFloat(item.acidez || 0))
+    // Calcular estatísticas para titulação, peso amostra e fator correção
+    const titulacaoValues = data.map(item => parseFloat(item.titulacao || 0))
                             .filter(val => !isNaN(val));
-    const umidadeValues = data.map(item => parseFloat(item.umidade || 0))
+    const pesoAmostraValues = data.map(item => parseFloat(item.peso_amostra || 0))
                              .filter(val => !isNaN(val));
-    const impurezasValues = data.map(item => parseFloat(item.impurezas || 0))
+    const fatorCorrecaoValues = data.map(item => parseFloat(item.fator_correcao || 0))
                                .filter(val => !isNaN(val));
     
-    if (acidezValues.length === 0 && umidadeValues.length === 0 && impurezasValues.length === 0) {
+    if (titulacaoValues.length === 0 && pesoAmostraValues.length === 0 && fatorCorrecaoValues.length === 0) {
         statsDiv.innerHTML = '<div class="alert alert-warning">Sem dados para calcular estatísticas</div>';
         return;
     }
     
-    const acidezStats = calcularEstatisticas(acidezValues);
-    const umidadeStats = calcularEstatisticas(umidadeValues);
-    const impurezasStats = calcularEstatisticas(impurezasValues);
+    const titulacaoStats = calcularEstatisticas(titulacaoValues);
+    const pesoAmostraStats = calcularEstatisticas(pesoAmostraValues);
+    const fatorCorrecaoStats = calcularEstatisticas(fatorCorrecaoValues);
     
     statsDiv.innerHTML = `
         <div class="card">
@@ -667,48 +667,48 @@ function renderOleoDegomadoStats(data) {
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <h6 class="text-danger">Acidez (%)</h6>
+                        <h6 class="text-primary">Titulação</h6>
                         <div class="stat-item">
                             <span class="stat-label">Média:</span>
-                            <span class="stat-value">${acidezStats.media.toFixed(2)}%</span>
+                            <span class="stat-value">${titulacaoStats.media.toFixed(2)}</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Mínimo:</span>
-                            <span class="stat-value">${acidezStats.minimo.toFixed(2)}%</span>
+                            <span class="stat-value">${titulacaoStats.minimo.toFixed(2)}</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Máximo:</span>
-                            <span class="stat-value">${acidezStats.maximo.toFixed(2)}%</span>
+                            <span class="stat-value">${titulacaoStats.maximo.toFixed(2)}</span>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <h6 class="text-info">Umidade (%)</h6>
+                        <h6 class="text-info">Peso Amostra (g)</h6>
                         <div class="stat-item">
                             <span class="stat-label">Média:</span>
-                            <span class="stat-value">${umidadeStats.media.toFixed(2)}%</span>
+                            <span class="stat-value">${pesoAmostraStats.media.toFixed(2)}g</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Mínimo:</span>
-                            <span class="stat-value">${umidadeStats.minimo.toFixed(2)}%</span>
+                            <span class="stat-value">${pesoAmostraStats.minimo.toFixed(2)}g</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Máximo:</span>
-                            <span class="stat-value">${umidadeStats.maximo.toFixed(2)}%</span>
+                            <span class="stat-value">${pesoAmostraStats.maximo.toFixed(2)}g</span>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <h6 class="text-secondary">Impurezas (%)</h6>
+                        <h6 class="text-secondary">Fator Correção</h6>
                         <div class="stat-item">
                             <span class="stat-label">Média:</span>
-                            <span class="stat-value">${impurezasStats.media.toFixed(2)}%</span>
+                            <span class="stat-value">${fatorCorrecaoStats.media.toFixed(2)}</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Mínimo:</span>
-                            <span class="stat-value">${impurezasStats.minimo.toFixed(2)}%</span>
+                            <span class="stat-value">${fatorCorrecaoStats.minimo.toFixed(2)}</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Máximo:</span>
-                            <span class="stat-value">${impurezasStats.maximo.toFixed(2)}%</span>
+                            <span class="stat-value">${fatorCorrecaoStats.maximo.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -718,37 +718,37 @@ function renderOleoDegomadoStats(data) {
 }
 
 /**
- * Renderiza o gráfico de evolução da acidez ao longo do tempo
+ * Renderiza o gráfico de evolução dos resultados ao longo do tempo
  * @param {Array} data - Dados de óleo degomado
  * @param {Object} options - Opções do gráfico
  */
-function renderOleoAcidezTimeChart(data, options) {
-    const chartCanvas = document.getElementById('oleoAcidezTimeChart');
+function renderOleoResultadoTimeChart(data, options) {
+    const chartCanvas = document.getElementById('oleoResultadoTimeChart');
     if (!chartCanvas) return;
     
-    const acidezTimeData = groupByDate(data, 'data', 'acidez');
-    const acidezTimeLabels = acidezTimeData.map(item => item.x);
-    const acidezTimeValues = acidezTimeData.map(item => item.y);
+    const resultadoTimeData = groupByDate(data, 'data', 'resultado');
+    const resultadoTimeLabels = resultadoTimeData.map(item => item.x);
+    const resultadoTimeValues = resultadoTimeData.map(item => item.y);
     
-    if (acidezTimeLabels.length === 0) {
+    if (resultadoTimeLabels.length === 0) {
         chartCanvas.parentNode.innerHTML = '<div class="alert alert-warning">Sem dados suficientes para o gráfico temporal</div>';
         return;
     }
     
     // Se já existe um gráfico, destrua-o antes de criar um novo
-    if (chartInstances.oleoDegomado.acidez) {
-        chartInstances.oleoDegomado.acidez.destroy();
+    if (chartInstances.oleoDegomado.resultado) {
+        chartInstances.oleoDegomado.resultado.destroy();
     }
     
-    chartInstances.oleoDegomado.acidez = new Chart(
+    chartInstances.oleoDegomado.resultado = new Chart(
         chartCanvas,
         {
             type: 'line',
             data: {
-                labels: acidezTimeLabels,
+                labels: resultadoTimeLabels,
                 datasets: [{
-                    label: 'Acidez (%)',
-                    data: acidezTimeValues,
+                    label: 'Resultado (%)',
+                    data: resultadoTimeValues,
                     borderColor: 'rgba(220, 53, 69, 1)',
                     backgroundColor: 'rgba(220, 53, 69, 0.1)',
                     fill: true,
@@ -761,7 +761,7 @@ function renderOleoAcidezTimeChart(data, options) {
                     ...options.plugins,
                     title: {
                         display: true,
-                        text: 'Evolução da Acidez ao Longo do Tempo'
+                        text: 'Evolução dos Resultados ao Longo do Tempo'
                     }
                 }
             }
@@ -777,7 +777,7 @@ function renderOleoTipoChart(data) {
     const chartCanvas = document.getElementById('oleoTipoChart');
     if (!chartCanvas) return;
     
-    const oleoTipoGrouped = groupByTipo(data, 'tipo_amostra', 'acidez');
+    const oleoTipoGrouped = groupByTipo(data, 'tipo_amostra', 'resultado');
     
     if (oleoTipoGrouped.labels.length === 0) {
         chartCanvas.parentNode.innerHTML = '<div class="alert alert-warning">Sem dados suficientes para o gráfico de tipos</div>';

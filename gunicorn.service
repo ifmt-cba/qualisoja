@@ -1,0 +1,21 @@
+[Unit]
+Description=QualiSoja Gunicorn daemon
+Requires=qualisoja.socket
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+RuntimeDirectory=gunicorn
+WorkingDirectory=/var/www/qualisoja
+ExecStart=/var/www/qualisoja/venv/bin/gunicorn --config gunicorn.conf.py qualisoja.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Environment="DEBUG=False"
+Environment="ALLOWED_HOSTS=www.qualisoja.com.br,qualisoja.com.br"
+
+[Install]
+WantedBy=multi-user.target

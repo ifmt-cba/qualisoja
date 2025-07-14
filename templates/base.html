@@ -4,6 +4,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QualiSoja</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -47,7 +48,6 @@
             font-family: "Segoe UI", sans-serif;
         }
     </style>
-
 </head>
 <body>
 <nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm">
@@ -67,136 +67,13 @@
             <span class="logo-text">QualiSoja</span>
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-start" id="navbarNav">
             <ul class="navbar-nav ms-3">
                 {% if user.is_authenticated %}
                     {% if user|in_group:"Analista" or user.is_superuser %}
-                        <!-- Dropdown para Análises -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarAnalises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-flask-fill me-1"></i>Análises
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarAnalises">
-                                <!-- Análises Básicas -->
-                                <li><h6 class="dropdown-header"><i class="bi bi-gear-fill me-1"></i>Análises Básicas</h6></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:umidade_create' %}">
-                                        <i class="bi bi-droplet me-2 text-info"></i>Nova Umidade
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:proteina_create' %}">
-                                        <i class="bi bi-egg-fill me-2 text-success"></i>Nova Proteína
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:oleo_create' %}">
-                                        <i class="bi bi-droplet-fill me-2 text-primary"></i>Novo Óleo Degomado
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:urase_create' %}">
-                                        <i class="bi bi-activity me-2 text-danger"></i>Nova Urase
-                                    </a>
-                                </li>
-                                
-                                <li><hr class="dropdown-divider"></li>
-                                
-                                <!-- Análises Avançadas -->
-                                <li><h6 class="dropdown-header"><i class="bi bi-star-fill me-1"></i>Análises Avançadas</h6></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:cinza_create' %}">
-                                        <i class="bi bi-fire me-2 text-secondary"></i>Nova Cinza
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:silica_create' %}">
-                                        <i class="bi bi-layers-half me-2 text-dark"></i>Nova Sílica
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:teor_oleo_create' %}">
-                                        <i class="bi bi-droplet-half me-2 text-warning"></i>Novo Teor de Óleo
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:fibra_create' %}">
-                                        <i class="bi bi-graph-up me-2 text-info"></i>Nova Fibra
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:cadastro_fosforo' %}">
-                                        <i class="bi bi-lightning-fill me-2 text-success"></i>Novo Fósforo
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        
-                        <!-- Dropdown para Visualizar Análises -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarVisualizarAnalises" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-list-ul me-1"></i>Visualizar
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarVisualizarAnalises">
-                                <!-- Listas de Análises Básicas -->
-                                <li><h6 class="dropdown-header"><i class="bi bi-gear-fill me-1"></i>Análises Básicas</h6></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:umidade_list' %}">
-                                        <i class="bi bi-droplet me-2 text-info"></i>Lista Umidade
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:proteina_list' %}">
-                                        <i class="bi bi-egg-fill me-2 text-success"></i>Lista Proteína
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:oleo_list' %}">
-                                        <i class="bi bi-droplet-fill me-2 text-primary"></i>Lista Óleo Degomado
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:urase_list' %}">
-                                        <i class="bi bi-activity me-2 text-danger"></i>Lista Urase
-                                    </a>
-                                </li>
-                                
-                                <li><hr class="dropdown-divider"></li>
-                                
-                                <!-- Listas de Análises Avançadas -->
-                                <li><h6 class="dropdown-header"><i class="bi bi-star-fill me-1"></i>Análises Avançadas</h6></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:cinza_list' %}">
-                                        <i class="bi bi-fire me-2 text-secondary"></i>Lista Cinza
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:silica_list' %}">
-                                        <i class="bi bi-layers-half me-2 text-dark"></i>Lista Sílica
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:teor_oleo_list' %}">
-                                        <i class="bi bi-droplet-half me-2 text-warning"></i>Lista Teor de Óleo
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:fibra_list' %}">
-                                        <i class="bi bi-graph-up me-2 text-info"></i>Lista Fibra
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'analises:lista_fosforo' %}">
-                                        <i class="bi bi-lightning-fill me-2 text-success"></i>Lista Fósforo
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        
-                        <!-- Link direto para Home das Análises -->
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'analises:home' %}">
                                 <i class="bi bi-house-fill me-1"></i>Dashboard
@@ -240,24 +117,24 @@
             <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                     <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Perfil" width="30" height="30" class="rounded-circle me-2">
-                     {{ user.username }}
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li class="dropdown-item disabled">
-                            Tipo: 
-                            {% if user.is_superuser %}
-                                Administrador
-                            {% elif user|in_group:'Analista' %}
-                                Analista
-                            {% elif user|in_group:'Produção' %}
-                                Produção
-                            {% endif %}
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="{% url 'users:logout' %}">Sair</a></li>
-                    </ul>
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Perfil" width="30" height="30" class="rounded-circle me-2">
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-item disabled">
+                                Tipo: 
+                                {% if user.is_superuser %}
+                                    Administrador
+                                {% elif user|in_group:'Analista' %}
+                                    Analista
+                                {% elif user|in_group:'Produção' %}
+                                    Produção
+                                {% endif %}
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'users:logout' %}">Sair</a></li>
+                        </ul>
                     </li>
                 {% endif %}
             </ul>
@@ -266,6 +143,25 @@
 </nav>
 
 <div class="container mt-4">
+    <!-- Mensagens do Django -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {% if message.tags == 'error' %}
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                {% elif message.tags == 'success' %}
+                    <i class="bi bi-check-circle me-2"></i>
+                {% elif message.tags == 'warning' %}
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                {% elif message.tags == 'info' %}
+                    <i class="bi bi-info-circle me-2"></i>
+                {% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
     {% block content %}{% endblock %}
 </div>
 

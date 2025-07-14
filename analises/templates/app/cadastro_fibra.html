@@ -50,24 +50,34 @@
                                 </label>
                                 {{ form.tipo_amostra|add_class:"form-select" }}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.peso_amostra.id_for_label }}" class="form-label">
-                                    <i class="fas fa-weight me-1"></i>
-                                    Peso da Amostra (g)
-                                </label>
-                                {{ form.peso_amostra|add_class:"form-control" }}
-                                {% if form.peso_amostra.errors %}
-                                    <div class="text-danger small mt-1">{{ form.peso_amostra.errors.0 }}</div>
-                                {% endif %}
-                            </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.peso_tara.id_for_label }}" class="form-label">
-                                    <i class="fas fa-balance-scale me-1"></i>
-                                    Peso da Tara (g)
-                                </label>
+                        <!-- Mensagem para casos especiais -->
+                        <div id="special-case-message" class="text-center my-4" style="display: none">
+                            <h3 class="text-danger fw-bold"></h3>
+                        </div>
+
+                        <!-- Wrapper para os campos de análise -->
+                        <div id="analise-fields-wrapper">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.peso_amostra.id_for_label }}" class="form-label">
+                                        <i class="fas fa-weight me-1"></i>
+                                        Peso da Amostra (g)
+                                    </label>
+                                    {{ form.peso_amostra|add_class:"form-control" }}
+                                    {% if form.peso_amostra.errors %}
+                                        <div class="text-danger small mt-1">{{ form.peso_amostra.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.peso_tara.id_for_label }}" class="form-label">
+                                        <i class="fas fa-balance-scale me-1"></i>
+                                        Peso da Tara (g)
+                                    </label>
                                 {{ form.peso_tara|add_class:"form-control" }}
                                 {% if form.peso_tara.errors %}
                                     <div class="text-danger small mt-1">{{ form.peso_tara.errors.0 }}</div>
@@ -96,6 +106,8 @@
                                     <div class="text-danger small mt-1">{{ form.peso_branco.errors.0 }}</div>
                                 {% endif %}
                             </div>
+                        </div>
+                        </div>
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.resultado.id_for_label }}" class="form-label">
                                     <i class="fas fa-percentage me-1"></i>
@@ -164,6 +176,42 @@ document.addEventListener('DOMContentLoaded', function() {
         pesoFibraField.addEventListener('input', calcularTeorFibra);
         pesoBrancoField.addEventListener('input', calcularTeorFibra);
     }
+});
+
+// Funcionalidade para ocultar campos quando FP ou SA for selecionado
+document.addEventListener("DOMContentLoaded", function () {
+    const tipoAmostraSelect = document.getElementById("id_tipo_amostra");
+    const analiseFieldsWrapper = document.getElementById("analise-fields-wrapper");
+    const messageContainer = document.getElementById("special-case-message");
+    const messageText = messageContainer.querySelector("h3");
+
+    function toggleAnaliseFields() {
+        const selectedValue = tipoAmostraSelect.value;
+        const camposAnalise = analiseFieldsWrapper.querySelectorAll("input");
+
+        // Reseta o estado
+        messageContainer.style.display = "none";
+        analiseFieldsWrapper.style.display = "";
+        camposAnalise.forEach((input) => (input.disabled = false));
+
+        if (selectedValue === "FP") {
+            messageText.textContent = "FÁBRICA PARADA";
+            messageContainer.style.display = "block";
+            analiseFieldsWrapper.style.display = "none";
+            camposAnalise.forEach((input) => (input.disabled = true));
+        } else if (selectedValue === "SA") {
+            messageText.textContent = "SEM AMOSTRA";
+            messageContainer.style.display = "block";
+            analiseFieldsWrapper.style.display = "none";
+            camposAnalise.forEach((input) => (input.disabled = true));
+        }
+    }
+
+    // Executa a função quando a página carrega
+    toggleAnaliseFields();
+
+    // Adiciona o listener para o evento de mudança
+    tipoAmostraSelect.addEventListener("change", toggleAnaliseFields);
 });
 </script>
 {% endblock %}

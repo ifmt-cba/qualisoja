@@ -50,18 +50,23 @@ def loginViews(request):  # Login deve ser público
 
     elif request.method == "POST":
 
-        email = request.POST.get('email')
+        username_or_email = request.POST.get('username')  # Campo vem como 'username' do template
         password = request.POST.get('password')
 
-        # Autenticação por email
-        try:
-            user = User.objects.get(email=email)
-            user = auth.authenticate(request, username=user.username, password=password)
-        except User.DoesNotExist:
-            user = None
+        # Tentar autenticação por username primeiro
+        user = auth.authenticate(request, username=username_or_email, password=password)
+        
+        # Se não funcionar, tentar por email (usando filter para evitar múltiplos resultados)
+        if not user:
+            try:
+                user_obj = User.objects.filter(email=username_or_email).first()
+                if user_obj:
+                    user = auth.authenticate(request, username=user_obj.username, password=password)
+            except Exception:
+                user = None
 
         if not user:
-            messages.error(request, "Email ou senha inválidos.")
+            messages.error(request, "Usuário/email ou senha inválidos.")
             return redirect('users:login')
 
         auth.login(request, user)

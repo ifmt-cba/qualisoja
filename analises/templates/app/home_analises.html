@@ -4,6 +4,132 @@
 
 {% block content %}
 <div class="container mt-4">
+    <!-- Dashboard Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="bi bi-speedometer2 me-2"></i>Dashboard de Análises
+            </h2>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total de Análises</h6>
+                            <h2 class="mb-0" id="total-analises">{{ total_analises }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-graph-up" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Análises Hoje</h6>
+                            <h2 class="mb-0" id="analises-hoje">{{ analises_hoje }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-calendar-check" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Tipos de Análises</h6>
+                            <h2 class="mb-0">8</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-collection" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Última Análise</h6>
+                            <h6 class="mb-0">
+                                {% if ultima_analise %}
+                                    {{ ultima_analise.tipo }}<br>
+                                    <small>{{ ultima_analise.data|date:"d/m/Y" }} {{ ultima_analise.horario|time:"H:i" }}</small>
+                                {% else %}
+                                    Nenhuma
+                                {% endif %}
+                            </h6>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-clock-history" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos e Tabelas -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Distribuição por Tipo de Análise</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoAnalises" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Análises Recentes</h5>
+                </div>
+                <div class="card-body">
+                    {% if ultimas_analises %}
+                        <div class="list-group list-group-flush">
+                            {% for analise in ultimas_analises %}
+                                <div class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">{{ analise.tipo }}</div>
+                                        <small class="text-muted">{{ analise.tipo_amostra }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ analise.data|date:"d/m" }} {{ analise.horario|time:"H:i" }}</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Nenhuma análise encontrada</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Separador -->
+    <hr class="my-5">
+
+    <!-- Módulo de Análises Original -->
     <div class="row">
         <div class="col-12">
             <h2 class="mb-4">Módulo de Análises</h2>
@@ -160,4 +286,138 @@
         </div>
     </div>
 </div>
+
+<!-- Scripts para Dashboard -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Dados dinâmicos do Django usando JSON filter
+    const dadosAnalises = [
+        parseInt('{{ total_umidade|default:0 }}'),
+        parseInt('{{ total_proteina|default:0 }}'),
+        parseInt('{{ total_oleo|default:0 }}'),
+        parseInt('{{ total_urase|default:0 }}'),
+        parseInt('{{ total_cinza|default:0 }}'),
+        parseInt('{{ total_fibra|default:0 }}'),
+        parseInt('{{ total_fosforo|default:0 }}'),
+        parseInt('{{ total_teor_oleo|default:0 }}')
+    ];
+
+    // Configuração do gráfico de distribuição
+    const ctx = document.getElementById('graficoAnalises');
+    if (ctx) {
+        const graficoAnalises = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Umidade', 'Proteína', 'Óleo Degomado', 'Urase', 'Cinza', 'Fibra', 'Fósforo', 'Teor Óleo'],
+                datasets: [{
+                    data: dadosAnalises,
+                    backgroundColor: [
+                        '#0d6efd', '#198754', '#ffc107', '#dc3545',
+                        '#6c757d', '#20c997', '#fd7e14', '#6f42c1'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + ' análises';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Atualização automática dos dados a cada 30 segundos
+    setInterval(function() {
+        atualizarDashboard();
+    }, 30000);
+
+    function atualizarDashboard() {
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Atualizar contadores
+                const totalAnalises = doc.getElementById('total-analises');
+                const analisesHoje = doc.getElementById('analises-hoje');
+                
+                if (totalAnalises) {
+                    document.getElementById('total-analises').textContent = totalAnalises.textContent;
+                }
+                if (analisesHoje) {
+                    document.getElementById('analises-hoje').textContent = analisesHoje.textContent;
+                }
+                
+                console.log('Dashboard atualizado automaticamente');
+            })
+            .catch(error => {
+                console.log('Erro na atualização automática:', error);
+            });
+    }
+
+    // Efeito de hover nos cards
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+
+<style>
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#graficoAnalises {
+    height: 300px !important;
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+</style>
 {% endblock %}
