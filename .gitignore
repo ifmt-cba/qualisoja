@@ -86,3 +86,23 @@ debug_*.py
 debug_*.html
 *_test.html
 *_test.py
+
+# Arquivos temporários de desenvolvimento
+teste_*.py
+check_*.py
+criar_dados_*.py
+adicionar_registros.py
+corrigir_*.py
+fix_*.py
+forcar_*.py
+reset_*.py
+testar_*.py
+verificacao_*.py
+atualizar_*.py
+cookies.txt
+_temp_cleanup/
+
+# Arquivos de configuração temporários
+backup.json
+*.tmp
+*.temp
