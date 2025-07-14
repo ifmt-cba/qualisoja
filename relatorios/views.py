@@ -83,7 +83,7 @@ class RelatorioGerarClassicoView(FormView):
 
 class RelatorioGerarView(FormView):
     """View moderna para selecionar parâmetros e gerar relatórios"""
-    template_name = 'relatorios/gerar_relatorio_moderno.html'
+    template_name = 'relatorios/gerar_relatorio.html'
     form_class = RelatorioFiltroForm
 
     def get_initial(self):
