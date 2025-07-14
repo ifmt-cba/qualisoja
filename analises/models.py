@@ -73,16 +73,29 @@ class AnaliseUmidade(BaseModel):
         max_digits=10, decimal_places=2, verbose_name="Peso da Amostra"
     )
     resultado = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Resultado"
+        max_digits=10, 
+        decimal_places=4, 
+        blank=True, 
+        null=True, 
+        verbose_name="Umidade (%)",
+        help_text="Calculado automaticamente: ((tara + peso_amostra) - liquido) / peso_amostra * 100"
     )
-    fator_correcao = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        blank=True,
-        null=True,
-        verbose_name="Fator de Correção",
-        validators=[MinValueValidator(-1000), MaxValueValidator(1000)],
-    )
+
+    def save(self, *args, **kwargs):
+        """
+        Calcula automaticamente o resultado da umidade.
+        Fórmula: Umidade (%) = ((tara + peso_amostra) - liquido) / peso_amostra * 100
+        """
+        if (
+            self.tara is not None 
+            and self.liquido is not None 
+            and self.peso_amostra is not None 
+            and self.peso_amostra != 0
+        ):
+            self.resultado = (
+                ((self.tara + self.peso_amostra) - self.liquido) / self.peso_amostra
+            ) * 100
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Análise de Umidade - {self.get_tipo_amostra_display()} - {self.data}"

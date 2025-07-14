@@ -101,28 +101,18 @@
                     <div class="card bg-light mb-3 border-0">
                         <div class="card-body">
                             <h5 class="card-title mb-3">
-                                <i></i>Resultados
+                                <i class="fas fa-chart-line"></i> Resultados
                             </h5>
                             <div class="row g-3">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="form-floating">
-                                        {{ form.resultado|add_class:"form-control" }}
+                                        {{ form.resultado|add_class:"form-control"|attr:"readonly:readonly" }}
                                         <label for="{{ form.resultado.id_for_label }}">{{ form.resultado.label }}</label>
                                         {% if form.resultado.errors %}
                                             <div class="invalid-feedback d-block">{{ form.resultado.errors }}</div>
                                         {% endif %}
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        {{ form.fator_correcao|add_class:"form-control" }}
-                                        <label for="{{ form.fator_correcao.id_for_label }}">{{ form.fator_correcao.label }}</label>
-                                        {% if form.fator_correcao.errors %}
-                                            <div class="invalid-feedback d-block">{{ form.fator_correcao.errors }}</div>
-                                        {% endif %}
                                         <div class="form-text text-muted mt-1">
-                                            <i class="bi bi-info-circle"></i> Valor entre -1000 e 1000
+                                            <i class="bi bi-info-circle"></i> Calculado automaticamente: ((tara + peso_amostra) - líquido) / peso_amostra × 100
                                         </div>
                                     </div>
                                 </div>
@@ -161,5 +151,41 @@
             })
     })()
 
+    // Cálculo automático da umidade
+    document.addEventListener('DOMContentLoaded', function() {
+        const horarioField = document.querySelector('#{{ form.horario.id_for_label }}');
+        if (horarioField && !horarioField.value) {
+            const now = new Date();
+            const timeString = now.toTimeString().substr(0, 5);
+            horarioField.value = timeString;
+        }
+        
+        // Campos para cálculo
+        const taraField = document.querySelector('#{{ form.tara.id_for_label }}');
+        const liquidoField = document.querySelector('#{{ form.liquido.id_for_label }}');
+        const pesoAmostraField = document.querySelector('#{{ form.peso_amostra.id_for_label }}');
+        const resultadoField = document.querySelector('#{{ form.resultado.id_for_label }}');
+        
+        function calcularUmidade() {
+            const tara = parseFloat(taraField.value);
+            const liquido = parseFloat(liquidoField.value);
+            const pesoAmostra = parseFloat(pesoAmostraField.value);
+            
+            if (tara && liquido && pesoAmostra && pesoAmostra > 0) {
+                // Fórmula: ((tara + peso_amostra) - liquido) / peso_amostra * 100
+                const umidade = (((tara + pesoAmostra) - liquido) / pesoAmostra) * 100;
+                resultadoField.value = umidade.toFixed(4);
+            } else {
+                resultadoField.value = '';
+            }
+        }
+        
+        // Event listeners
+        if (taraField && liquidoField && pesoAmostraField && resultadoField) {
+            taraField.addEventListener('input', calcularUmidade);
+            liquidoField.addEventListener('input', calcularUmidade);
+            pesoAmostraField.addEventListener('input', calcularUmidade);
+        }
+    });
 </script>
 {% endblock %}
