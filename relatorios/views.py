@@ -1729,6 +1729,7 @@ class RelatorioGerarModernoView(FormView):
 class RelatorioExpedicaoListView(LoginRequiredMixin, TemplateView):
     """View para listar relatórios de expedição."""
     template_name = 'relatorios/expedicao/lista.html'
+    login_url = '/'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1788,12 +1789,16 @@ class RelatorioExpedicaoCreateView(LoginRequiredMixin, FormView):
     """View para criar novos relatórios de expedição."""
     template_name = 'relatorios/expedicao/criar.html'
     form_class = RelatorioExpedicaoForm
-    login_url = '/usuarios/login/'
+    login_url = '/'  # URL de login correta baseada em users/urls.py
+    redirect_field_name = 'next'
     
     def dispatch(self, request, *args, **kwargs):
         """Verifica autenticação antes de processar qualquer request."""
         if not request.user.is_authenticated:
+            print(f"DEBUG: Usuário não autenticado, redirecionando para {self.login_url}")
+            from django.shortcuts import redirect
             return redirect(self.login_url)
+        print(f"DEBUG: Usuário autenticado: {request.user}")
         return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
@@ -1935,16 +1940,30 @@ class RelatorioExpedicaoCreateView(LoginRequiredMixin, FormView):
         logger = logging.getLogger(__name__)
         print("="*50)
         print("FORM_VALID CHAMADO!")
+        print(f"Usuário autenticado: {self.request.user.is_authenticated}")
+        print(f"Usuário: {self.request.user}")
+        print(f"Tipo do usuário: {type(self.request.user)}")
         print("="*50)
         logger.info("=== INÍCIO DO FORM_VALID ===")
         logger.info(f"Dados do formulário: {form.cleaned_data}")
         print(f"Dados do formulário: {form.cleaned_data}")
         
-        # Verificar se o usuário está autenticado
-        if not self.request.user.is_authenticated:
-            logger.error("Usuário não autenticado tentando criar relatório")
+        # Verificar se o usuário está autenticado com mais detalhes
+        if not self.request.user.is_authenticated or self.request.user.is_anonymous:
+            logger.error(f"Usuário não autenticado ou anônimo: {self.request.user}")
+            print(f"ERRO: Usuário não autenticado ou anônimo: {self.request.user}")
             messages.error(self.request, "Você precisa estar logado para criar relatórios.")
-            return redirect('users:login')
+            from django.shortcuts import redirect
+            return redirect('/usuarios/login/')
+        
+        # Verificar se o usuário é uma instância real de User
+        from django.contrib.auth.models import User
+        if not isinstance(self.request.user, User):
+            logger.error(f"Usuário não é instância de User: {type(self.request.user)}")
+            print(f"ERRO: Usuário não é instância de User: {type(self.request.user)}")
+            messages.error(self.request, "Erro de autenticação. Faça login novamente.")
+            from django.shortcuts import redirect
+            return redirect('/usuarios/login/')
         
         try:
             # Gerar código único para o relatório
@@ -2236,6 +2255,7 @@ class RelatorioExpedicaoCreateView(LoginRequiredMixin, FormView):
 class RelatorioExpedicaoDetailView(LoginRequiredMixin, TemplateView):
     """View para visualizar relatório de expedição."""
     template_name = 'relatorios/expedicao/detalhe.html'
+    login_url = '/'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -2522,6 +2542,7 @@ class RelatorioExpedicaoEnviarView(LoginRequiredMixin, FormView):
     """View para enviar relatório por e-mail."""
     template_name = 'relatorios/expedicao/enviar.html'
     form_class = EnvioRelatorioForm
+    login_url = '/'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

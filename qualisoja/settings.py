@@ -170,9 +170,9 @@ if CODESPACES:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configurações de login
-LOGIN_URL = '/usuarios/login/'
+LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/usuarios/login/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Configurar o logger para capturar exceções e alertas
 LOGGING = {
