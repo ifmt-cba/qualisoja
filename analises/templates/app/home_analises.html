@@ -53,7 +53,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="card-title">Tipos de Análises</h6>
-                            <h2 class="mb-0">8</h2>
+                            <h2 class="mb-0">9</h2>
                         </div>
                         <div class="align-self-center">
                             <i class="bi bi-collection" style="font-size: 2rem;"></i>
@@ -322,11 +322,12 @@ document.addEventListener('DOMContentLoaded', function() {
         parseInt('{{ total_umidade|default:0 }}'),
         parseInt('{{ total_proteina|default:0 }}'),
         parseInt('{{ total_oleo|default:0 }}'),
+        parseInt('{{ total_teor_oleo|default:0 }}'),
+        parseInt('{{ total_fosforo|default:0 }}'),
         parseInt('{{ total_urase|default:0 }}'),
         parseInt('{{ total_cinza|default:0 }}'),
-        parseInt('{{ total_fibra|default:0 }}'),
-        parseInt('{{ total_fosforo|default:0 }}'),
-        parseInt('{{ total_teor_oleo|default:0 }}')
+        parseInt('{{ total_silica|default:0 }}'),
+        parseInt('{{ total_fibra|default:0 }}')
     ];
     
     console.log('=== DEBUG DASHBOARD ===');
@@ -334,11 +335,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Total Umidade:', '{{ total_umidade|default:0 }}');
     console.log('Total Proteína:', '{{ total_proteina|default:0 }}');
     console.log('Total Óleo:', '{{ total_oleo|default:0 }}');
+    console.log('Total Teor Óleo:', '{{ total_teor_oleo|default:0 }}');
+    console.log('Total Fósforo:', '{{ total_fosforo|default:0 }}');
     console.log('Total Urase:', '{{ total_urase|default:0 }}');
     console.log('Total Cinza:', '{{ total_cinza|default:0 }}');
+    console.log('Total Sílica:', '{{ total_silica|default:0 }}');
     console.log('Total Fibra:', '{{ total_fibra|default:0 }}');
-    console.log('Total Fósforo:', '{{ total_fosforo|default:0 }}');
-    console.log('Total Teor Óleo:', '{{ total_teor_oleo|default:0 }}');
     console.log('Soma dos dados:', dadosAnalises.reduce((a, b) => a + b, 0));
     
     // Verificar se todos os valores são zero
@@ -363,10 +365,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // Usar dados reais
             dadosGrafico = dadosAnalises;
-            labelsGrafico = ['Umidade', 'Proteína', 'Óleo Degomado', 'Urase', 'Cinza', 'Fibra', 'Fósforo', 'Teor Óleo'];
+            labelsGrafico = ['Umidade', 'Proteína', 'Óleo Degomado', 'Teor Óleo', 'Fósforo', 'Urase', 'Cinza', 'Sílica', 'Fibra'];
             coresGrafico = [
-                '#0d6efd', '#198754', '#ffc107', '#dc3545',
-                '#6c757d', '#20c997', '#fd7e14', '#6f42c1'
+                '#0d6efd', '#198754', '#ffc107', '#fd7e14', '#6f42c1',
+                '#dc3545', '#6c757d', '#495057', '#20c997'
             ];
         }
         

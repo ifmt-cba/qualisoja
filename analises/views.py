@@ -61,13 +61,15 @@ class AnaliseHomeView(TemplateView):
             context['total_fibra'] = AnaliseFibra.objects.count()
             context['total_fosforo'] = AnaliseFosforo.objects.count()
             context['total_teor_oleo'] = AnaliseTeorOleo.objects.count()
+            context['total_silica'] = AnaliseSilica.objects.count()
             
             # Total geral de análises
             context['total_analises'] = (
                 context['total_umidade'] + context['total_proteina'] + 
                 context['total_oleo'] + context['total_urase'] + 
                 context['total_cinza'] + context['total_fibra'] + 
-                context['total_fosforo'] + context['total_teor_oleo']
+                context['total_fosforo'] + context['total_teor_oleo'] +
+                context['total_silica']
             )
             
             # Análises de hoje
@@ -82,6 +84,7 @@ class AnaliseHomeView(TemplateView):
                 analises_hoje += AnaliseFibra.objects.filter(data=hoje).count()
                 analises_hoje += AnaliseFosforo.objects.filter(data=hoje).count()
                 analises_hoje += AnaliseTeorOleo.objects.filter(data=hoje).count()
+                analises_hoje += AnaliseSilica.objects.filter(data=hoje).count()
             except Exception as e:
                 print(f"Erro ao contar análises de hoje: {e}")
                 analises_hoje = 0
@@ -105,6 +108,7 @@ class AnaliseHomeView(TemplateView):
                     (AnaliseFibra, 'Fibra'),
                     (AnaliseFosforo, 'Fósforo'),
                     (AnaliseTeorOleo, 'Teor de Óleo'),
+                    (AnaliseSilica, 'Sílica'),
                 ]
                 
                 for modelo, nome in modelos:
@@ -144,6 +148,7 @@ class AnaliseHomeView(TemplateView):
                     (AnaliseFibra, 'Fibra'),
                     (AnaliseFosforo, 'Fósforo'),
                     (AnaliseTeorOleo, 'Teor de Óleo'),
+                    (AnaliseSilica, 'Sílica'),
                 ]
                 
                 for modelo, nome in modelos:
@@ -190,6 +195,7 @@ class AnaliseHomeView(TemplateView):
                 'total_fibra': 0,
                 'total_fosforo': 0,
                 'total_teor_oleo': 0,
+                'total_silica': 0,
                 'total_analises': 0,
                 'analises_hoje': 0,
                 'ultima_analise': None
@@ -350,9 +356,30 @@ class OleoDegomadoCreateView(CreateView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class UmidadeListView(ListView):
     model = AnaliseUmidade
     template_name = "app/lista_umidade.html"
+    context_object_name = "object_list"
+    ordering = ["-data", "-horario"]
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from datetime import date, timedelta
+        from django.db.models import Avg
+        
+        hoje = date.today()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Estatísticas para Umidade
+        context['analises_hoje'] = AnaliseUmidade.objects.filter(data=hoje).count()
+        context['analises_semana'] = AnaliseUmidade.objects.filter(data__gte=inicio_semana).count()
+        context['media_resultado'] = AnaliseUmidade.objects.filter(resultado__isnull=False).aggregate(
+            media=Avg('resultado')
+        )['media'] or 0
+        
+        return context
 
 
 @method_decorator(login_required, name="dispatch")
@@ -361,6 +388,24 @@ class ProteinaListView(ListView):
     template_name = "app/lista_proteina.html"
     context_object_name = "analises"
     ordering = ["-data", "-horario"]
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from datetime import date, timedelta
+        from django.db.models import Avg
+        
+        hoje = date.today()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Estatísticas para Proteína
+        context['analises_hoje'] = AnaliseProteina.objects.filter(data=hoje).count()
+        context['analises_semana'] = AnaliseProteina.objects.filter(data__gte=inicio_semana).count()
+        context['media_proteina'] = AnaliseProteina.objects.aggregate(
+            media=Avg('resultado')
+        )['media'] or 0
+        
+        return context
 
 
 class ProteinaCreateView(CreateView):
@@ -459,9 +504,30 @@ class ProteinaDeleteView(DeleteView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class OleoDegomadoListView(ListView):
     model = AnaliseOleoDegomado
     template_name = "app/lista_oleo.html"
+    context_object_name = "object_list"
+    ordering = ["-data", "-horario"]
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from datetime import date, timedelta
+        from django.db.models import Avg
+        
+        hoje = date.today()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Estatísticas para Óleo Degomado
+        context['analises_hoje'] = AnaliseOleoDegomado.objects.filter(data=hoje).count()
+        context['analises_semana'] = AnaliseOleoDegomado.objects.filter(data__gte=inicio_semana).count()
+        context['media_resultado'] = AnaliseOleoDegomado.objects.filter(resultado__isnull=False).aggregate(
+            media=Avg('resultado')
+        )['media'] or 0
+        
+        return context
 
 
 # Adicione estas classes no seu views.py
@@ -503,7 +569,20 @@ class UraseListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from datetime import date, timedelta
+        from django.db.models import Avg
+        
+        hoje = date.today()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Estatísticas para Urase
+        context['analises_hoje'] = AnaliseUrase.objects.filter(data=hoje).count()
+        context['analises_semana'] = AnaliseUrase.objects.filter(data__gte=inicio_semana).count()
+        context['media_resultado'] = AnaliseUrase.objects.aggregate(
+            media=Avg('resultado')
+        )['media'] or 0
         context["total_farelo"] = self.get_queryset().filter(tipo_amostra="FL").count()
+        
         return context
 
     def get_queryset(self):
@@ -586,12 +665,30 @@ class CinzaCreateView(CreateView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class CinzaListView(ListView):
     model = AnaliseCinza
     template_name = "app/lista_cinza.html"
     context_object_name = "object_list"
     ordering = ["-data", "-horario"]
     paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from datetime import date, timedelta
+        from django.db.models import Avg
+        
+        hoje = date.today()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Estatísticas para Cinza
+        context['analises_hoje'] = AnaliseCinza.objects.filter(data=hoje).count()
+        context['analises_semana'] = AnaliseCinza.objects.filter(data__gte=inicio_semana).count()
+        context['media_resultado'] = AnaliseCinza.objects.aggregate(
+            media=Avg('resultado')
+        )['media'] or 0
+        
+        return context
 
 
 @method_decorator(login_required, name="dispatch")
@@ -659,12 +756,30 @@ class TeorOleoCreateView(CreateView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class TeorOleoListView(ListView):
     model = AnaliseTeorOleo
     template_name = "app/lista_teor_oleo.html"
     context_object_name = "object_list"
     ordering = ["-data", "-horario"]
     paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from datetime import date, timedelta
+        from django.db.models import Avg
+        
+        hoje = date.today()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Estatísticas para Teor de Óleo
+        context['analises_hoje'] = AnaliseTeorOleo.objects.filter(data=hoje).count()
+        context['analises_semana'] = AnaliseTeorOleo.objects.filter(data__gte=inicio_semana).count()
+        context['media_teor'] = AnaliseTeorOleo.objects.aggregate(
+            media=Avg('teor_oleo')
+        )['media'] or 0
+        
+        return context
 
 
 @method_decorator(login_required, name="dispatch")
@@ -739,12 +854,30 @@ class FibraCreateView(CreateView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class FibraListView(ListView):
     model = AnaliseFibra
     template_name = "app/lista_fibra.html"
     context_object_name = "object_list"
     ordering = ["-data", "-horario"]
     paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from datetime import date, timedelta
+        from django.db.models import Avg
+        
+        hoje = date.today()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Estatísticas para Fibra
+        context['analises_hoje'] = AnaliseFibra.objects.filter(data=hoje).count()
+        context['analises_semana'] = AnaliseFibra.objects.filter(data__gte=inicio_semana).count()
+        context['media_resultado'] = AnaliseFibra.objects.aggregate(
+            media=Avg('resultado')
+        )['media'] or 0
+        
+        return context
 
 
 @method_decorator(login_required, name="dispatch")
@@ -810,12 +943,30 @@ class FosforoCreateView(CreateView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class FosforoListView(ListView):
     model = AnaliseFosforo
     template_name = "app/lista_fosforo.html"
     context_object_name = "object_list"
     ordering = ["-id"]
     paginate_by = 100
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from datetime import date, timedelta
+        from django.db.models import Avg
+        
+        hoje = date.today()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Estatísticas para Fósforo
+        context['analises_hoje'] = AnaliseFosforo.objects.filter(data=hoje).count()
+        context['analises_semana'] = AnaliseFosforo.objects.filter(data__gte=inicio_semana).count()
+        context['media_resultado'] = AnaliseFosforo.objects.filter(resultado__isnull=False).aggregate(
+            media=Avg('resultado')
+        )['media'] or 0
+        
+        return context
 
     def get_queryset(self):
         """Retorna todos os registros de forma simples"""
@@ -921,12 +1072,30 @@ class SilicaCreateView(CreateView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class SilicaListView(ListView):
     model = AnaliseSilica
     template_name = "app/lista_silica.html"
     context_object_name = "analises"
     paginate_by = 10
     ordering = ["-data", "-horario"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from datetime import date, timedelta
+        from django.db.models import Avg
+        
+        hoje = date.today()
+        inicio_semana = hoje - timedelta(days=hoje.weekday())
+        
+        # Estatísticas para Sílica
+        context['analises_hoje'] = AnaliseSilica.objects.filter(data=hoje).count()
+        context['analises_semana'] = AnaliseSilica.objects.filter(data__gte=inicio_semana).count()
+        context['media_resultado'] = AnaliseSilica.objects.aggregate(
+            media=Avg('resultado_final')
+        )['media'] or 0
+        
+        return context
 
 
 @method_decorator(login_required, name="dispatch")

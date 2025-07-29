@@ -230,6 +230,31 @@ class RelatorioExpedicao(BaseModel):
     incluir_graficos = models.BooleanField(default=False, verbose_name="Incluir Gráficos Comparativos")
     arquivo_gerado = models.FileField(upload_to='relatorios/expedicao/', blank=True, null=True, verbose_name="Arquivo Gerado")
     
+    def save(self, *args, **kwargs):
+        if not self.codigo:
+            from datetime import datetime
+            ano_atual = datetime.now().year
+            
+            # Buscar o último número sequencial para o ano atual
+            ultimo_relatorio = RelatorioExpedicao.objects.filter(
+                codigo__startswith=f'REL{ano_atual}'
+            ).order_by('-codigo').first()
+            
+            if ultimo_relatorio:
+                try:
+                    # Extrair o número sequencial do último código
+                    ultimo_numero = int(ultimo_relatorio.codigo[7:])  # REL2025XXX -> XXX
+                    proximo_numero = ultimo_numero + 1
+                except (ValueError, IndexError):
+                    proximo_numero = 1
+            else:
+                proximo_numero = 1
+            
+            # Gerar o código com 3 dígitos zerofill
+            self.codigo = f'REL{ano_atual}{proximo_numero:03d}'
+        
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Relatório {self.codigo} - {self.get_cliente_nome()}"
     

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Expedição - {{ relatorio.codigo }}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .email-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #059669;
+        }
+        
+        .logo {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        
+        .system-name {
+            color: #059669;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .subtitle {
+            color: #6c757d;
+            font-size: 14px;
+            margin: 5px 0 0 0;
+        }
+        
+        .content {
+            margin-bottom: 30px;
+        }
+        
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .report-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid #059669;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .report-info h3 {
+            color: #059669;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        
+        .info-value {
+            color: #212529;
+            font-size: 14px;
+        }
+        
+        .message-section {
+            background-color: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .message-section h4 {
+            color: #004085;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+        
+        .actions {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .button {
+            display: inline-block;
+            background-color: #059669;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 0 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .button:hover {
+            background-color: #047857;
+            color: white;
+        }
+        
+        .button.secondary {
+            background-color: #6c757d;
+        }
+        
+        .button.secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .footer {
+            border-top: 1px solid #dee2e6;
+            padding-top: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-gerado {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-enviado {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-rascunho {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        @media (max-width: 600px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                text-align: left;
+            }
+            
+            .button {
+                display: block;
+                margin: 10px 0;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            {% if logo_url %}
+                <img src="{{ logo_url }}" alt="{{ sistema_nome }}" class="logo">
+            {% endif %}
+            <h1 class="system-name">{{ sistema_nome }}</h1>
+            <p class="subtitle">Sistema de Gestão de Qualidade</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Prezado(a),
+            </div>
+            
+            <p>
+                Está disponível um novo relatório de expedição para sua empresa. 
+                Segue em anexo o documento com todas as análises realizadas no período solicitado.
+            </p>
+            
+            <div class="report-info">
+                <h3>📋 Informações do Relatório</h3>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Código do Relatório</span>
+                        <span class="info-value">{{ relatorio.codigo }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="info-value">
+                            <span class="status-badge status-{{ relatorio.status|lower }}">
+                                {{ relatorio.get_status_display }}
+                            </span>
+                        </span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Cliente</span>
+                        <span class="info-value">{{ cliente_nome }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Contrato</span>
+                        <span class="info-value">{{ contrato_info.nome }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Período Analisado</span>
+                        <span class="info-value">
+                            {{ relatorio.data_inicial|date:"d/m/Y" }} a {{ relatorio.data_final|date:"d/m/Y" }}
+                        </span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Data de Geração</span>
+                        <span class="info-value">{{ data_envio|date:"d/m/Y H:i" }}</span>
+                    </div>
+                </div>
+                
+                {% if relatorio.certificacao_conformidade %}
+                <div style="margin-top: 15px; padding: 10px; background-color: #d1fae5; border-radius: 5px;">
+                    <strong style="color: #065f46;">✅ Certificação de Conformidade Incluída</strong>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if mensagem_personalizada %}
+            <div class="message-section">
+                <h4>💬 Mensagem Adicional:</h4>
+                <p style="margin: 0; white-space: pre-line;">{{ mensagem_personalizada }}</p>
+            </div>
+            {% endif %}
+            
+            <p>
+                <strong>Anexos incluídos:</strong><br>
+                📄 Relatório completo em PDF/Excel<br>
+                📊 Análises detalhadas por parâmetro<br>
+                📈 Gráficos e tendências (quando aplicável)
+            </p>
+            
+            <div class="actions">
+                <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">
+                    Os arquivos estão anexados a este email. Caso tenha alguma dúvida, entre em contato conosco.
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{ sistema_nome }}</strong></p>
+            <p>Email gerado automaticamente em {{ data_envio|date:"d/m/Y H:i" }}</p>
+            <p>Este é um email automático, não responda diretamente a esta mensagem.</p>
+            {% if relatorio.usuario_responsavel %}
+            <p>Responsável técnico: {{ relatorio.usuario_responsavel.get_full_name|default:relatorio.usuario_responsavel.username }}</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

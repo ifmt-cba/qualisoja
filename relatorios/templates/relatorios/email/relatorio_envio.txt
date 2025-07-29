@@ -1,0 +1,43 @@
+RELATÓRIO DE EXPEDIÇÃO - {{ relatorio.codigo }}
+{{ sistema_nome }} - Sistema de Gestão de Qualidade
+
+Prezado(a),
+
+Está disponível um novo relatório de expedição para sua empresa.
+Segue em anexo o documento com todas as análises realizadas no período solicitado.
+
+INFORMAÇÕES DO RELATÓRIO:
+========================
+
+Código do Relatório: {{ relatorio.codigo }}
+Cliente: {{ cliente_nome }}
+Contrato: {{ contrato_info.nome }}
+Período Analisado: {{ relatorio.data_inicial|date:"d/m/Y" }} a {{ relatorio.data_final|date:"d/m/Y" }}
+Status: {{ relatorio.get_status_display }}
+Data de Geração: {{ data_envio|date:"d/m/Y H:i" }}
+
+{% if relatorio.certificacao_conformidade %}
+✅ CERTIFICAÇÃO DE CONFORMIDADE INCLUÍDA
+{% endif %}
+
+{% if mensagem_personalizada %}
+MENSAGEM ADICIONAL:
+==================
+{{ mensagem_personalizada }}
+
+{% endif %}
+ANEXOS INCLUÍDOS:
+================
+📄 Relatório completo em PDF/Excel
+📊 Análises detalhadas por parâmetro
+📈 Gráficos e tendências (quando aplicável)
+
+Os arquivos estão anexados a este email. Caso tenha alguma dúvida, entre em contato conosco.
+
+---
+{{ sistema_nome }}
+Email gerado automaticamente em {{ data_envio|date:"d/m/Y H:i" }}
+Este é um email automático, não responda diretamente a esta mensagem.
+{% if relatorio.usuario_responsavel %}
+Responsável técnico: {{ relatorio.usuario_responsavel.get_full_name|default:relatorio.usuario_responsavel.username }}
+{% endif %}

@@ -309,17 +309,20 @@
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h1 style="margin: 0; font-size: 2rem; font-weight: 700;">📋 {{ relatorio.codigo }}</h1>
+                <h1 style="margin: 0; font-size: 2rem; font-weight: 700; display: flex; align-items: center;">
+                    <i class="bi bi-file-earmark-text" style="margin-right: 0.75rem; font-size: 1.75rem;"></i>
+                    {{ relatorio.codigo }}
+                </h1>
                 <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Relatório de Expedição - {{ relatorio.get_cliente_nome }}</p>
             </div>
             <div class="btn-actions">
                 <a href="{% url 'relatorios:expedicao_lista' %}" class="btn btn-outline" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
-                    <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
+                    <i class="bi bi-arrow-left" style="margin-right: 0.5rem;"></i>
                     Voltar
                 </a>
                 {% if relatorio.status != 'RASCUNHO' %}
                 <a href="{% url 'relatorios:expedicao_enviar' relatorio.pk %}" class="btn btn-primary" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
-                    <i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i>
+                    <i class="bi bi-send" style="margin-right: 0.5rem;"></i>
                     Enviar
                 </a>
                 {% endif %}
@@ -336,15 +339,15 @@
                 <h2>{{ relatorio.codigo }}</h2>
                 <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
                     <span class="status-badge status-{{ relatorio.status|lower }}">
-                        {% if relatorio.status == 'GERADO' %}📊 Gerado
-                        {% elif relatorio.status == 'ENVIADO' %}📧 Enviado
-                        {% elif relatorio.status == 'VISUALIZADO' %}👁️ Visualizado
+                        {% if relatorio.status == 'GERADO' %}<i class="bi bi-graph-up"></i> Gerado
+                        {% elif relatorio.status == 'ENVIADO' %}<i class="bi bi-send"></i> Enviado
+                        {% elif relatorio.status == 'VISUALIZADO' %}<i class="bi bi-eye-fill"></i> Visualizado
                         {% endif %}
                     </span>
                     
                     {% if relatorio.certificacao_conformidade %}
                         <span class="conformidade-badge conformidade-conforme">
-                            <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>
+                            <i class="bi bi-check-circle" style="margin-right: 0.5rem;"></i>
                             Conforme às Especificações
                         </span>
                     {% else %}
@@ -417,13 +420,19 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
             <!-- Gráfico de Evolução Temporal -->
             <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem;">
-                <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dark);">📈 Evolução dos Resultados</h4>
+                <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dark); display: flex; align-items: center;">
+                    <i class="bi bi-graph-up" style="margin-right: 0.5rem; color: var(--accent-green);"></i>
+                    Evolução dos Resultados
+                </h4>
                 <canvas id="graficoEvolucao" width="400" height="250"></canvas>
             </div>
             
             <!-- Gráfico de Distribuição por Tipo -->
             <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem;">
-                <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dark);">🥧 Distribuição por Parâmetro</h4>
+                <h4 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-dark); display: flex; align-items: center;">
+                    <i class="bi bi-pie-chart" style="margin-right: 0.5rem; color: var(--accent-green);"></i>
+                    Distribuição por Parâmetro
+                </h4>
                 <canvas id="graficoDistribuicao" width="400" height="250"></canvas>
             </div>
         </div>
