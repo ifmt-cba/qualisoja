@@ -5,550 +5,108 @@
 
 {% block title %}Relatórios de Expedição - QualiSoja{% endblock %}
 
-{% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-    :root {
-        --primary-green: #065f46;
-        --light-green: #d1fae5;
-        --accent-green: #059669;
-        --text-dark: #111827;
-        --text-muted: #6b7280;
-        --border-color: #e5e7eb;
-        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    }
-
-    body {
-        font-family: 'Inter', sans-serif;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        min-height: 100vh;
-    }
-
-    .page-header {
-        background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-green) 100%);
-        color: white;
-        padding: 2rem 0;
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow-md);
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 1rem;
-    }
-
-    .card {
-        background: white;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
-        margin-bottom: 1.5rem;
-    }
-
-    /* Novos estilos para destacar relatórios */
-    .relatorio-novo-destacado {
-        background-color: #f0fdf4 !important;
-        border-left: 4px solid var(--accent-green) !important;
-        animation: highlight 2s ease-in-out;
-    }
-
-    @keyframes highlight {
-        0% { background-color: #dcfce7; }
-        50% { background-color: #bbf7d0; }
-        100% { background-color: #f0fdf4; }
-    }
-
-    .badge-novo {
-        background: linear-gradient(45deg, #10b981, #059669);
-        color: white;
-        padding: 0.2rem 0.5rem;
-        border-radius: 0.375rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-left: 0.5rem;
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-    }
-
-    .tipo-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 0.5rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        background-color: #f3f4f6;
-        color: #374151;
-    }
-
-    .tipo-oleo { background-color: #fef3c7; color: #92400e; }
-    .tipo-farelo { background-color: #d1fae5; color: #065f46; }
-    .tipo-ambos { background-color: #e0e7ff; color: #3730a3; }
-    .tipo-auto { background-color: #f3e8ff; color: #6b21a8; }
-
-    .analises-selecionadas {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        max-width: 200px;
-    }
-
-    .analise-item {
-        background: #f8fafc;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.375rem;
-        font-size: 0.8rem;
-        color: #475569;
-        border-left: 3px solid var(--accent-green);
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        color: white;
-        border: none;
-    }
-
-    .btn-success:hover {
-        background: linear-gradient(135deg, #047857 0%, #065f46 100%);
-        transform: translateY(-1px);
-    }
-
-    /* Estilos para mensagens */
-    .alert {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1rem 1.5rem;
-        margin-bottom: 1rem;
-        border-radius: 0.75rem;
-        border-left: 4px solid;
-        font-weight: 500;
-        animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .alert-success {
-        background-color: #f0fdf4;
-        border-left-color: #10b981;
-        color: #065f46;
-    }
-
-    .alert-error {
-        background-color: #fef2f2;
-        border-left-color: #ef4444;
-        color: #991b1b;
-    }
-
-    .alert-warning {
-        background-color: #fffbeb;
-        border-left-color: #f59e0b;
-        color: #92400e;
-    }
-
-    .alert-info {
-        background-color: #eff6ff;
-        border-left-color: #3b82f6;
-        color: #1e40af;
-    }
-
-    .alert-content {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .alert-content i {
-        font-size: 1.25rem;
-    }
-
-    .alert-close {
-        background: none;
-        border: none;
-        color: inherit;
-        opacity: 0.7;
-        cursor: pointer;
-        padding: 0.25rem;
-        border-radius: 50%;
-        transition: all 0.2s;
-    }
-
-    .alert-close:hover {
-        opacity: 1;
-        background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        font-weight: 500;
-        text-decoration: none;
-        transition: all 0.2s;
-        border: none;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background: var(--accent-green);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-green);
-        color: white;
-    }
-
-    .btn-outline {
-        background: transparent;
-        color: var(--accent-green);
-        border: 1px solid var(--accent-green);
-    }
-
-    .btn-outline:hover {
-        background: var(--accent-green);
-        color: white;
-    }
-
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1rem;
-    }
-
-    .table th,
-    .table td {
-        padding: 0.75rem;
-        text-align: left;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .table th {
-        background: #f9fafb;
-        font-weight: 600;
-        color: var(--text-dark);
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    .status-rascunho {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .status-gerado {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .status-enviado {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-visualizado {
-        background: #f3e8ff;
-        color: #7c3aed;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-control {
-        padding: 0.75rem;
-        border: 1px solid var(--border-color);
-        border-radius: 0.5rem;
-        font-size: 0.875rem;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--accent-green);
-        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 3rem;
-        color: var(--text-muted);
-    }
-
-    .actions {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
-    .btn-sm {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="page-header">
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1 style="margin: 0; font-size: 2rem; font-weight: 700;">📊 Relatórios de Expedição</h1>
-                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Gerencie e acompanhe relatórios de expedição para vendas</p>
-            </div>
-            <a href="{% url 'relatorios:expedicao_criar' %}" class="btn btn-primary" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
-                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
-                Novo Relatório
-            </a>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="bi bi-truck me-2"></i>Relatórios de Expedição
+            </h2>
+            <p class="text-muted">Gerencie e acompanhe relatórios de expedição para vendas</p>
         </div>
     </div>
-</div>
 
-<div class="container">
-    <!-- Mensagens do Sistema -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
-                <div class="alert-content">
-                    {% if message.tags == 'success' %}
-                        <i class="fas fa-check-circle"></i>
-                    {% elif message.tags == 'error' %}
-                        <i class="fas fa-exclamation-circle"></i>
-                    {% elif message.tags == 'warning' %}
-                        <i class="fas fa-exclamation-triangle"></i>
-                    {% else %}
-                        <i class="fas fa-info-circle"></i>
-                    {% endif %}
-                    {{ message }}
+    {% if relatorios %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Lista de Relatórios ({{ total_relatorios }})</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Período</th>
+                                        <th>Tipo</th>
+                                        <th>Status</th>
+                                        <th>Data Geração</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for relatorio in relatorios %}
+                                    <tr>
+                                        <td><strong>{{ relatorio.codigo }}</strong></td>
+                                        <td>{{ relatorio.data_inicial|date:"d/m/Y" }} - {{ relatorio.data_final|date:"d/m/Y" }}</td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {% if relatorio.tipo_analise == 'oleo' %}<i class="bi bi-droplet"></i> Óleo
+                                                {% elif relatorio.tipo_analise == 'farelo' %}<i class="bi bi-grain"></i> Farelo
+                                                {% elif relatorio.tipo_analise == 'ambos' %}<i class="bi bi-collection"></i> Ambos
+                                                {% else %}<i class="bi bi-cpu"></i> Auto
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if relatorio.status == 'GERADO' %}bg-success{% elif relatorio.status == 'ENVIADO' %}bg-primary{% else %}bg-warning{% endif %}">
+                                                {% if relatorio.status == 'RASCUNHO' %}<i class="bi bi-pencil"></i> Rascunho
+                                                {% elif relatorio.status == 'GERADO' %}<i class="bi bi-graph-up"></i> Gerado
+                                                {% elif relatorio.status == 'ENVIADO' %}<i class="bi bi-send"></i> Enviado
+                                                {% elif relatorio.status == 'VISUALIZADO' %}<i class="bi bi-eye-fill"></i> Visualizado
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                        <td>{{ relatorio.data_geracao|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'relatorios:expedicao_detalhe' relatorio.pk %}" class="btn btn-outline-primary btn-sm">
+                                                    <i class="bi bi-eye"></i> Ver
+                                                </a>
+                                                <a href="{% url 'relatorios:expedicao_pdf' relatorio.pk %}" class="btn btn-success btn-sm">
+                                                    <i class="bi bi-file-earmark-pdf"></i> PDF
+                                                </a>
+                                                {% if relatorio.status != 'RASCUNHO' %}
+                                                <a href="{% url 'relatorios:expedicao_enviar' relatorio.pk %}" class="btn btn-primary btn-sm">
+                                                    <i class="bi bi-send"></i> Enviar
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
-                    <i class="fas fa-times"></i>
-                </button>
             </div>
-        {% endfor %}
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-file-earmark-text text-muted" style="font-size: 3rem;"></i>
+                        <h4 class="mt-3 text-muted">Nenhum relatório encontrado</h4>
+                        <p class="text-muted">Crie seu primeiro relatório de expedição clicando no botão abaixo</p>
+                        <a href="{% url 'relatorios:expedicao_criar' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Novo Relatório
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     {% endif %}
 
-    <!-- Filtros -->
-    <div class="card">
-        <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem; font-weight: 600;">🔍 Filtros</h3>
-        <form method="get">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="{{ form_filtro.status.id_for_label }}">Status</label>
-                    {{ form_filtro.status|add_class:"form-control" }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form_filtro.data_inicial.id_for_label }}">Data Inicial</label>
-                    {{ form_filtro.data_inicial|add_class:"form-control" }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form_filtro.data_final.id_for_label }}">Data Final</label>
-                    {{ form_filtro.data_final|add_class:"form-control" }}
-                </div>
-            </div>
-            <div style="display: flex; gap: 1rem;">
-                <button type="submit" class="btn btn-primary">Filtrar</button>
-                <a href="{% url 'relatorios:expedicao_lista' %}" class="btn btn-outline">Limpar</a>
-            </div>
-        </form>
-    </div>
-
-    <!-- Lista de Relatórios -->
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600;">📋 Relatórios ({{ total_relatorios }})</h3>
+    <div class="row mt-4">
+        <div class="col-12">
             <a href="{% url 'relatorios:expedicao_criar' %}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Criar Novo Relatório
+                <i class="bi bi-plus-circle me-2"></i>Criar Novo Relatório
             </a>
         </div>
-
-        <!-- Relatório Recém-Criado (se houver) -->
-        {% if relatorio_destacado and mostrar_novo %}
-        <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 2px solid #059669; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                <i class="fas fa-check-circle" style="color: #059669; font-size: 1.5rem; margin-right: 0.75rem;"></i>
-                <h4 style="margin: 0; color: #065f46; font-weight: 600;">✨ Relatório Criado com Sucesso!</h4>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                <div>
-                    <strong style="color: #065f46;">Código:</strong><br>
-                    <span style="font-family: monospace; background: rgba(255,255,255,0.6); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">{{ relatorio_destacado.codigo }}</span>
-                </div>
-                <div>
-                    <strong style="color: #065f46;">Período:</strong><br>
-                    {{ relatorio_destacado.data_inicial|date:"d/m/Y" }} - {{ relatorio_destacado.data_final|date:"d/m/Y" }}
-                </div>
-                <div>
-                    <strong style="color: #065f46;">Formato:</strong><br>
-                    {{ relatorio_destacado.get_formato_display }}
-                </div>
-                <div>
-                    <strong style="color: #065f46;">Status:</strong><br>
-                    <span class="status-badge status-{{ relatorio_destacado.status|lower }}">
-                        {% if relatorio_destacado.status == 'GERADO' %}📊 Gerado{% endif %}
-                    </span>
-                </div>
-            </div>
-            
-            {% if relatorio_destacado.analises_selecionadas %}
-            <div style="background: rgba(255,255,255,0.8); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
-                <h5 style="margin: 0 0 1rem 0; color: #065f46; font-weight: 600;">📋 Análises Selecionadas</h5>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-                    {% for analise in relatorio_destacado.analises_selecionadas %}
-                        <div style="background: white; border: 1px solid #d1fae5; border-radius: 0.375rem; padding: 0.75rem;">
-                            {% if analise.tipo == 'grupo' %}
-                                <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                                    <i class="fas fa-layer-group" style="color: #059669; margin-right: 0.5rem;"></i>
-                                    <strong style="color: #065f46;">Grupo Completo</strong>
-                                </div>
-                                <div style="font-size: 0.875rem;">
-                                    <strong>Data:</strong> {{ analise.data }}<br>
-                                    <strong>Tipo:</strong> {{ analise.tipo_analise }}
-                                </div>
-                            {% else %}
-                                <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                                    <i class="fas fa-chart-line" style="color: #059669; margin-right: 0.5rem;"></i>
-                                    <strong style="color: #065f46;">{{ analise.parametro }}</strong>
-                                </div>
-                                <div style="font-size: 0.875rem;">
-                                    <strong>Data:</strong> {{ analise.data }}<br>
-                                    {% if analise.valor %}<strong>Valor:</strong> {{ analise.valor }}<br>{% endif %}
-                                    <strong>Modelo:</strong> {{ analise.modelo }}
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="{% url 'relatorios:expedicao_pdf' relatorio_destacado.pk %}" class="btn btn-primary" target="_blank">
-                    <i class="fas fa-file-pdf"></i> Gerar PDF
-                </a>
-                <a href="{% url 'relatorios:expedicao_detalhe' relatorio_destacado.pk %}" class="btn btn-outline">
-                    <i class="fas fa-eye"></i> Visualizar Detalhes
-                </a>
-                <a href="{% url 'relatorios:expedicao_criar' %}" class="btn btn-outline">
-                    <i class="fas fa-plus"></i> Criar Outro Relatório
-                </a>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if relatorios %}
-            <div style="overflow-x: auto;">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Período</th>
-                            <th>Tipo</th>
-                            <th>Análises Selecionadas</th>
-                            <th>Status</th>
-                            <th>Data Geração</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for relatorio in relatorios %}
-                        <tr {% if relatorio_destacado and relatorio.id == relatorio_destacado.id %}class="relatorio-novo-destacado"{% endif %}>
-                            <td>
-                                <strong>{{ relatorio.codigo }}</strong>
-                                {% if relatorio_destacado and relatorio.id == relatorio_destacado.id %}
-                                    <span class="badge-novo">NOVO!</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ relatorio.data_inicial|date:"d/m/Y" }} - {{ relatorio.data_final|date:"d/m/Y" }}</td>
-                            <td>
-                                <span class="tipo-badge tipo-{{ relatorio.tipo_analise|lower }}">
-                                    {% if relatorio.tipo_analise == 'oleo' %}�️ Óleo
-                                    {% elif relatorio.tipo_analise == 'farelo' %}🌾 Farelo
-                                    {% elif relatorio.tipo_analise == 'ambos' %}� Ambos
-                                    {% else %}🤖 Auto
-                                    {% endif %}
-                                </span>
-                            </td>
-                            <td>
-                                {% if relatorio.analises_selecionadas %}
-                                    <div class="analises-selecionadas">
-                                        {% for analise in relatorio.analises_selecionadas %}
-                                            <span class="analise-item">
-                                                📊 {{ analise.data|date:"d/m" }} - {{ analise.tipo_predominante }}
-                                                ({{ analise.total_analises }} análise{{ analise.total_analises|pluralize }})
-                                            </span>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    <span class="text-muted">Automático por período</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="status-badge status-{{ relatorio.status|lower }}">
-                                    {% if relatorio.status == 'RASCUNHO' %}📝 Rascunho
-                                    {% elif relatorio.status == 'GERADO' %}📊 Gerado
-                                    {% elif relatorio.status == 'ENVIADO' %}📧 Enviado
-                                    {% elif relatorio.status == 'VISUALIZADO' %}👁️ Visualizado
-                                    {% endif %}
-                                </span>
-                            </td>
-                            <td>{{ relatorio.data_geracao|date:"d/m/Y H:i" }}</td>
-                            <td>
-                                <div class="actions">
-                                    <a href="{% url 'relatorios:expedicao_detalhe' relatorio.pk %}" class="btn btn-outline btn-sm">
-                                        <i class="fas fa-eye"></i> Ver
-                                    </a>
-                                    <a href="{% url 'relatorios:expedicao_pdf' relatorio.pk %}" class="btn btn-success btn-sm" title="Gerar PDF">
-                                        <i class="fas fa-file-pdf"></i> PDF
-                                    </a>
-                                    {% if relatorio.status != 'RASCUNHO' %}
-                                    <a href="{% url 'relatorios:expedicao_enviar' relatorio.pk %}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-paper-plane"></i> Enviar
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <i class="fas fa-file-alt" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
-                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-muted);">Nenhum relatório encontrado</h4>
-                <p style="margin: 0;">Crie seu primeiro relatório de expedição clicando no botão "Novo Relatório"</p>
-            </div>
-        {% endif %}
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 {% endblock %}

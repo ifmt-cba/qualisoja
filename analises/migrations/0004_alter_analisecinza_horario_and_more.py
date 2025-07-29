@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analises', '0003_alter_analisecinza_horario_and_more'),
+        ('analises', '0003_add_new_analysis_models'),
     ]
 
     operations = [

@@ -42,6 +42,14 @@ class AnaliseUmidade(BaseModel):
         ("PE", "Peletizado"),
     ]
 
+    # CAMPO CODIGO REMOVIDO TEMPORARIAMENTE - SERÁ READICIONADO APÓS MIGRAÇÃO
+    # codigo = models.CharField(
+    #     max_length=20,
+    #     unique=True,
+    #     verbose_name="Código da Análise",
+    #     blank=True,
+    #     help_text="Código único gerado automaticamente"
+    # )
     data = models.DateField(
         verbose_name="Data da Análise",
         default=timezone.localdate,
@@ -83,9 +91,34 @@ class AnaliseUmidade(BaseModel):
 
     def save(self, *args, **kwargs):
         """
-        Calcula automaticamente o resultado da umidade.
+        Calcula automaticamente o resultado da umidade e gera código único.
         Fórmula: Umidade (%) = ((tara + peso_amostra) - liquido) / peso_amostra * 100
+        Código: UM-YYYYNNNN (UM + ano + sequencial de 4 dígitos)
         """
+        # Gerar código se não existir - TEMPORARIAMENTE DESABILITADO
+        # if not self.codigo:
+        #     ano_atual = timezone.now().year
+        #     prefixo = f"UM-{ano_atual}"
+        #     
+        #     # Buscar o último código do ano
+        #     ultimo_codigo = AnaliseUmidade.objects.filter(
+        #         codigo__startswith=prefixo
+        #     ).order_by('-codigo').first()
+        #     
+        #     if ultimo_codigo:
+        #         # Extrair o número sequencial do último código
+        #         try:
+        #             ultimo_numero = int(ultimo_codigo.codigo.split('-')[1][4:])
+        #             proximo_numero = ultimo_numero + 1
+        #         except (ValueError, IndexError):
+        #             proximo_numero = 1
+        #     else:
+        #         proximo_numero = 1
+        #     
+        #     # Gerar o código com 4 dígitos sequenciais
+        #     self.codigo = f"{prefixo}{proximo_numero:04d}"
+        
+        # Calcular resultado da umidade
         if (
             self.tara is not None
             and self.liquido is not None

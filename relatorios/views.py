@@ -1967,9 +1967,7 @@ class RelatorioExpedicaoCreateView(LoginRequiredMixin, FormView):
         
         try:
             # Gerar código único para o relatório
-            import uuid
-            codigo = f"REL-{uuid.uuid4().hex[:8].upper()}"
-            logger.info(f"Código gerado: {codigo}")
+            logger.info("Iniciando criação do relatório de expedição")
             
             # Determinar datas
             data_inicial = form.cleaned_data.get('data_inicial')
@@ -1999,7 +1997,6 @@ class RelatorioExpedicaoCreateView(LoginRequiredMixin, FormView):
             
             # Criar o relatório (sem cliente e contrato, sempre formato PDF)
             relatorio = RelatorioExpedicao.objects.create(
-                codigo=codigo,
                 tipo_analise=form.cleaned_data.get('tipo_analise', 'auto'),
                 data_inicial=data_inicial,
                 data_final=data_final,
@@ -2014,13 +2011,13 @@ class RelatorioExpedicaoCreateView(LoginRequiredMixin, FormView):
                 status='GERADO'  # Marcar como gerado e pronto para uso
             )
             
-            logger.info(f"Relatório criado com ID: {relatorio.pk}")
+            logger.info(f"Relatório criado com ID: {relatorio.pk} e código: {relatorio.codigo}")
             
             # Registrar log
             from logs.utils import registrar_log
             registrar_log(
                 usuario=self.request.user,
-                acao=f"CRIAR_RELATORIO_EXPEDICAO - Relatório {codigo} criado",
+                acao=f"CRIAR_RELATORIO_EXPEDICAO - Relatório {relatorio.codigo} criado",
                 obj=relatorio
             )
 
@@ -2035,14 +2032,14 @@ class RelatorioExpedicaoCreateView(LoginRequiredMixin, FormView):
             if total_analises > 0:
                 messages.success(
                     self.request, 
-                    f"✅ Relatório {codigo} criado com sucesso! "
+                    f"✅ Relatório {relatorio.codigo} criado com sucesso! "
                     f"Período: {periodo_msg} | Análises específicas selecionadas: {total_analises} | "
                     f"Clique no botão 'PDF' para gerar o arquivo."
                 )
             else:
                 messages.success(
                     self.request, 
-                    f"✅ Relatório {codigo} criado com sucesso! "
+                    f"✅ Relatório {relatorio.codigo} criado com sucesso! "
                     f"Período: {periodo_msg} | Tipo: {form.cleaned_data.get('tipo_analise', 'auto').title()} | "
                     f"Clique no botão 'PDF' para gerar o arquivo."
                 )

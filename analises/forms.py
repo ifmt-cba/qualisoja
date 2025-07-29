@@ -16,7 +16,39 @@ from django.utils import timezone
 from django.utils.timezone import localdate
 
 
-class AnaliseUmidadeForm(forms.ModelForm):
+def validar_data_nao_futura(data):
+    """
+    Validação para garantir que a data não seja futura.
+    """
+    if data and data > localdate():
+        raise ValidationError(
+            "A data da análise não pode ser posterior ao dia atual."
+        )
+    return data
+
+
+class BaseAnaliseForm(forms.ModelForm):
+    """
+    Classe base para todos os formulários de análise com validação de data.
+    """
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Adicionar validação no frontend para não permitir datas futuras
+        today = localdate().isoformat()
+        if 'data' in self.fields:
+            self.fields['data'].widget.attrs.update({
+                'max': today,
+                'title': 'A data não pode ser posterior ao dia atual'
+            })
+    
+    def clean_data(self):
+        """Validação da data para impedir datas futuras"""
+        data = self.cleaned_data.get('data')
+        return validar_data_nao_futura(data)
+
+
+class AnaliseUmidadeForm(BaseAnaliseForm):
     """
     Formulário para cadastro e edição de análises de umidade.
     """
@@ -43,7 +75,7 @@ class AnaliseUmidadeForm(forms.ModelForm):
         return cleaned_data
 
 
-class AnaliseProteinaForm(forms.ModelForm):
+class AnaliseProteinaForm(BaseAnaliseForm):
     class Meta:
         model = AnaliseProteina
         exclude = ["resultado", "resultado_corrigido"]
@@ -158,7 +190,7 @@ class AnaliseProteinaForm(forms.ModelForm):
 #         return cleaned_data
 
 
-class AnaliseOleoDegomadoForm(forms.ModelForm):
+class AnaliseOleoDegomadoForm(BaseAnaliseForm):
     """
     Formulário para cadastro e edição de análises de óleo degomado.
     """
@@ -170,12 +202,6 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
             "data": forms.DateInput(attrs={"type": "date"}),
             "horario": forms.TimeInput(attrs={"type": "time"}),
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Não definir min para data - permitir datas anteriores
-        # today = localdate()
-        # self.fields['data'].widget.attrs['min'] = today.isoformat()
 
     def clean_data(self):
         data = self.cleaned_data.get('data')
@@ -256,7 +282,7 @@ class AnaliseOleoDegomadoForm(forms.ModelForm):
         return cleaned_data
 
 
-class AnaliseUraseForm(forms.ModelForm):
+class AnaliseUraseForm(BaseAnaliseForm):
     """
     Formulário para cadastro e edição de análises de urase.
     """
@@ -303,7 +329,7 @@ class AnaliseUraseForm(forms.ModelForm):
         return cleaned_data
 
 
-class AnaliseCinzaForm(forms.ModelForm):
+class AnaliseCinzaForm(BaseAnaliseForm):
     """
     Formulário para cadastro e edição de análises de cinza.
     """
@@ -327,7 +353,7 @@ class AnaliseCinzaForm(forms.ModelForm):
         return cleaned_data
 
 
-class AnaliseTeorOleoForm(forms.ModelForm):
+class AnaliseTeorOleoForm(BaseAnaliseForm):
     """
     Formulário para cadastro e edição de análises de teor de óleo.
     """
@@ -402,7 +428,7 @@ class AnaliseTeorOleoForm(forms.ModelForm):
         return cleaned_data
 
 
-class AnaliseFibraForm(forms.ModelForm):
+class AnaliseFibraForm(BaseAnaliseForm):
     """
     Formulário para cadastro e edição de análises de fibra.
     """
@@ -496,7 +522,7 @@ class AnaliseFibraForm(forms.ModelForm):
         return cleaned_data
 
 
-class AnaliseFosforoForm(forms.ModelForm):
+class AnaliseFosforoForm(BaseAnaliseForm):
     """
     Formulário para cadastro e edição de análises de fósforo.
     Focado na absorbância da amostra, com valores padrão para outros campos.
@@ -608,7 +634,7 @@ class AnaliseFosforoForm(forms.ModelForm):
         return cleaned_data
 
 
-class AnaliseSilicaForm(forms.ModelForm):
+class AnaliseSilicaForm(BaseAnaliseForm):
     """
     Formulário para cadastro e edição de análises de sílica.
     """
